@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Wikitext Formatter mark">
+  <rect width="64" height="64" rx="8" fill="#2a5db0"/>
+  <path d="M23 16h-5v11c0 3-1.5 5-5 5 3.5 0 5 2 5 5v11h5M41 16h5v11c0 3 1.5 5 5 5-3.5 0-5 2-5 5v11h-5" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="square"/>
+</svg>
