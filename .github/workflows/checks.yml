@@ -17,16 +17,12 @@ jobs:
         node: ["22.13.0", "24.11.0"]
     steps:
       - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          cache: true
       - uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node }}
-      - run: corepack enable
-      - run: pnpm config set store-dir ~/.pnpm-store
-      - uses: actions/cache@v6
-        with:
-          path: ~/.pnpm-store
-          key: pnpm-${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: pnpm-${{ runner.os }}-${{ matrix.node }}-
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
@@ -40,16 +36,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          cache: true
       - uses: actions/setup-node@v7
         with:
           node-version: "24.11.0"
-      - run: corepack enable
-      - run: pnpm config set store-dir ~/.pnpm-store
-      - uses: actions/cache@v6
-        with:
-          path: ~/.pnpm-store
-          key: pnpm-${{ runner.os }}-24.11.0-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: pnpm-${{ runner.os }}-24.11.0-
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm build
