@@ -101,12 +101,6 @@ The bundle check rejects Node built-ins, `fast-glob`, CLI/config-discovery/VS Co
 
 ## Deployment
 
-### GitHub Pages
-
-`.github/workflows/pages.yml` verifies the application on pushes to `master`, builds with `VITE_BASE_PATH=/wikitext-fmt-web/`, uploads `dist/`, and deploys through GitHub Pages with the minimum Pages permissions and deployment concurrency.
-
-In repository settings, select **GitHub Actions** as the Pages source if it is not already selected.
-
 ### Cloudflare Pages
 
 Create a Pages project connected to this repository with:
