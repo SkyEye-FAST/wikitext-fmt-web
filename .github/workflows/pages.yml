@@ -18,11 +18,17 @@ jobs:
     env:
       VITE_BASE_PATH: /wikitext-fmt-web/
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: "24.11.0"
       - run: corepack enable
+      - run: pnpm config set store-dir ~/.pnpm-store
+      - uses: actions/cache@v6
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-${{ runner.os }}-24.11.0-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-24.11.0-
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
@@ -31,8 +37,8 @@ jobs:
       - run: pnpm check:bundle
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm e2e
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
 
@@ -48,4 +54,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
