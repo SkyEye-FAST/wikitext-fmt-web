@@ -33,6 +33,16 @@ test("never transmits, logs, URL-encodes, or persists Wikitext", async ({ page }
   for await (const chunk of stream) downloadedChunks.push(Buffer.from(chunk));
   expect(Buffer.concat(downloadedChunks).toString("utf8")).toContain(marker);
 
+  await page.locator('[data-testid="source-editor"] .cm-content').click();
+  await page.keyboard.insertText(" stale edit");
+  await expect(page.getByText("Output is outdated")).toBeVisible();
+  await page.getByRole("button", { name: "Diff" }).click();
+  await expect(page.getByText("Previous formatting run")).toBeVisible();
+  await page.getByRole("button", { name: "Format" }).click();
+  await expect(page.getByText(/Formatted with changes|Already formatted/)).toBeVisible();
+  await page.getByRole("button", { name: "Apply output" }).click();
+  await page.keyboard.press("Control+z");
+
   await fileInput.setInputFiles({
     name: "Malformed.wikitext",
     mimeType: "text/plain",

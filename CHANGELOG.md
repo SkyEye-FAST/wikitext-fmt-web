@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Add immutable formatting-run provenance with submitted source and formatter
+  revisions. Keep output and diagnostics visible but clearly marked outdated
+  after source or formatter-option changes, while Diff remains tied to its
+  submitted source snapshot.
+- Add an undoable Apply output action for current successful results and cover
+  stale-result, Diff provenance, apply, undo, accessibility, privacy, and
+  cross-browser language workflows.
 - Add a type-safe i18n system with English, Simplified Chinese (zh-Hans), and
   Traditional Chinese (zh-Hant) UI localisation. Translate all controls,
   labels, status messages, diagnostics, settings, and accessible names.

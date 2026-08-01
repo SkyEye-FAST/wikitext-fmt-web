@@ -19,6 +19,12 @@ test("has no automated accessibility violations in primary states", async ({ pag
   await expect(page.getByText("Formatted with changes")).toBeVisible();
   await expectNoAxeViolations(page);
 
+  await page.locator('[data-testid="source-editor"] .cm-content').click();
+  await page.keyboard.insertText("stale edit");
+  await expect(page.getByText("Output is outdated")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Apply output" })).toBeDisabled();
+  await expectNoAxeViolations(page);
+
   await page.getByRole("button", { name: "Diff" }).click();
   await expect(page.getByTestId("diff-view")).toBeVisible();
   await expectNoAxeViolations(page);

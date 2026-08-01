@@ -4,6 +4,7 @@ import {
   FileInput,
   GitCompareArrows,
   Play,
+  Replace,
   RotateCcw,
   Settings,
   Square,
@@ -14,11 +15,13 @@ import { useI18n } from "../i18n/useI18n.js";
 interface EditorToolbarProps {
   busy: boolean;
   hasOutput: boolean;
+  canApplyOutput: boolean;
   diffVisible: boolean;
   onFormat: () => void;
   onStop: () => void;
   onCopy: () => void;
   onDownload: () => void;
+  onApplyOutput: () => void;
   onOpenFile: () => void;
   onClear: () => void;
   onLoadExample: () => void;
@@ -57,6 +60,14 @@ export function EditorToolbar(props: EditorToolbarProps) {
       </ToolbarButton>
       <ToolbarButton icon={<Download size={17} />} onClick={props.onDownload} disabled={!props.hasOutput}>
         {t("toolbar.download")}
+      </ToolbarButton>
+      <ToolbarButton
+        icon={<Replace size={17} />}
+        onClick={props.onApplyOutput}
+        disabled={!props.canApplyOutput}
+        title={props.canApplyOutput ? t("toolbar.apply-output") : t("toolbar.apply-output-unavailable")}
+      >
+        {t("toolbar.apply-output")}
       </ToolbarButton>
       <ToolbarButton icon={<FileInput size={17} />} onClick={props.onOpenFile}>{t("toolbar.open-file")}</ToolbarButton>
       <ToolbarButton icon={<Trash2 size={17} />} onClick={props.onClear}>{t("toolbar.clear")}</ToolbarButton>

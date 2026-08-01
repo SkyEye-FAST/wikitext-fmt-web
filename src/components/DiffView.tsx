@@ -9,6 +9,7 @@ import { useI18n } from "../i18n/useI18n.js";
 interface DiffViewProps {
   original: string;
   formatted: string;
+  outdated: boolean;
   theme: ResolvedTheme;
   lineWrapping: boolean;
 }
@@ -24,7 +25,7 @@ function useNarrowDiff(): boolean {
   return narrow;
 }
 
-export default function DiffView({ original, formatted, theme, lineWrapping }: DiffViewProps) {
+export default function DiffView({ original, formatted, outdated, theme, lineWrapping }: DiffViewProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const narrow = useNarrowDiff();
   const { t } = useI18n();
@@ -75,10 +76,12 @@ export default function DiffView({ original, formatted, theme, lineWrapping }: D
   }, [formatted, lineWrapping, narrow, original, theme, t]);
 
   return (
-    <section className="diff-pane syntax-spine" aria-labelledby="diff-title">
+    <section className="diff-pane syntax-spine" aria-labelledby="diff-title" aria-describedby={outdated ? "diff-provenance" : undefined}>
       <header className="pane-header">
         <h2 id="diff-title">{t("diff.title")}</h2>
-        <span className="pane-muted">{narrow ? t("diff.unified") : t("diff.side-by-side")}</span>
+        <span id={outdated ? "diff-provenance" : undefined} className="pane-muted">
+          {outdated ? t("diff.previous-run") : narrow ? t("diff.unified") : t("diff.side-by-side")}
+        </span>
       </header>
       <div ref={hostRef} className="diff-host" data-testid="diff-view" />
     </section>

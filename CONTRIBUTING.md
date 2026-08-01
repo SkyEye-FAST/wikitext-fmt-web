@@ -24,14 +24,14 @@ pnpm e2e
 
 ## Reviewed bundle baseline
 
-The `0.1.0` production-hardening build records the following informational baseline. These are reviewed measurements, not arbitrary failure thresholds:
+The current Unreleased build, including the three statically imported UI catalogs and formatting-run provenance workflow, records the following informational baseline. These are reviewed measurements, not arbitrary failure thresholds:
 
 | Surface | Raw | Gzip |
 | --- | ---: | ---: |
-| Initial application JavaScript | 634.14 KiB | 201.08 KiB |
-| Initial application CSS | 11.64 KiB | 3.26 KiB |
+| Initial application JavaScript | 665.93 KiB | 209.57 KiB |
+| Initial application CSS | 12.35 KiB | 3.40 KiB |
 | Complete formatter Worker graph | 251.22 KiB | 83.71 KiB |
-| Diff chunk | 28.62 KiB | 9.83 KiB |
-| Settings chunk | 7.49 KiB | 1.88 KiB |
+| Diff chunk | 28.74 KiB | 9.88 KiB |
+| Settings chunk | 8.44 KiB | 1.91 KiB |
 
 Run `pnpm build && pnpm check:bundle` to regenerate the report. The check identifies entries and their full static/dynamic relationships from emitted Vite/Rollup graph metadata, and rejects browser-incompatible or out-of-scope dependencies.

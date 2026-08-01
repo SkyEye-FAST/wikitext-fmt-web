@@ -1,18 +1,19 @@
 import type { FormatDetailedResult } from "wikitext-fmt/browser";
 import { AlertCircle, AlertTriangle, Info } from "lucide-react";
 import { clientErrorMessageKey, summarizeRuleDiagnostics, type FormatStatus } from "../formatter/resultSummary.js";
+import type { MessageCatalog } from "../i18n/messages.en.js";
 import { useI18n } from "../i18n/useI18n.js";
 
 interface DiagnosticsPanelProps {
   result?: FormatDetailedResult;
   status: FormatStatus;
-  notice?: string;
+  notice?: keyof MessageCatalog;
 }
 
 export function DiagnosticsPanel({ result, status, notice }: DiagnosticsPanelProps) {
   const { t } = useI18n();
   const rows = result ? summarizeRuleDiagnostics(result, t) : [];
-  const failure = status.kind === "failure" ? status.failure : undefined;
+  const failure = result?.failure;
   const unexpectedError = status.kind === "error"
     ? t(status.messageKey ?? clientErrorMessageKey(status.code))
     : undefined;
@@ -47,7 +48,7 @@ export function DiagnosticsPanel({ result, status, notice }: DiagnosticsPanelPro
         ) : null}
         {notice ? (
           <div className="diagnostic-callout warning-callout" role="status">
-            <AlertTriangle size={18} aria-hidden="true" /><p>{notice}</p>
+            <AlertTriangle size={18} aria-hidden="true" /><p>{t(notice)}</p>
           </div>
         ) : null}
         {rows.length > 0 ? (

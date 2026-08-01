@@ -1,4 +1,5 @@
 import type { FormatDetailedResult, FormatFailure } from "wikitext-fmt/browser";
+import type { ResultFreshness } from "../app/formatRun.js";
 import type { MessageCatalog } from "../i18n/messages.en.js";
 import type { ClientErrorCode, FormatterClientError } from "./client.js";
 
@@ -8,6 +9,8 @@ export type FormatStatus =
   | { kind: "changed"; durationMs: number }
   | { kind: "unchanged"; durationMs: number }
   | { kind: "failure"; durationMs: number; failure: FormatFailure }
+  | { kind: "outdated"; freshness: Exclude<ResultFreshness, "none" | "current"> }
+  | { kind: "applied" }
   | {
     kind: "error";
     code: ClientErrorCode;

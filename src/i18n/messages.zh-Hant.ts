@@ -33,6 +33,8 @@ export const messages: MessageCatalog = {
   "toolbar.stop": "停止",
   "toolbar.copy-output": "複製輸出",
   "toolbar.download": "下載",
+  "toolbar.apply-output": "套用輸出",
+  "toolbar.apply-output-unavailable": "僅能套用目前且成功的格式化結果。",
   "toolbar.open-file": "開啟檔案",
   "toolbar.clear": "清空",
   "toolbar.load-example": "載入範例",
@@ -60,6 +62,7 @@ export const messages: MessageCatalog = {
   "diff.formatted.aria": "格式化後的 Wikitext",
   "diff.unified.aria": "合併檢視中的 Wikitext 差異",
   "diff.loading": "正在載入比對工具……",
+  "diff.previous-run": "前一次格式化執行",
 
   // Status bar
   "status.ready": "就緒",
@@ -68,6 +71,9 @@ export const messages: MessageCatalog = {
   "status.unchanged": "格式已是最新",
   "status.fail-closed": "安全中止",
   "status.unexpected-error": "意外錯誤",
+  "status.outdated": "輸出已過期",
+  "status.outdated.detail": "產生此結果後，原始碼或格式化設定已變更。",
+  "status.applied": "已套用格式化輸出",
   "status.profile": "設定檔",
   "status.versions": "Web {web} · 格式化器 {fmt}",
 
@@ -153,6 +159,7 @@ export const messages: MessageCatalog = {
   "status.source-changed":
     "格式化過程中原始碼已變更，先前的結果已捨棄，請重新格式化以更新輸出。",
   "status.formatting-stopped": "格式化已停止。格式化器 Worker 已重新啟動。",
+  "status.result-discarded": "格式化過程中原始碼或格式化設定已變更，這次結果已捨棄。",
 
   // Clipboard and copy
   "copy.success": "格式化輸出已複製到剪貼簿。",

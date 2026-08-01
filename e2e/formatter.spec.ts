@@ -72,6 +72,7 @@ test("shows already-formatted and real structured fail-closed states", async ({ 
   await expect(page.getByText("Fail-closed")).toBeVisible();
   await expect(page.getByText("input-roundtrip")).toBeVisible();
   await expect(page.getByText("Stage: initial-roundtrip")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Apply output" })).toBeDisabled();
 });
 
 test("switches and persists the dark theme", async ({ page }) => {
@@ -88,7 +89,7 @@ test("switches, persists, and restores the interface language", async ({ page })
   await expect(page.getByLabel("语言")).toHaveValue("zh-Hans");
   await expect(page.locator(".pane-stats").first()).toContainText("行");
   await expect(page.locator(".status-profile")).toContainText("默认");
-  await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /基于浏览器的 MediaWiki/);
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /在浏览器中运行的 MediaWiki/);
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem("wikitext-formatter.settings") ?? "null") as { language?: string });
   expect(stored.language).toBe("zh-Hans");
   expect(await page.evaluate(() => localStorage.getItem("wikitext-formatter.locale"))).toBeNull();
@@ -99,6 +100,33 @@ test("switches, persists, and restores the interface language", async ({ page })
   await expect(page.locator("html")).toHaveAttribute("lang", "zh-Hant");
   await expect(page.locator(".pane-stats").first()).toContainText("個字元");
   await expect(page.locator(".status-profile")).toContainText("預設");
+});
+
+test("keeps an iterative formatting run tied to its submitted source", async ({ page }) => {
+  await page.getByRole("button", { name: "Load example" }).click();
+  await page.getByRole("button", { name: "Format" }).click();
+  await expect(page.getByText("Formatted with changes")).toBeVisible();
+
+  const source = page.locator('[data-testid="source-editor"] .cm-content');
+  await source.click();
+  await page.keyboard.insertText("stale edit");
+  await expect(page.getByText("Output is outdated")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Apply output" })).toBeDisabled();
+  await expect(page.locator('[data-testid="output-editor"] .cm-content')).toContainText("Example article");
+
+  await page.getByRole("button", { name: "Diff" }).click();
+  await expect(page.getByTestId("diff-view")).toBeVisible();
+  await expect(page.getByText("Previous formatting run")).toBeVisible();
+
+  await page.getByRole("button", { name: "Format" }).click();
+  await expect(page.getByText(/Formatted with changes|Already formatted/)).toBeVisible();
+  await expect(page.getByText("Output is outdated")).toBeHidden();
+  const sourceBeforeApply = await source.innerText();
+  await page.getByRole("button", { name: "Apply output" }).click();
+  await expect(page.getByText("Formatted output applied")).toBeVisible();
+  await expect(source).toBeFocused();
+  await page.keyboard.press("Control+z");
+  await expect.poll(() => source.innerText()).toBe(sourceBeforeApply);
 });
 
 test("traps settings focus and restores it on Escape", async ({ page }) => {

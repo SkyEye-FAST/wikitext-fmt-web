@@ -34,6 +34,15 @@ const catalogs: [string, MessageCatalog][] = [
 ];
 
 const enKeys = Object.keys(enMessages) as (keyof MessageCatalog)[];
+const freshnessKeys = [
+  "toolbar.apply-output",
+  "toolbar.apply-output-unavailable",
+  "diff.previous-run",
+  "status.outdated",
+  "status.outdated.detail",
+  "status.applied",
+  "status.result-discarded",
+] as const satisfies readonly (keyof MessageCatalog)[];
 
 describe("i18n catalog consistency", () => {
   it("has identical key sets across all three catalogs", () => {
@@ -68,6 +77,14 @@ describe("i18n catalog consistency", () => {
           targetPlaceholders,
           `${name} "${key}" placeholders mismatch: expected ${enPlaceholders.join(", ")}, got ${targetPlaceholders.join(", ")}`,
         ).toEqual(enPlaceholders);
+      }
+    }
+  });
+
+  it("includes every result-freshness message in every locale", () => {
+    for (const catalog of [enMessages, ...catalogs.map(([, value]) => value)]) {
+      for (const key of freshnessKeys) {
+        expect(catalog[key], key).not.toEqual("");
       }
     }
   });

@@ -1,4 +1,4 @@
-import { AlertOctagon, CheckCircle2, CircleDot, Clock3, LoaderCircle } from "lucide-react";
+import { AlertOctagon, AlertTriangle, CheckCircle2, CircleDot, Clock3, LoaderCircle } from "lucide-react";
 import type { FormatStatus as Status } from "../formatter/resultSummary.js";
 import { useI18n } from "../i18n/useI18n.js";
 
@@ -20,6 +20,10 @@ function useStatusPresentation(status: Status) {
       return { label: t("status.unchanged"), className: "is-neutral", icon: <CircleDot size={17} /> };
     case "failure":
       return { label: t("status.fail-closed"), className: "is-failure", icon: <AlertOctagon size={17} /> };
+    case "outdated":
+      return { label: t("status.outdated"), className: "is-stale", icon: <AlertTriangle size={17} /> };
+    case "applied":
+      return { label: t("status.applied"), className: "is-success", icon: <CheckCircle2 size={17} /> };
     case "error":
       return { label: t("status.unexpected-error"), className: "is-failure", icon: <AlertOctagon size={17} /> };
     default:
@@ -40,6 +44,7 @@ export function FormatStatus({ status, profile, webVersion, formatterVersion }: 
   return (
     <div className="format-status" role="status" aria-live="polite">
       <span className={`status-kind ${presentation.className}`}>{presentation.icon}{presentation.label}</span>
+      {status.kind === "outdated" ? <span className="status-detail">{t("status.outdated.detail")}</span> : null}
       {duration !== undefined ? (
         <span><Clock3 size={15} aria-hidden="true" /> {duration.toFixed(1)} ms</span>
       ) : null}

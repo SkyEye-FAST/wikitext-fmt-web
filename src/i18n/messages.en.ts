@@ -32,6 +32,8 @@ export interface MessageCatalog {
   "toolbar.stop": string;
   "toolbar.copy-output": string;
   "toolbar.download": string;
+  "toolbar.apply-output": string;
+  "toolbar.apply-output-unavailable": string;
   "toolbar.open-file": string;
   "toolbar.clear": string;
   "toolbar.load-example": string;
@@ -58,6 +60,7 @@ export interface MessageCatalog {
   "diff.formatted.aria": string;
   "diff.unified.aria": string;
   "diff.loading": string;
+  "diff.previous-run": string;
 
   // Status bar
   "status.ready": string;
@@ -66,6 +69,9 @@ export interface MessageCatalog {
   "status.unchanged": string;
   "status.fail-closed": string;
   "status.unexpected-error": string;
+  "status.outdated": string;
+  "status.outdated.detail": string;
+  "status.applied": string;
   "status.profile": string;
   "status.versions": string;
 
@@ -150,6 +156,7 @@ export interface MessageCatalog {
   "status.worker-not-ready": string;
   "status.source-changed": string;
   "status.formatting-stopped": string;
+  "status.result-discarded": string;
 
   // Clipboard and copy
   "copy.success": string;
@@ -233,6 +240,8 @@ export const enMessages: MessageCatalog = {
   "toolbar.stop": "Stop",
   "toolbar.copy-output": "Copy output",
   "toolbar.download": "Download",
+  "toolbar.apply-output": "Apply output",
+  "toolbar.apply-output-unavailable": "Apply output is available only for a current successful result.",
   "toolbar.open-file": "Open file",
   "toolbar.clear": "Clear",
   "toolbar.load-example": "Load example",
@@ -261,6 +270,7 @@ export const enMessages: MessageCatalog = {
   "diff.formatted.aria": "Formatted Wikitext",
   "diff.unified.aria": "Unified Wikitext diff",
   "diff.loading": "Loading diff tools…",
+  "diff.previous-run": "Previous formatting run",
 
   // Status bar
   "status.ready": "Ready",
@@ -269,6 +279,9 @@ export const enMessages: MessageCatalog = {
   "status.unchanged": "Already formatted",
   "status.fail-closed": "Fail-closed",
   "status.unexpected-error": "Unexpected error",
+  "status.outdated": "Output is outdated",
+  "status.outdated.detail": "The source or formatter settings changed after this result was generated.",
+  "status.applied": "Formatted output applied",
   "status.profile": "Profile",
   "status.versions": "Web {web} · Formatter {fmt}",
 
@@ -359,6 +372,8 @@ export const enMessages: MessageCatalog = {
     "The source changed while formatting. The older result was discarded; format again to update the output.",
   "status.formatting-stopped":
     "Formatting was stopped. The formatter Worker was restarted.",
+  "status.result-discarded":
+    "The source or formatter settings changed while formatting. This result was discarded.",
 
   // Clipboard and copy
   "copy.success": "Formatted output copied to the clipboard.",

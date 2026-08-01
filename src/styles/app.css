@@ -368,8 +368,15 @@ a {
   font-weight: 750;
 }
 
+.status-detail {
+  flex: 1 1 260px;
+  white-space: normal !important;
+  line-height: 1.35;
+}
+
 .is-success { color: var(--success); }
 .is-failure { color: var(--failure); }
+.is-stale { color: var(--warning); }
 .is-running { color: var(--accent); }
 .is-neutral { color: var(--text-muted); }
 

@@ -42,8 +42,139 @@ describe("App formatting snapshots", () => {
       await pendingFormat;
     });
 
-    expect(screen.getByText(/older result was discarded/i)).toBeVisible();
+    expect(screen.getByText(/result was discarded/i)).toBeVisible();
     expect(screen.getByTestId("output-editor")).not.toHaveTextContent("stale output");
+  });
+
+  it("keeps a completed output and marks its source provenance outdated after editing", async () => {
+    const metadata = createMetadata({ ...defaultOptions });
+    const client: FormatterClientPort = {
+      ready: vi.fn().mockResolvedValue(metadata),
+      format: vi.fn().mockResolvedValue({ result: createDetailedResult("==Formatted==\n"), durationMs: 1 }),
+      restart: vi.fn().mockResolvedValue(metadata),
+      dispose: vi.fn(),
+    };
+    const user = userEvent.setup();
+    render(<App createFormatterClient={() => client} />);
+
+    await user.click(await screen.findByRole("button", { name: "Load example" }));
+    await user.click(screen.getByRole("button", { name: "Format" }));
+    await screen.findByText("Formatted with changes");
+    await user.click(screen.getByRole("textbox", { name: "Source" }));
+    await user.keyboard("x");
+
+    expect(screen.getByText("Output is outdated")).toBeVisible();
+    expect(screen.getByText(/source or formatter settings changed/i)).toBeVisible();
+    expect(screen.getByTestId("output-editor")).toHaveTextContent("Formatted");
+    expect(screen.getByRole("button", { name: "Apply output" })).toBeDisabled();
+  });
+
+  it("marks a completed output outdated only when formatter options change", async () => {
+    const metadata = createMetadata({ ...defaultOptions });
+    const client: FormatterClientPort = {
+      ready: vi.fn().mockResolvedValue(metadata),
+      format: vi.fn().mockResolvedValue({ result: createDetailedResult("formatted output"), durationMs: 1 }),
+      restart: vi.fn().mockResolvedValue(metadata),
+      dispose: vi.fn(),
+    };
+    const user = userEvent.setup();
+    render(<App createFormatterClient={() => client} />);
+
+    await user.click(await screen.findByRole("button", { name: "Load example" }));
+    await user.click(screen.getByRole("button", { name: "Format" }));
+    await screen.findByText("Formatted with changes");
+    await user.selectOptions(screen.getByLabelText("Theme"), "dark");
+    expect(screen.queryByText("Output is outdated")).not.toBeInTheDocument();
+    await user.selectOptions(screen.getByLabelText("Language"), "zh-Hans");
+    expect(screen.queryByText("输出已过期")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "设置" }));
+    await user.click(await screen.findByLabelText("自动换行"));
+    expect(screen.queryByText("输出已过期")).not.toBeInTheDocument();
+    const lineWidth = await screen.findByLabelText("行宽");
+    await user.clear(lineWidth);
+    await user.type(lineWidth, "88");
+
+    expect(screen.getByText("输出已过期")).toBeVisible();
+    expect(screen.getByRole("button", { name: "应用输出" })).toBeDisabled();
+  });
+
+  it("discards an in-flight result when formatter options change", async () => {
+    let resolveFormat!: (value: Awaited<ReturnType<FormatterClientPort["format"]>>) => void;
+    const pendingFormat = new Promise<Awaited<ReturnType<FormatterClientPort["format"]>>>((resolve) => {
+      resolveFormat = resolve;
+    });
+    const metadata = createMetadata({ ...defaultOptions });
+    const client: FormatterClientPort = {
+      ready: vi.fn().mockResolvedValue(metadata),
+      format: vi.fn().mockReturnValue(pendingFormat),
+      restart: vi.fn().mockResolvedValue(metadata),
+      dispose: vi.fn(),
+    };
+    const user = userEvent.setup();
+    render(<App createFormatterClient={() => client} />);
+
+    await user.click(await screen.findByRole("button", { name: "Load example" }));
+    await user.click(screen.getByRole("button", { name: "Format" }));
+    await user.click(screen.getByRole("button", { name: "Settings" }));
+    const lineWidth = await screen.findByLabelText("Line width");
+    await user.clear(lineWidth);
+    await user.type(lineWidth, "88");
+    await act(async () => {
+      resolveFormat({ result: createDetailedResult("discarded output"), durationMs: 1 });
+      await pendingFormat;
+    });
+
+    expect(screen.getByText(/result was discarded/i)).toBeVisible();
+    expect(screen.getByTestId("output-editor")).not.toHaveTextContent("discarded output");
+  });
+
+  it("applies a current successful output to the source editor", async () => {
+    const metadata = createMetadata({ ...defaultOptions });
+    const client: FormatterClientPort = {
+      ready: vi.fn().mockResolvedValue(metadata),
+      format: vi.fn().mockResolvedValue({ result: createDetailedResult("==Formatted title==\n"), durationMs: 1 }),
+      restart: vi.fn().mockResolvedValue(metadata),
+      dispose: vi.fn(),
+    };
+    const user = userEvent.setup();
+    render(<App createFormatterClient={() => client} />);
+
+    await user.click(await screen.findByRole("button", { name: "Load example" }));
+    await user.click(screen.getByRole("button", { name: "Format" }));
+    await screen.findByText("Formatted with changes");
+    await user.click(screen.getByRole("button", { name: "Apply output" }));
+
+    expect(screen.getByText("Formatted output applied")).toBeVisible();
+    expect(screen.getByRole("textbox", { name: "Source" })).toHaveTextContent("Formatted title");
+    expect(screen.getByRole("textbox", { name: "Source" })).toHaveFocus();
+    expect(screen.getByRole("button", { name: "Apply output" })).toBeDisabled();
+  });
+
+  it("resets the completed run when the source is cleared or replaced with the example", async () => {
+    const metadata = createMetadata({ ...defaultOptions });
+    const client: FormatterClientPort = {
+      ready: vi.fn().mockResolvedValue(metadata),
+      format: vi.fn().mockResolvedValue({ result: createDetailedResult("formatted output"), durationMs: 1 }),
+      restart: vi.fn().mockResolvedValue(metadata),
+      dispose: vi.fn(),
+    };
+    const user = userEvent.setup();
+    render(<App createFormatterClient={() => client} />);
+
+    await user.click(await screen.findByRole("button", { name: "Load example" }));
+    await user.click(screen.getByRole("button", { name: "Format" }));
+    await screen.findByText("Formatted with changes");
+    await user.click(screen.getByRole("button", { name: "Clear" }));
+    expect(screen.getByTestId("output-editor")).not.toHaveTextContent("formatted output");
+    expect(screen.getByText("Ready")).toBeVisible();
+
+    await user.click(screen.getByRole("button", { name: "Load example" }));
+    await user.click(screen.getByRole("button", { name: "Format" }));
+    await screen.findByText("Formatted with changes");
+    await user.click(screen.getByRole("button", { name: "Load example" }));
+    expect(screen.getByTestId("output-editor")).not.toHaveTextContent("formatted output");
+    expect(screen.getByText("Ready")).toBeVisible();
   });
 });
 

@@ -8,10 +8,10 @@ Formatting runs locally in your browser. Source text is not uploaded, logged, pl
 
 - CodeMirror 6 source and read-only output editors with line numbers, search, bracket matching, line wrapping, and MediaWiki Wikitext highlighting.
 - Explicit formatting through `wikitext-fmt/browser`; formatting never runs on each keystroke or on the main UI thread.
-- Changed, already-formatted, fail-closed, and unexpected-error states.
+- Changed, already-formatted, fail-closed, unexpected-error, and explicitly outdated-result states.
 - Exact structured failure fields, warnings, rule counters, and structural-equivalence diagnostics.
 - Side-by-side CodeMirror merge diff on wide screens and unified diff on narrow screens.
-- Copy, local file opening, browser-generated downloads, clear, and example workflows.
+- Copy, local file opening, browser-generated downloads, applying current output, clear, and example workflows.
 - Core formatter settings, system/light/dark themes, and responsive desktop/mobile layouts.
 - No backend, analytics, advertising, external parser CDN, service worker, or Wikitext preview rendering.
 
@@ -62,7 +62,9 @@ wikitext-fmt/browser + bundled wikiparser-node runtime
 - `src/settings/` validates, migrates, and persists theme and formatter settings.
 - `scripts/check-bundle.mjs` inspects the production application and full Worker graph.
 
-CodeMirror is the mutable authority for the source document; ordinary keystrokes update only editor-local statistics and do not copy the full document into React state. Explicit actions obtain one immutable snapshot. A result is classified against that submitted snapshot, and is discarded with a visible notice if the source changes before the Worker responds.
+CodeMirror is the mutable authority for the source document; ordinary keystrokes update only editor-local statistics and do not copy the full document into React state. A completed formatting run retains one immutable submitted snapshot together with source and formatter-option revisions, the detailed result, and duration. Output, diagnostics, and Diff are derived from that one run. Editing source or formatting options keeps the prior output visible but marks it outdated; Diff continues comparing the submitted snapshot with its own output. A new result is discarded if either revision changes before the Worker responds. Theme, language, line wrapping, and panel visibility do not invalidate output.
+
+**Apply output** is available only for a current successful run. It replaces the CodeMirror source document in one undoable transaction, returns focus to the source editor, and clears the completed run so an earlier snapshot cannot be mistaken for a result for the newly applied source.
 
 Every format request receives a monotonically increasing ID and a Worker generation. The explicit `initialize` handshake produces exactly one generation-bound `ready` response after the formatter module has loaded. The client rejects superseded operations, settles pending work exactly once on restart, and ignores all messages and errors from old generations. Stop terminates the busy Worker and creates a new module Worker while CodeMirror source and settings remain intact. Module-load errors, invalid responses, and formatter exceptions are presented as unexpected errors; structured formatter failures remain distinct and retain the core package's exact code, stage, and message.
 
@@ -80,7 +82,7 @@ The settings drawer exposes:
 
 The parser configuration is read-only: **MediaWiki bundled browser configuration**. The first release does not expose arbitrary `parserConfig`, siteinfo fetching, or complex localization alias editing. The formatter browser build supports only its bundled `mediawiki`/`default` configuration.
 
-Only the theme, line-wrapping preference, and validated formatter settings are saved to `localStorage`. Source, output, files, diagnostics, and failure details are never persisted.
+Only the language preference, theme preference, line-wrapping preference, and validated formatter settings are saved to `localStorage`. Source, output, completed-run snapshots, files, diagnostics, and failure details are never persisted.
 
 ## Language support
 
@@ -112,7 +114,7 @@ pnpm check
 
 Vitest and React Testing Library cover settings validation/migration, storage privacy, Worker typing/lifecycle/stale responses, classification, structured failure rendering, helpers, statistics, and settings reset actions. Integration tests run the real installed `wikitext-fmt@0.6.0` browser package for headings, templates, tables, lists, unchanged text, structured fail-closed output, CRLF, and idempotency.
 
-Playwright provides full Chromium coverage plus focused Firefox and WebKit smoke coverage. It covers the example-to-format flow, changed status, output inspection, diff, setting changes, persistence without source retention, keyboard formatting, Stop/recreation, local file/download behavior, unique-marker network and storage privacy checks, axe accessibility scans, 200% zoom, and responsive layouts.
+Playwright provides full Chromium coverage plus focused Firefox and WebKit smoke coverage. It covers iterative format → stale output → Diff → reformat → apply → undo flows, changed status, output inspection, setting changes, persistence without source retention, keyboard formatting, Stop/recreation, local file/download behavior, unique-marker network and storage privacy checks, axe accessibility scans, 200% zoom, and responsive layouts.
 
 The bundle check rejects Node built-ins, `fast-glob`, CLI/config-discovery/VS Code code, core-workspace references, and deep package imports in the Worker graph. It reports raw and gzip baselines without arbitrary failure thresholds.
 

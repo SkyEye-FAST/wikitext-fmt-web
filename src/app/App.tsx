@@ -1,4 +1,3 @@
-import type { FormatDetailedResult } from "wikitext-fmt/browser";
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AppHeader } from "../components/AppHeader.js";
 import { DiagnosticsPanel } from "../components/DiagnosticsPanel.js";
@@ -10,8 +9,10 @@ import type { ResolvedTheme } from "../editor/themes.js";
 import { FormatterClient, StaleResponseError, WorkerStoppedError } from "../formatter/client.js";
 import type { ResolvedBrowserOptions } from "../formatter/protocol.js";
 import { classifyResult, classifyUnexpectedError, clientErrorMessageKey, type FormatStatus as Status } from "../formatter/resultSummary.js";
+import { isApplicableFormatRun, resolveResultFreshness, type FormatRun, type ResultFreshness } from "./formatRun.js";
 import { I18nProvider } from "../i18n/I18nProvider.js";
 import { resolveLocale, type LanguagePreference, type SupportedLocale } from "../i18n/locales.js";
+import type { MessageCatalog } from "../i18n/messages.en.js";
 import { useI18n } from "../i18n/useI18n.js";
 import { LARGE_DOCUMENT_WARNING_BYTES } from "../settings/defaults.js";
 import { createDefaultSettings, type AppSettings, type ThemePreference } from "../settings/schema.js";
@@ -25,6 +26,35 @@ const SettingsPanel = lazy(() => import("../components/SettingsPanel.js"));
 export type FormatterClientPort = Pick<FormatterClient, "ready" | "format" | "restart" | "dispose">;
 
 const defaultFormatterClientFactory = (): FormatterClientPort => new FormatterClient();
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function areOptionValuesEqual(left: unknown, right: unknown): boolean {
+  if (Object.is(left, right)) {
+    return true;
+  }
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return Array.isArray(left) && Array.isArray(right) &&
+      left.length === right.length && left.every((value, index) => areOptionValuesEqual(value, right[index]));
+  }
+  if (!isRecord(left) || !isRecord(right)) {
+    return false;
+  }
+  const leftKeys = Object.keys(left);
+  const rightKeys = Object.keys(right);
+  return leftKeys.length === rightKeys.length && leftKeys.every((key) =>
+    Object.hasOwn(right, key) && areOptionValuesEqual(left[key], right[key]),
+  );
+}
+
+function areFormatterOptionsEqual(
+  left: ResolvedBrowserOptions,
+  right: ResolvedBrowserOptions,
+): boolean {
+  return areOptionValuesEqual(left, right);
+}
 
 interface AppProps {
   createFormatterClient?: () => FormatterClientPort;
@@ -181,15 +211,20 @@ function AppMain({
   const sourceEditorRef = useRef<EditorPaneHandle>(null);
   const outputEditorRef = useRef<EditorPaneHandle>(null);
   const sourceRevisionRef = useRef(0);
+  const formatterRevisionRef = useRef(0);
+  const formatterOptionsRef = useRef(initialSettings.formatter);
+  const formatRunRef = useRef<FormatRun | undefined>(undefined);
+  const freshnessRef = useRef<ResultFreshness>("none");
+  const sourceReplacementRef = useRef(false);
   const activeFormatRef = useRef(0);
   const busyRef = useRef(false);
 
   const [settings, setSettings] = useState<AppSettings>(initialSettings);
-  const [output, setOutput] = useState("");
-  const [diffSource, setDiffSource] = useState("");
-  const [result, setResult] = useState<FormatDetailedResult>();
-  const [status, setStatus] = useState<Status>({ kind: "idle" });
-  const [notice, setNotice] = useState<string>();
+  const [formatRun, setFormatRun] = useState<FormatRun>();
+  const [freshness, setFreshness] = useState<ResultFreshness>("none");
+  const [activityStatus, setActivityStatusState] = useState<Status>({ kind: "idle" });
+  const activityStatusRef = useRef<Status>({ kind: "idle" });
+  const [notice, setNotice] = useState<keyof MessageCatalog>();
   const [diffVisible, setDiffVisible] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -202,52 +237,122 @@ function AppMain({
   }, [resolvedTheme]);
 
   useEffect(() => {
-    outputEditorRef.current?.setValue(output);
-  }, [output]);
+    outputEditorRef.current?.setValue(formatRun?.result.formatted ?? "");
+  }, [formatRun]);
 
   // Persist settings on every change.
   useEffect(() => {
     saveSettings(settings);
   }, [settings]);
 
-  const handleSourceDocumentChange = useCallback(() => {
-    sourceRevisionRef.current += 1;
+  const setActivityStatus = useCallback((nextStatus: Status) => {
+    activityStatusRef.current = nextStatus;
+    setActivityStatusState(nextStatus);
   }, []);
 
-  const replaceSourceDocument = useCallback((source: string) => {
-    sourceRevisionRef.current += 1;
-    sourceEditorRef.current?.setValue(source);
+  const updateResultFreshness = useCallback((): ResultFreshness => {
+    const nextFreshness = resolveResultFreshness(
+      formatRunRef.current,
+      sourceRevisionRef.current,
+      formatterRevisionRef.current,
+    );
+    if (nextFreshness !== freshnessRef.current) {
+      freshnessRef.current = nextFreshness;
+      setFreshness(nextFreshness);
+    }
+    return nextFreshness;
   }, []);
+
+  const clearFormatRun = useCallback(() => {
+    formatRunRef.current = undefined;
+    freshnessRef.current = "none";
+    setFormatRun(undefined);
+    setFreshness("none");
+  }, []);
+
+  const handleSourceDocumentChange = useCallback(() => {
+    if (sourceReplacementRef.current) {
+      return;
+    }
+    sourceRevisionRef.current += 1;
+    updateResultFreshness();
+    if (activityStatusRef.current.kind === "applied") {
+      setActivityStatus({ kind: "idle" });
+    }
+  }, [setActivityStatus, updateResultFreshness]);
+
+  const replaceSourceDocument = useCallback((source: string) => {
+    sourceReplacementRef.current = true;
+    sourceRevisionRef.current += 1;
+    try {
+      sourceEditorRef.current?.setValue(source);
+    } finally {
+      sourceReplacementRef.current = false;
+    }
+    updateResultFreshness();
+  }, [updateResultFreshness]);
+
+  const updateFormatter = useCallback((formatter: ResolvedBrowserOptions) => {
+    if (areFormatterOptionsEqual(formatterOptionsRef.current, formatter)) {
+      return;
+    }
+    formatterOptionsRef.current = formatter;
+    formatterRevisionRef.current += 1;
+    updateResultFreshness();
+    setSettings((currentSettings) => ({ ...currentSettings, formatter }));
+  }, [updateResultFreshness]);
+
+  const replaceAllSettings = useCallback((nextSettings: AppSettings) => {
+    if (!areFormatterOptionsEqual(formatterOptionsRef.current, nextSettings.formatter)) {
+      formatterOptionsRef.current = nextSettings.formatter;
+      formatterRevisionRef.current += 1;
+      updateResultFreshness();
+    }
+    setSettings(nextSettings);
+  }, [updateResultFreshness]);
 
   const format = useCallback(async () => {
     if (busyRef.current) return;
     const sourceEditor = sourceEditorRef.current;
     if (!client || !sourceEditor) {
-      setStatus({ kind: "error", code: "worker-not-ready" });
+      setActivityStatus({ kind: "error", code: "worker-not-ready" });
       return;
     }
     const sourceSnapshot = sourceEditor.getValue();
     const sourceRevision = sourceRevisionRef.current;
+    const formatterRevision = formatterRevisionRef.current;
+    const formatterOptions = formatterOptionsRef.current;
     const operationToken = ++activeFormatRef.current;
     busyRef.current = true;
     setBusy(true);
     setNotice(undefined);
-    setStatus({ kind: "formatting" });
+    setActivityStatus({ kind: "formatting" });
     try {
-      const operation = await client.format(sourceSnapshot, settings.formatter);
+      const operation = await client.format(sourceSnapshot, formatterOptions);
       if (operationToken !== activeFormatRef.current) return;
-      if (sourceRevision !== sourceRevisionRef.current) {
-        setStatus({ kind: "idle" });
-        setNotice(t("status.source-changed"));
+      if (
+        sourceRevision !== sourceRevisionRef.current ||
+        formatterRevision !== formatterRevisionRef.current
+      ) {
+        setActivityStatus({ kind: "idle" });
+        setNotice("status.result-discarded");
         return;
       }
-      setResult(operation.result);
-      setOutput(operation.result.formatted);
-      setDiffSource(sourceSnapshot);
-      setStatus(classifyResult(sourceSnapshot, operation.result, operation.durationMs));
+      const completedRun: FormatRun = {
+        sourceSnapshot,
+        sourceRevision,
+        formatterRevision,
+        result: operation.result,
+        durationMs: operation.durationMs,
+      };
+      formatRunRef.current = completedRun;
+      freshnessRef.current = "current";
+      setFormatRun(completedRun);
+      setFreshness("current");
+      setActivityStatus({ kind: "idle" });
     } catch (error) {
       if (operationToken === activeFormatRef.current && !(error instanceof StaleResponseError)) {
-        setStatus(classifyUnexpectedError(error));
+        setActivityStatus(classifyUnexpectedError(error));
         if (!(error instanceof WorkerStoppedError)) {
           void client.restart().catch(() => undefined);
         }
@@ -258,7 +363,7 @@ function AppMain({
         setBusy(false);
       }
     }
-  }, [client, settings.formatter, t]);
+  }, [client, setActivityStatus]);
 
   const formatRef = useRef(format);
   useEffect(() => {
@@ -281,82 +386,107 @@ function AppMain({
     activeFormatRef.current += 1;
     busyRef.current = false;
     setBusy(false);
-    setStatus({ kind: "error", code: "request-rejected", messageKey: "status.formatting-stopped" });
+    setActivityStatus({ kind: "error", code: "request-rejected", messageKey: "status.formatting-stopped" });
     try {
       await client.restart();
     } catch (error) {
-      setStatus(classifyUnexpectedError(error));
+      setActivityStatus(classifyUnexpectedError(error));
     }
   }
 
   async function copyOutput(): Promise<void> {
     try {
-      await copyText(output);
-      setNotice(t("copy.success"));
+      await copyText(formatRunRef.current?.result.formatted ?? "");
+      setNotice("copy.success");
     } catch {
-      setNotice(t("copy.denied"));
+      setNotice("copy.denied");
     }
+  }
+
+  function applyOutput(): void {
+    const run = formatRunRef.current;
+    const currentFreshness = resolveResultFreshness(
+      run,
+      sourceRevisionRef.current,
+      formatterRevisionRef.current,
+    );
+    if (!isApplicableFormatRun(run, currentFreshness)) {
+      return;
+    }
+    replaceSourceDocument(run.result.formatted);
+    clearFormatRun();
+    setDiffVisible(false);
+    setNotice(undefined);
+    setActivityStatus({ kind: "applied" });
+    queueMicrotask(() => sourceEditorRef.current?.focus());
   }
 
   async function openFile(file: File): Promise<void> {
     try {
       const text = await file.text();
       replaceSourceDocument(text);
-      setOutput("");
-      setResult(undefined);
-      setStatus({ kind: "idle" });
+      clearFormatRun();
+      setActivityStatus({ kind: "idle" });
       setSourceFilename(file.name);
       setDiffVisible(false);
       setNotice(file.size > LARGE_DOCUMENT_WARNING_BYTES
-        ? t("editor.large-file-warning")
+        ? "editor.large-file-warning"
         : undefined);
     } catch {
-      setNotice(t("editor.file-not-readable"));
+      setNotice("editor.file-not-readable");
     }
   }
 
   function clearDocument(): void {
     replaceSourceDocument("");
-    setOutput("");
-    setResult(undefined);
-    setStatus({ kind: "idle" });
+    clearFormatRun();
+    setActivityStatus({ kind: "idle" });
     setNotice(undefined);
     setDiffVisible(false);
-    setDiffSource("");
     setSourceFilename(undefined);
     sourceEditorRef.current?.focus();
   }
 
   function loadExample(): void {
     replaceSourceDocument(EXAMPLE_WIKITEXT);
-    setOutput("");
-    setResult(undefined);
-    setStatus({ kind: "idle" });
+    clearFormatRun();
+    setActivityStatus({ kind: "idle" });
     setNotice(undefined);
     setDiffVisible(false);
-    setDiffSource("");
     setSourceFilename("Example.wikitext");
     sourceEditorRef.current?.focus();
   }
 
   function toggleDiff(): void {
-    setDiffVisible((visible) => {
-      if (!visible) {
-        setDiffSource(sourceEditorRef.current?.getValue() ?? "");
-      }
-      return !visible;
-    });
+    setDiffVisible((visible) => !visible);
   }
 
   function resetAllSettings(): void {
     clearStoredSettings();
     setLanguagePref("system");
-    setSettings(createDefaultSettings(defaults));
+    replaceAllSettings(createDefaultSettings(defaults));
   }
 
   function handleLanguageChange(lang: LanguagePreference): void {
     setLanguagePref(lang);
     setSettings((s) => ({ ...s, language: lang }));
+  }
+
+  const output = formatRun?.result.formatted ?? "";
+  const hasOutput = Boolean(formatRun);
+  const canApplyOutput = isApplicableFormatRun(formatRun, freshness);
+  let status: Status;
+  if (activityStatus.kind !== "idle") {
+    status = activityStatus;
+  } else if (formatRun && freshness === "current") {
+    status = classifyResult(formatRun.sourceSnapshot, formatRun.result, formatRun.durationMs);
+  } else if (formatRun) {
+    const staleFreshness = freshness === "source-outdated" || freshness === "options-outdated"
+      ? freshness
+      : "outdated";
+    status = { kind: "outdated", freshness: staleFreshness };
+  } else {
+    status = activityStatus;
   }
 
   return (
@@ -369,12 +499,14 @@ function AppMain({
       />
       <EditorToolbar
         busy={busy}
-        hasOutput={output.length > 0}
+        hasOutput={hasOutput}
+        canApplyOutput={canApplyOutput}
         diffVisible={diffVisible}
         onFormat={() => void format()}
         onStop={() => void stopFormatting()}
         onCopy={() => void copyOutput()}
         onDownload={() => triggerTextDownload(output, sourceFilename)}
+        onApplyOutput={applyOutput}
         onOpenFile={() => fileInputRef.current?.click()}
         onClear={clearDocument}
         onLoadExample={loadExample}
@@ -402,7 +534,13 @@ function AppMain({
         </div>
         {diffVisible ? (
           <Suspense fallback={<div className="lazy-loading">{t("diff.loading")}</div>}>
-            <DiffView original={diffSource} formatted={output} lineWrapping={settings.lineWrapping} theme={resolvedTheme} />
+            <DiffView
+              original={formatRun?.sourceSnapshot ?? ""}
+              formatted={output}
+              outdated={freshness !== "current"}
+              lineWrapping={settings.lineWrapping}
+              theme={resolvedTheme}
+            />
           </Suspense>
         ) : null}
       </main>
@@ -412,7 +550,7 @@ function AppMain({
           <FormatStatus status={status} profile={settings.formatter.profile} webVersion={__WIKITEXT_FMT_WEB_VERSION__} formatterVersion={formatterVersion} />
           <PrivacyNotice />
         </div>
-        <DiagnosticsPanel result={result} status={status} notice={notice} />
+        <DiagnosticsPanel result={formatRun?.result} status={status} notice={notice} />
       </aside>
 
       {settingsOpen ? (
@@ -420,8 +558,9 @@ function AppMain({
           <SettingsPanel
             settings={settings}
             onChange={setSettings}
+            onFormatterChange={updateFormatter}
             onClose={() => setSettingsOpen(false)}
-            onRestoreDefaults={() => setSettings((s) => ({ ...s, formatter: { ...defaults } }))}
+            onRestoreDefaults={() => updateFormatter({ ...defaults })}
             onReset={resetAllSettings}
           />
         </Suspense>

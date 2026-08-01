@@ -11,6 +11,16 @@ test("runs the critical formatter workflow", async ({ page }) => {
   await expect(page.getByText("Formatted with changes")).toBeVisible();
   await expect(page.locator('[data-testid="output-editor"] .cm-content')).toContainText("Example article");
 
+  await page.locator('[data-testid="source-editor"] .cm-content').click();
+  await page.keyboard.insertText("stale edit");
+  await expect(page.getByText("Output is outdated")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Apply output" })).toBeDisabled();
+  await page.getByLabel("Language").selectOption("zh-Hans");
+  await expect(page.getByText("输出已过期")).toBeVisible();
+  await page.getByLabel("语言").selectOption("zh-Hant");
+  await expect(page.getByText("輸出已過期")).toBeVisible();
+  await page.getByLabel("語言").selectOption("en");
+
   await page.locator('input[type="file"]').setInputFiles({
     name: "Malformed.wikitext",
     mimeType: "text/plain",

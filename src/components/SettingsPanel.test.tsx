@@ -15,6 +15,7 @@ describe("SettingsPanel", () => {
       <SettingsPanel
         settings={createDefaultSettings({ ...defaultOptions } as ResolvedBrowserOptions)}
         onChange={vi.fn()}
+        onFormatterChange={vi.fn()}
         onClose={vi.fn()}
         onRestoreDefaults={onRestoreDefaults}
         onReset={onReset}

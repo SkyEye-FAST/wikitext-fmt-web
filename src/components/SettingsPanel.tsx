@@ -7,6 +7,7 @@ import { applyCoreProfile, type AppSettings } from "../settings/schema.js";
 interface SettingsPanelProps {
   settings: AppSettings;
   onChange: (settings: AppSettings) => void;
+  onFormatterChange: (formatter: ResolvedBrowserOptions) => void;
   onClose: () => void;
   onRestoreDefaults: () => void;
   onReset: () => void;
@@ -30,6 +31,7 @@ function ToggleField({ label, checked, onChange }: ToggleFieldProps) {
 export default function SettingsPanel({
   settings,
   onChange,
+  onFormatterChange,
   onClose,
   onRestoreDefaults,
   onReset,
@@ -43,10 +45,7 @@ export default function SettingsPanel({
     key: K,
     value: ResolvedBrowserOptions[K],
   ): void {
-    onChange({
-      ...settings,
-      formatter: { ...formatter, [key]: value },
-    });
+    onFormatterChange({ ...formatter, [key]: value });
   }
 
   useEffect(() => {
@@ -106,10 +105,9 @@ export default function SettingsPanel({
           <fieldset>
             <legend>{t("settings.general")}</legend>
             <label><span>{t("settings.profile")}</span>
-              <select value={formatter.profile} onChange={(event) => onChange({
-                ...settings,
-                formatter: applyCoreProfile(formatter, event.target.value as ResolvedBrowserOptions["profile"]),
-              })}>
+              <select value={formatter.profile} onChange={(event) => onFormatterChange(
+                applyCoreProfile(formatter, event.target.value as ResolvedBrowserOptions["profile"]),
+              )}>
                 <option value="default">{t("settings.profile.default")}</option><option value="production">{t("settings.profile.production")}</option><option value="aggressive">{t("settings.profile.aggressive")}</option>
               </select>
             </label>
