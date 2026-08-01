@@ -47,6 +47,8 @@ test("keeps controls available at mobile size and 200 percent zoom", async ({ pa
   await page.setViewportSize({ width: 390, height: 844 });
   await page.reload();
   await expect(page.getByRole("button", { name: "Format" })).toBeVisible();
+  await expect(page.getByLabel("Theme")).toBeVisible();
+  await expectNoAxeViolations(page);
   const formatBox = await page.getByRole("button", { name: "Format" }).boundingBox();
   expect(formatBox?.height).toBeGreaterThanOrEqual(36);
 

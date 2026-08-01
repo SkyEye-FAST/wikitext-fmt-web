@@ -1,6 +1,6 @@
 {
   "name": "wikitext-fmt-web",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Browser-based MediaWiki Wikitext formatter powered by wikitext-fmt",
   "license": "GPL-3.0-or-later",
