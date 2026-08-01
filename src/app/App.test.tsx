@@ -135,7 +135,7 @@ describe("App formatter client lifecycle", () => {
 
   it.each([
     ["zh-CN", "zh-Hans", "正在初始化本地格式化器 Worker……"],
-    ["zh-TW", "zh-Hant", "正在初始化本地格式化器 Worker……"],
+    ["zh-TW", "zh-Hant", "正在初始化本機格式化器 Worker……"],
   ])("uses the browser locale during initialization for %s", (browserLanguage, expectedLocale, expectedMessage) => {
     Object.defineProperty(navigator, "languages", { configurable: true, value: [browserLanguage] });
     Object.defineProperty(navigator, "language", { configurable: true, value: browserLanguage });

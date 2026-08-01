@@ -87,8 +87,8 @@ describe("i18n catalog consistency", () => {
     // Brand stays English.
     expect(t("brand.name")).toBe("Wikitext Formatter");
     expect(t("toolbar.format")).toBe("格式化");
-    expect(t("editor.source.label")).toBe("源文本");
-    expect(t("editor.output.label")).toBe("格式化结果");
+    expect(t("editor.source.label")).toBe("源代码");
+    expect(t("editor.output.label")).toBe("格式化输出");
     expect(t("settings.title")).toBe("格式化器设置");
     expect(t("settings.general")).toBe("常规");
   });
