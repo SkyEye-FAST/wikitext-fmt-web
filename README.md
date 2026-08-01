@@ -62,7 +62,9 @@ wikitext-fmt/browser + bundled wikiparser-node runtime
 - `src/settings/` validates, migrates, and persists theme and formatter settings.
 - `scripts/check-bundle.mjs` inspects the production application and full Worker graph.
 
-Every format request receives a monotonically increasing ID. The client rejects superseded operations and ignores stale responses. Stop terminates the busy Worker and creates a new module Worker while source and settings remain in React/CodeMirror state. Module-load errors, invalid responses, and formatter exceptions are presented as unexpected errors; structured formatter failures remain distinct and retain the core package's exact code, stage, and message.
+CodeMirror is the mutable authority for the source document; ordinary keystrokes update only editor-local statistics and do not copy the full document into React state. Explicit actions obtain one immutable snapshot. A result is classified against that submitted snapshot, and is discarded with a visible notice if the source changes before the Worker responds.
+
+Every format request receives a monotonically increasing ID and a Worker generation. The explicit `initialize` handshake produces exactly one generation-bound `ready` response after the formatter module has loaded. The client rejects superseded operations, settles pending work exactly once on restart, and ignores all messages and errors from old generations. Stop terminates the busy Worker and creates a new module Worker while CodeMirror source and settings remain intact. Module-load errors, invalid responses, and formatter exceptions are presented as unexpected errors; structured formatter failures remain distinct and retain the core package's exact code, stage, and message.
 
 The main React bundle imports only public `wikitext-fmt/browser` types. `formatWikitextSafeDetailed`, `defaultOptions`, and `ruleLevels` are runtime imports only in `formatter.worker.ts`. Core defaults are sent to the UI in the Worker's ready message.
 
@@ -88,14 +90,14 @@ pnpm typecheck
 pnpm test:run
 pnpm build
 pnpm check:bundle
-pnpm exec playwright install chromium
+pnpm exec playwright install chromium firefox webkit
 pnpm e2e
 pnpm check
 ```
 
 Vitest and React Testing Library cover settings validation/migration, storage privacy, Worker typing/lifecycle/stale responses, classification, structured failure rendering, helpers, statistics, and settings reset actions. Integration tests run the real installed `wikitext-fmt@0.6.0` browser package for headings, templates, tables, lists, unchanged text, structured fail-closed output, CRLF, and idempotency.
 
-Playwright covers the example-to-format flow, changed status, output inspection, diff, setting changes, persistence without source retention, keyboard formatting, local file/download behavior, network request bodies, and a 390 px mobile layout.
+Playwright provides full Chromium coverage plus focused Firefox and WebKit smoke coverage. It covers the example-to-format flow, changed status, output inspection, diff, setting changes, persistence without source retention, keyboard formatting, Stop/recreation, local file/download behavior, unique-marker network and storage privacy checks, axe accessibility scans, 200% zoom, and responsive layouts.
 
 The bundle check rejects Node built-ins, `fast-glob`, CLI/config-discovery/VS Code code, core-workspace references, and deep package imports in the Worker graph. It reports raw and gzip baselines without arbitrary failure thresholds.
 
@@ -111,6 +113,10 @@ Output directory: dist
 ```
 
 Use Node 24 and leave `VITE_BASE_PATH` unset for a root deployment. `public/_headers` adds a restrictive Content Security Policy and related static security headers. No Cloudflare runtime or backend is required.
+
+## Versioning and releases
+
+Frontend releases use annotated tags named `web-v<version>` (for example, `web-v0.1.0`). The `core-v*` namespace belongs to the `wikitext-fmt` core package and is not used here. A frontend tag is created only after the exact commit passes CI and its Cloudflare Pages production deployment has been verified.
 
 ## Browser support
 

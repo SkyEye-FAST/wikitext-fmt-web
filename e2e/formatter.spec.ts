@@ -104,3 +104,20 @@ test("keeps editors usable in a narrow mobile layout", async ({ page }) => {
   const bodyWidth = await page.evaluate(() => document.body.scrollWidth);
   expect(bodyWidth).toBeLessThanOrEqual(390);
 });
+
+test("warns for a large document and recovers after Stop", async ({ page }) => {
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "Large.wikitext",
+    mimeType: "text/plain",
+    buffer: Buffer.from("plain text\n".repeat(100_001)),
+  });
+  await expect(page.getByText(/unusually large file/i)).toBeVisible();
+
+  await page.getByRole("button", { name: "Format" }).click();
+  await page.getByRole("button", { name: "Stop" }).click();
+  await expect(page.getByText(/Formatting was stopped/i)).toBeVisible();
+
+  await page.getByRole("button", { name: "Load example" }).click();
+  await page.getByRole("button", { name: "Format" }).click();
+  await expect(page.getByText("Formatted with changes")).toBeVisible();
+});

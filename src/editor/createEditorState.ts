@@ -21,16 +21,20 @@ import {
 } from "@codemirror/view";
 import { createEditorTheme, createSyntaxTheme, type ResolvedTheme } from "./themes.js";
 import { createWikitextExtensions } from "./createWikitextExtensions.js";
+import type { DocumentStatistics } from "../utils/document.js";
 
-export interface EditorStateOptions {
-  doc: string;
+export interface EditorExtensionOptions {
   readOnly: boolean;
   lineWrapping: boolean;
   theme: ResolvedTheme;
-  onChange?: (value: string, statistics: { characters: number; lines: number }) => void;
+  onDocumentChange?: (statistics: DocumentStatistics) => void;
 }
 
-export function createEditorExtensions(options: EditorStateOptions): Extension[] {
+export interface EditorStateOptions extends EditorExtensionOptions {
+  doc: string;
+}
+
+export function createEditorExtensions(options: EditorExtensionOptions): Extension[] {
   const extensions: Extension[] = [
     lineNumbers(),
     highlightActiveLineGutter(),
@@ -63,11 +67,11 @@ export function createEditorExtensions(options: EditorStateOptions): Extension[]
   if (options.lineWrapping) {
     extensions.push(EditorView.lineWrapping);
   }
-  if (options.onChange) {
+  if (options.onDocumentChange) {
     extensions.push(
       EditorView.updateListener.of((update) => {
         if (update.docChanged) {
-          options.onChange?.(update.state.doc.toString(), {
+          options.onDocumentChange?.({
             characters: update.state.doc.length,
             lines: update.state.doc.length === 0 ? 0 : update.state.doc.lines,
           });

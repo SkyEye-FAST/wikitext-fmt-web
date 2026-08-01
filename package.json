@@ -19,7 +19,8 @@
     "test:run": "vitest run",
     "e2e": "playwright test",
     "check:bundle": "node scripts/check-bundle.mjs",
-    "check": "pnpm lint && pnpm typecheck && pnpm test:run && pnpm build && pnpm check:bundle"
+    "check:metadata": "node scripts/check-metadata.mjs",
+    "check": "pnpm lint && pnpm typecheck && pnpm test:run && pnpm build && pnpm check:bundle && pnpm check:metadata"
   },
   "dependencies": {
     "@bhsd/codemirror-wikitext": "^0.10.1",
@@ -39,6 +40,7 @@
     "wikitext-fmt": "0.6.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.62.1",
     "@testing-library/jest-dom": "^7.0.0",

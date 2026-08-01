@@ -25,6 +25,16 @@ interface PendingOperation {
   reject: (error: Error) => void;
 }
 
+interface WorkerSession {
+  generation: number;
+  worker: WorkerLike;
+  readiness: Promise<FormatterMetadata>;
+  resolveReady: (metadata: FormatterMetadata) => void;
+  rejectReady: (error: Error) => void;
+  state: "pending" | "ready" | "failed";
+  error?: Error;
+}
+
 export class StaleResponseError extends Error {
   constructor() {
     super("A newer formatting request replaced this request.");
@@ -47,14 +57,11 @@ function defaultWorkerFactory(): WorkerLike {
 
 export class FormatterClient {
   private readonly workerFactory: WorkerFactory;
-  private worker!: WorkerLike;
+  private session!: WorkerSession;
   private nextRequestId = 0;
   private latestRequestId = 0;
   private generation = 0;
   private pending = new Map<number, PendingOperation>();
-  private readyPromise!: Promise<FormatterMetadata>;
-  private resolveReady!: (metadata: FormatterMetadata) => void;
-  private rejectReady!: (error: Error) => void;
   private disposed = false;
 
   constructor(workerFactory: WorkerFactory = defaultWorkerFactory) {
@@ -63,17 +70,28 @@ export class FormatterClient {
   }
 
   ready(): Promise<FormatterMetadata> {
-    return this.readyPromise;
+    if (this.disposed) {
+      return Promise.reject(new WorkerStoppedError("The formatter client has been disposed."));
+    }
+    return this.session.readiness;
   }
 
   async format(source: string, options: FormatOptions): Promise<FormatOperation> {
-    const generation = this.generation;
-    await this.ready();
-    if (generation !== this.generation) {
-      throw new WorkerStoppedError();
-    }
     if (this.disposed) {
       throw new WorkerStoppedError("The formatter client has been disposed.");
+    }
+
+    let session = this.session;
+    if (session.state === "failed") {
+      await this.restart(session.error?.message);
+      session = this.session;
+    }
+    await session.readiness;
+    if (session !== this.session || session.generation !== this.generation) {
+      throw new WorkerStoppedError();
+    }
+    if (session.state !== "ready") {
+      throw session.error ?? new Error("The formatter Worker is not ready.");
     }
 
     for (const pending of this.pending.values()) {
@@ -88,51 +106,96 @@ export class FormatterClient {
       this.pending.set(requestId, { resolve, reject });
     });
 
-    this.worker.postMessage({
-      type: "format",
-      requestId,
-      source,
-      options,
-    });
+    try {
+      session.worker.postMessage({
+        type: "format",
+        generation: session.generation,
+        requestId,
+        source,
+        options,
+      });
+    } catch (error) {
+      this.handleWorkerFailure(
+        session,
+        error instanceof Error ? error : new Error("The formatter Worker rejected the formatting request."),
+      );
+    }
 
     return operation;
   }
 
   restart(reason?: string): Promise<FormatterMetadata> {
-    this.failPending(new WorkerStoppedError(reason));
-    this.worker.terminate();
+    const error = new WorkerStoppedError(reason);
+    this.stopSession(this.session, error);
+    this.failPending(error);
+    this.session.worker.terminate();
+    this.disposed = false;
     this.createWorker();
     return this.ready();
   }
 
   dispose(): void {
+    if (this.disposed) return;
     this.disposed = true;
-    this.failPending(new WorkerStoppedError("The formatter client was disposed."));
-    this.worker.terminate();
+    const error = new WorkerStoppedError("The formatter client was disposed.");
+    this.stopSession(this.session, error);
+    this.failPending(error);
+    this.session.worker.terminate();
   }
 
   private createWorker(): void {
-    this.generation += 1;
-    this.disposed = false;
-    this.readyPromise = new Promise<FormatterMetadata>((resolve, reject) => {
-      this.resolveReady = resolve;
-      this.rejectReady = reject;
+    const generation = ++this.generation;
+    let resolveReady!: (metadata: FormatterMetadata) => void;
+    let rejectReady!: (error: Error) => void;
+    const readiness = new Promise<FormatterMetadata>((resolve, reject) => {
+      resolveReady = resolve;
+      rejectReady = reject;
     });
-    this.worker = this.workerFactory();
-    this.worker.onmessage = (event) => this.handleMessage(event);
-    this.worker.onerror = (event) => this.handleWorkerError(event);
-    this.worker.postMessage({ type: "initialize" });
+    // A caller may restart before observing readiness; keep that rejection handled
+    // while returning the original rejecting promise to explicit consumers.
+    void readiness.catch(() => undefined);
+    const worker = this.workerFactory();
+    const session: WorkerSession = {
+      generation,
+      worker,
+      readiness,
+      resolveReady,
+      rejectReady,
+      state: "pending",
+    };
+    this.session = session;
+    worker.onmessage = (event) => this.handleMessage(session, event);
+    worker.onerror = (event) => this.handleWorkerError(session, event);
+    try {
+      worker.postMessage({ type: "initialize", generation });
+    } catch (error) {
+      this.handleWorkerFailure(session, error instanceof Error ? error : new Error("The formatter Worker failed to initialize."));
+    }
   }
 
-  private handleMessage(event: MessageEvent<unknown>): void {
+  private handleMessage(session: WorkerSession, event: MessageEvent<unknown>): void {
+    if (this.disposed || session !== this.session) {
+      return;
+    }
     if (!isFormatResponse(event.data)) {
-      this.handleWorkerError(new ErrorEvent("error", { message: "The formatter Worker sent an invalid response." }));
+      this.handleWorkerFailure(session, new Error("The formatter Worker sent an invalid response."));
       return;
     }
 
     const response: FormatResponse = event.data;
+    if (response.generation !== session.generation) {
+      this.handleWorkerFailure(session, new Error("The formatter Worker sent a response for an invalid generation."));
+      return;
+    }
     if (response.type === "ready") {
-      this.resolveReady(response.metadata);
+      if (session.state === "pending") {
+        session.state = "ready";
+        session.resolveReady(response.metadata);
+      }
+      return;
+    }
+    if (response.type === "initialization-error") {
+      this.handleWorkerFailure(session, new Error(response.message));
       return;
     }
 
@@ -157,10 +220,27 @@ export class FormatterClient {
     });
   }
 
-  private handleWorkerError(event: ErrorEvent): void {
+  private handleWorkerError(session: WorkerSession, event: ErrorEvent): void {
     const error = new Error(event.message || "The formatter Worker failed to initialize.");
-    this.rejectReady(error);
+    this.handleWorkerFailure(session, error);
+  }
+
+  private handleWorkerFailure(session: WorkerSession, error: Error): void {
+    if (this.disposed || session !== this.session) {
+      return;
+    }
+    this.stopSession(session, error);
     this.failPending(error);
+    session.worker.terminate();
+  }
+
+  private stopSession(session: WorkerSession, error: Error): void {
+    if (session.state === "failed") return;
+    if (session.state === "pending") {
+      session.rejectReady(error);
+    }
+    session.state = "failed";
+    session.error = error;
   }
 
   private failPending(error: Error): void {

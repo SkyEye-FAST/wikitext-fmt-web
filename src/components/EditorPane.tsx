@@ -1,39 +1,72 @@
 import { StateEffect } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
-import { memo, useEffect, useRef, useState } from "react";
+import { forwardRef, memo, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { createEditorExtensions, createEditorState } from "../editor/createEditorState.js";
 import type { ResolvedTheme } from "../editor/themes.js";
-import { getDocumentStatistics } from "../utils/document.js";
+import { getDocumentStatistics, type DocumentStatistics } from "../utils/document.js";
+
+export interface EditorPaneHandle {
+  getValue(): string;
+  setValue(value: string): void;
+  focus(): void;
+}
 
 interface EditorPaneProps {
   id: string;
   label: string;
-  value: string;
-  onChange?: (value: string) => void;
+  initialValue?: string;
+  onDocumentChange?: (statistics: DocumentStatistics) => void;
   readOnly?: boolean;
   lineWrapping: boolean;
   theme: ResolvedTheme;
   mutedLabel?: string;
 }
 
-export const EditorPane = memo(function EditorPane({
+const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(function EditorPane({
   id,
   label,
-  value,
-  onChange,
+  initialValue = "",
+  onDocumentChange,
   readOnly = false,
   lineWrapping,
   theme,
   mutedLabel,
-}: EditorPaneProps) {
+}: EditorPaneProps, forwardedRef) {
   const hostRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
-  const onChangeRef = useRef(onChange);
-  const [stats, setStats] = useState(() => getDocumentStatistics(value));
+  const initialValueRef = useRef(initialValue);
+  const onDocumentChangeRef = useRef(onDocumentChange);
+  const [stats, setStats] = useState(() => getDocumentStatistics(initialValue));
 
   useEffect(() => {
-    onChangeRef.current = onChange;
-  }, [onChange]);
+    onDocumentChangeRef.current = onDocumentChange;
+  }, [onDocumentChange]);
+
+  useImperativeHandle(forwardedRef, () => ({
+    getValue: () => viewRef.current?.state.doc.toString() ?? initialValueRef.current,
+    setValue: (value) => {
+      initialValueRef.current = value;
+      const view = viewRef.current;
+      if (!view) {
+        setStats(getDocumentStatistics(value));
+        return;
+      }
+      // Full-string comparison happens only for explicit document replacement,
+      // never for ordinary editor updates.
+      if (view.state.doc.length === value.length && view.state.doc.sliceString(0) === value) {
+        return;
+      }
+      const selection = view.state.selection.main;
+      view.dispatch({
+        changes: { from: 0, to: view.state.doc.length, insert: value },
+        selection: {
+          anchor: Math.min(selection.anchor, value.length),
+          head: Math.min(selection.head, value.length),
+        },
+      });
+    },
+    focus: () => viewRef.current?.focus(),
+  }), []);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -41,13 +74,13 @@ export const EditorPane = memo(function EditorPane({
       return;
     }
     const state = createEditorState({
-      doc: value,
+      doc: initialValueRef.current,
       readOnly,
       lineWrapping,
       theme,
-      onChange: (nextValue, nextStatistics) => {
+      onDocumentChange: (nextStatistics) => {
         setStats(nextStatistics);
-        onChangeRef.current?.(nextValue);
+        onDocumentChangeRef.current?.(nextStatistics);
       },
     });
     const view = new EditorView({ state, parent: host });
@@ -72,13 +105,12 @@ export const EditorPane = memo(function EditorPane({
     view.dispatch({
       effects: StateEffect.reconfigure.of(
         createEditorExtensions({
-          doc: view.state.doc.toString(),
           readOnly,
           lineWrapping,
           theme,
-          onChange: (nextValue, nextStatistics) => {
+          onDocumentChange: (nextStatistics) => {
             setStats(nextStatistics);
-            onChangeRef.current?.(nextValue);
+            onDocumentChangeRef.current?.(nextStatistics);
           },
         }),
       ),
@@ -86,21 +118,6 @@ export const EditorPane = memo(function EditorPane({
     view.contentDOM.setAttribute("aria-label", label);
     view.contentDOM.toggleAttribute("aria-readonly", readOnly);
   }, [label, lineWrapping, readOnly, theme]);
-
-  useEffect(() => {
-    const view = viewRef.current;
-    if (!view || view.state.doc.toString() === value) {
-      return;
-    }
-    const selection = view.state.selection.main;
-    const anchor = Math.min(selection.anchor, value.length);
-    const head = Math.min(selection.head, value.length);
-    view.dispatch({
-      changes: { from: 0, to: view.state.doc.length, insert: value },
-      selection: { anchor, head },
-    });
-    setStats({ characters: view.state.doc.length, lines: value.length === 0 ? 0 : view.state.doc.lines });
-  }, [value]);
 
   return (
     <section className="editor-pane syntax-spine" aria-labelledby={`${id}-label`}>
@@ -117,3 +134,5 @@ export const EditorPane = memo(function EditorPane({
     </section>
   );
 });
+
+export const EditorPane = memo(EditorPaneComponent);

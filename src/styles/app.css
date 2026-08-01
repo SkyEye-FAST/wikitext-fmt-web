@@ -48,6 +48,7 @@ a {
 
 .app-shell {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto auto minmax(390px, 1fr) auto;
   min-height: 100dvh;
   background: var(--bg);
@@ -184,13 +185,13 @@ a {
 
 .toolbar-button.button-primary {
   min-width: 112px;
-  border-color: var(--accent);
-  background: var(--accent);
+  border-color: var(--accent-solid);
+  background: var(--accent-solid);
   color: #fff;
 }
 
 .toolbar-button.button-primary:hover {
-  background: var(--accent-hover);
+  background: var(--accent-solid-hover);
 }
 
 .toolbar-button.button-stop {
@@ -412,6 +413,7 @@ a {
 .diagnostic-callout p {
   margin: 3px 0 0;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .failure-callout {
@@ -488,8 +490,8 @@ a {
   box-shadow: -8px 0 28px rgb(0 0 0 / 14%);
 }
 
-.settings-panel > header,
-.settings-panel > footer {
+.settings-panel-header,
+.settings-panel-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -499,7 +501,7 @@ a {
   border-bottom: 1px solid var(--border);
 }
 
-.settings-panel > footer {
+.settings-panel-footer {
   border-top: 1px solid var(--border);
   border-bottom: 0;
 }
@@ -659,12 +661,12 @@ a {
     gap: 12px;
   }
 
-  .format-status > span:nth-last-child(-n + 2) {
+  .format-status > .status-profile {
     display: none;
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 800px) {
   .app-shell {
     display: block;
     min-height: 100dvh;
@@ -751,7 +753,9 @@ a {
   }
 
   .format-status {
-    justify-content: space-between;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 8px 14px;
     font-size: 11px;
   }
 

@@ -29,6 +29,7 @@ jobs:
       - run: pnpm test:run
       - run: pnpm build
       - run: pnpm check:bundle
+      - run: pnpm check:metadata
 
   e2e:
     name: Playwright
@@ -43,6 +44,6 @@ jobs:
         with:
           node-version: "24.11.0"
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm exec playwright install --with-deps chromium firefox webkit
       - run: pnpm build
       - run: pnpm e2e
