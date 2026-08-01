@@ -38,7 +38,7 @@ describe("formatter result classification", () => {
 
   it("summarizes rule counters without inventing causes", () => {
     const result = createDetailedResult("formatted");
-    result.templateParameterDiagnostics.templatesChanged = 2;
+    result.templateDiagnostics.templatesChanged = 2;
     result.tableFormatDiagnostics.tablesSkippedAmbiguous = 1;
     const rows = summarizeRuleDiagnostics(result, t);
     expect(rows).toHaveLength(2);

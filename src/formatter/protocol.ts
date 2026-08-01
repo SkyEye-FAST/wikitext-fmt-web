@@ -50,7 +50,32 @@ export type FormatResponse =
       generation: number;
       requestId: number;
       message: string;
-    };
+      };
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function isTemplateDiagnostics(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  const numericFields = [
+    "templatesInspected",
+    "templatesEligible",
+    "templatesChanged",
+    "templatesAlreadyCanonical",
+    "templatesSkippedAmbiguous",
+    "uniqueTemplatesFormatted",
+    "templatesExpandedToMultiline",
+    "existingMultilineTemplatesNormalized",
+    "templatesSkipped",
+    "formattingPassesUsed",
+  ];
+  return numericFields.every((field) => typeof value[field] === "number") &&
+    typeof value.convergenceLimitReached === "boolean" &&
+    isRecord(value.skipReasons) &&
+    Array.isArray(value.templateSemanticIds) &&
+    Array.isArray(value.changedTemplateSemanticIds);
+}
 
 export function isFormatResponse(value: unknown): value is FormatResponse {
   if (!value || typeof value !== "object" || !("type" in value)) {
@@ -74,12 +99,14 @@ export function isFormatResponse(value: unknown): value is FormatResponse {
 
   if (candidate.type === "result") {
     const result = candidate.result;
+    const resultRecord = isRecord(result) ? result : undefined;
     return Number.isInteger(candidate.requestId) &&
       Number.isFinite(candidate.durationMs) &&
       (candidate.durationMs as number) >= 0 &&
-      Boolean(result) &&
-      typeof result === "object" &&
-      typeof (result as Record<string, unknown>).formatted === "string";
+      Boolean(resultRecord) &&
+      typeof resultRecord?.formatted === "string" &&
+      isTemplateDiagnostics(resultRecord.templateDiagnostics) &&
+      !("templateParameterDiagnostics" in resultRecord);
   }
 
   if (candidate.type === "initialization-error") {

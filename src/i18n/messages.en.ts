@@ -115,7 +115,6 @@ export interface MessageCatalog {
   "settings.parameter-layout.compact": string;
   "settings.parameter-layout.flush": string;
   "settings.parameter-layout.indented": string;
-  "settings.format-template-params": string;
   "settings.tables": string;
   "settings.format-tables": string;
   "settings.cell-separator": string;
@@ -328,8 +327,6 @@ export const enMessages: MessageCatalog = {
   "settings.parameter-layout.compact": "Compact",
   "settings.parameter-layout.flush": "Flush",
   "settings.parameter-layout.indented": "Indented",
-  "settings.format-template-params":
-    "Format template parameters (experimental)",
   "settings.tables": "Tables",
   "settings.format-tables": "Format tables",
   "settings.cell-separator": "Cell separator",

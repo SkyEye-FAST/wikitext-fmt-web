@@ -83,6 +83,29 @@ test("switches and persists the dark theme", async ({ page }) => {
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 });
 
+test("migrates version-2 settings containing the removed template toggle", async ({ page }) => {
+  await page.evaluate(() => {
+    localStorage.setItem("wikitext-formatter.settings", JSON.stringify({
+      version: 2,
+      theme: "system",
+      language: "en",
+      lineWrapping: true,
+      formatter: { lineWidth: 96, formatTemplates: true, formatTemplateParameters: true },
+    }));
+  });
+  await page.reload();
+  await page.getByRole("button", { name: "Settings" }).click();
+  await expect(page.getByText(/template parameters/i)).toHaveCount(0);
+  await expect(page.getByLabel("Line width")).toHaveValue("96");
+  await page.getByLabel("Line width").fill("104");
+  await page.getByRole("button", { name: "Close settings" }).click();
+
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem("wikitext-formatter.settings") ?? "null"));
+  expect(stored.formatter.lineWidth).toBe(104);
+  expect(stored.formatter.formatTemplates).toBe(true);
+  expect(stored.formatter).not.toHaveProperty("formatTemplateParameters");
+});
+
 test("switches, persists, and restores the interface language", async ({ page }) => {
   await page.getByLabel("Language").selectOption("zh-Hans");
   await expect(page.locator("html")).toHaveAttribute("lang", "zh-Hans");

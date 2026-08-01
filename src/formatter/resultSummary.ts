@@ -72,7 +72,7 @@ export function summarizeRuleDiagnostics(
   t: TFunction,
 ): RuleDiagnosticSummary[] {
   const rows: RuleDiagnosticSummary[] = [];
-  const templates = result.templateParameterDiagnostics;
+  const templates = result.templateDiagnostics;
   const tables = result.tableFormatDiagnostics;
   const lists = result.listDiagnostics;
 

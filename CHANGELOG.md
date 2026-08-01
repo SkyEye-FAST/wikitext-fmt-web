@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.2.0 — 2026-08-02
+
+### Added
+
 - Add immutable formatting-run provenance with submitted source and formatter
   revisions. Keep output and diagnostics visible but clearly marked outdated
   after source or formatter-option changes, while Diff remains tied to its
@@ -27,6 +31,34 @@
   and localize browser negotiation, metadata, client errors, and responsive
   accessibility surfaces.
 
+### Changed
+
+- Upgrade the exact browser dependency from `wikitext-fmt@0.6.0` to
+  `wikitext-fmt@0.7.0`.
+- Consume the unified `templateDiagnostics` result field and remove obsolete
+  template-parameter diagnostic counters.
+- Keep template settings limited to template formatting, inline spacing,
+  parameter layout, and line width; the deprecated experimental
+  template-parameter toggle is removed.
+- Inherit core 0.7.0's safe table caption, opener, row-attribute, and separator
+  normalization. Preserve mode now preserves only inline `||` and `!!`
+  separators.
+
+### Fixed
+
+- Preserve validated supported settings when loading version-2 records that
+  still contain the removed `formatTemplateParameters` property; the next
+  canonical save omits it.
+- Strengthen Worker response validation so result-shape drift is rejected
+  instead of being silently accepted.
+
+### Coverage
+
+- Cover English, Simplified Chinese, and Traditional Chinese UI, browser-language
+  detection, validated language persistence, result provenance and outdated
+  state, Apply output and undo, accessibility, privacy, and Chromium/Firefox/
+  WebKit workflows.
+
 ## 0.1.1 — 2026-08-01
 
 - Preserve the Theme selector's accessible name when its visible label is hidden at mobile widths.
@@ -36,7 +68,7 @@
 
 ## 0.1.0 — 2026-08-01
 
-- Add the browser-only React/Vite Wikitext formatter powered by exact dependency `wikitext-fmt@0.6.0`.
+- Add the browser-only React/Vite Wikitext formatter powered by exact dependency `wikitext-fmt@0.7.0`.
 - Run safe detailed formatting in a cancellable module Web Worker with typed stale-response protection.
 - Add CodeMirror Wikitext editors, merge diff, structured diagnostics, persistent validated settings, local file handling, copy, and download workflows.
 - Add responsive light/dark UI, privacy and accessibility safeguards, Vitest/Playwright coverage, bundle verification, CI, and Cloudflare Pages compatibility.

@@ -24,8 +24,33 @@ describe("Worker protocol", () => {
 
   it("rejects malformed generations and payloads", () => {
     expect(isFormatResponse({ type: "ready", generation: 0, metadata: {} })).toBe(false);
-    expect(isFormatResponse({ type: "ready", generation: 1, metadata: { version: "0.6.0", defaults: {}, ruleLevels: {} } })).toBe(true);
-    expect(isFormatResponse({ type: "result", generation: 1, requestId: 2, result: { formatted: "text" } })).toBe(false);
+    expect(isFormatResponse({ type: "ready", generation: 1, metadata: { version: "0.7.0", defaults: {}, ruleLevels: {} } })).toBe(true);
+    expect(isFormatResponse({
+      type: "result",
+      generation: 1,
+      requestId: 2,
+      result: {
+        formatted: "text",
+        templateDiagnostics: {
+          templatesInspected: 0,
+          templatesEligible: 0,
+          templatesChanged: 0,
+          templatesAlreadyCanonical: 0,
+          templatesSkippedAmbiguous: 0,
+          uniqueTemplatesFormatted: 0,
+          templatesExpandedToMultiline: 0,
+          existingMultilineTemplatesNormalized: 0,
+          templatesSkipped: 0,
+          skipReasons: {},
+          formattingPassesUsed: 0,
+          convergenceLimitReached: false,
+          templateSemanticIds: [],
+          changedTemplateSemanticIds: [],
+        },
+      },
+      durationMs: 1,
+    })).toBe(true);
+    expect(isFormatResponse({ type: "result", generation: 1, requestId: 2, result: { formatted: "text" }, durationMs: 1 })).toBe(false);
     expect(isFormatResponse({ type: "result", generation: 1, requestId: 2, result: { formatted: "text" }, durationMs: -1 })).toBe(false);
     expect(isFormatResponse({ type: "error", generation: 1, requestId: 2, message: 42 })).toBe(false);
     expect(isFormatResponse({ type: "initialization-error", generation: 1, message: "load failed" })).toBe(true);

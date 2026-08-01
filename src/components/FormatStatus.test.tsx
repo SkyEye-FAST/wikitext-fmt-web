@@ -8,11 +8,11 @@ describe("FormatStatus", () => {
       <FormatStatus
         status={{ kind: "idle" }}
         profile="default"
-        webVersion="0.1.0"
-        formatterVersion="0.6.0"
+        webVersion="0.2.0"
+        formatterVersion="0.7.0"
       />,
     );
 
-    expect(screen.getByText(/Web/).parentElement).toHaveTextContent("Web 0.1.0 · Formatter 0.6.0");
+    expect(screen.getByText(/Web/).parentElement).toHaveTextContent("Web 0.2.0 · Formatter 0.7.0");
   });
 });

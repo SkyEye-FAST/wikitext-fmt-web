@@ -15,7 +15,7 @@ Formatting runs locally in your browser. Source text is not uploaded, logged, pl
 - Core formatter settings, system/light/dark themes, and responsive desktop/mobile layouts.
 - No backend, analytics, advertising, external parser CDN, service worker, or Wikitext preview rendering.
 
-This project is independent of the core formatter repository and consumes the exact npm dependency `wikitext-fmt: "0.6.0"` as an ordinary external application. It is not affiliated with the Wikimedia Foundation.
+This project is independent of the core formatter repository and consumes the exact published npm dependency `wikitext-fmt: "0.7.0"` as an ordinary external application. It is not affiliated with the Wikimedia Foundation.
 
 ## Requirements and development
 
@@ -75,8 +75,8 @@ The main React bundle imports only public `wikitext-fmt/browser` types. `formatW
 The settings drawer exposes:
 
 - General: profile, line width, reliability level, and editor line wrapping.
-- Templates: template formatting, inline spacing, parameter layout, and experimental parameter formatting.
-- Tables: table formatting and cell-separator style.
+- Templates: template formatting, inline spacing, parameter layout, and line width.
+- Tables: table formatting, safe caption/opener/row-attribute spacing, and cell-separator style. Preserve mode preserves only inline cell separators.
 - Structure: headings, lists, section spacing, blank-line normalization, and HTML void-tag style.
 - Links and metadata: categories, file links, wikilinks, external links, references, redirects, behavior switches, interlanguage links, placements, and interlanguage prefixes.
 
@@ -112,7 +112,7 @@ pnpm e2e
 pnpm check
 ```
 
-Vitest and React Testing Library cover settings validation/migration, storage privacy, Worker typing/lifecycle/stale responses, classification, structured failure rendering, helpers, statistics, and settings reset actions. Integration tests run the real installed `wikitext-fmt@0.6.0` browser package for headings, templates, tables, lists, unchanged text, structured fail-closed output, CRLF, and idempotency.
+Vitest and React Testing Library cover settings validation/migration, storage privacy, Worker typing/lifecycle/stale responses, classification, structured failure rendering, helpers, statistics, and settings reset actions. Integration tests run the real installed `wikitext-fmt@0.7.0` browser package for headings, templates, table captions and attributes, split/preserve separators, lists, unchanged text, structured fail-closed output, CRLF, and idempotency.
 
 Playwright provides full Chromium coverage plus focused Firefox and WebKit smoke coverage. It covers iterative format → stale output → Diff → reformat → apply → undo flows, changed status, output inspection, setting changes, persistence without source retention, keyboard formatting, Stop/recreation, local file/download behavior, unique-marker network and storage privacy checks, axe accessibility scans, 200% zoom, and responsive layouts.
 

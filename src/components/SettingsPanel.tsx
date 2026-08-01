@@ -135,7 +135,6 @@ export default function SettingsPanel({
                 <option value="compact">{t("settings.parameter-layout.compact")}</option><option value="flush">{t("settings.parameter-layout.flush")}</option><option value="indented">{t("settings.parameter-layout.indented")}</option>
               </select>
             </label>
-            <ToggleField label={t("settings.format-template-params")} checked={formatter.formatTemplateParameters} onChange={(value) => updateFormatter("formatTemplateParameters", value)} />
           </fieldset>
 
           <fieldset>

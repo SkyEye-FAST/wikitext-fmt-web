@@ -78,6 +78,37 @@ describe("settings storage", () => {
     expect(loadSettings(defaults, memoryStorage("not-json"))).toEqual(createDefaultSettings(defaults));
   });
 
+  it("drops the removed template-parameter setting from version-2 records without resetting supported settings", () => {
+    const storage = memoryStorage(JSON.stringify({
+      version: 2,
+      theme: "dark",
+      language: "zh-Hans",
+      lineWrapping: false,
+      formatter: {
+        ...defaults,
+        lineWidth: 144,
+        formatTemplates: false,
+        formatTables: false,
+        formatTemplateParameters: true,
+      },
+    }));
+
+    const loaded = loadSettings(defaults, storage);
+    expect(loaded).toMatchObject({
+      theme: "dark",
+      language: "zh-Hans",
+      lineWrapping: false,
+      formatter: { lineWidth: 144, formatTemplates: false, formatTables: false },
+    });
+    expect("formatTemplateParameters" in loaded.formatter).toBe(false);
+
+    saveSettings(loaded, storage);
+    const saved = JSON.parse(storage.entries.get(SETTINGS_STORAGE_KEY) ?? "{}");
+    expect(saved.formatter).not.toHaveProperty("formatTemplateParameters");
+    expect(saved).not.toHaveProperty("source");
+    expect(saved).not.toHaveProperty("output");
+  });
+
   it("persists only theme, language, and settings, never source or output text", () => {
     const storage = memoryStorage();
     saveSettings(createDefaultSettings(defaults), storage);

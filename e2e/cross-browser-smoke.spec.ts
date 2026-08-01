@@ -4,7 +4,7 @@ test("runs the critical formatter workflow", async ({ page }) => {
   await page.goto(".");
   await expect(page).toHaveTitle(/Wikitext Formatter/);
   await expect(page.getByRole("button", { name: "Format" })).toBeVisible();
-  await expect(page.getByRole("status")).toContainText("Web 0.1.1 · Formatter 0.6.0");
+  await expect(page.getByRole("status")).toContainText("Web 0.2.0 · Formatter 0.7.0");
 
   await page.getByRole("button", { name: "Load example" }).click();
   await page.getByRole("button", { name: "Format" }).click();

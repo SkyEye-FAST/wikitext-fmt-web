@@ -63,23 +63,19 @@ export function createDetailedResult(formatted: string): FormatDetailedResult {
       sectionSpacingBeforeHeadingsInserted: 0,
       sectionSpacingAfterHeadingsInserted: 0,
     },
-    templateParameterDiagnostics: {
+    templateDiagnostics: {
       templatesInspected: 0,
       templatesEligible: 0,
       templatesChanged: 0,
       templatesAlreadyCanonical: 0,
       templatesSkippedAmbiguous: 0,
       uniqueTemplatesFormatted: 0,
-      templatesFormatted: 0,
       templatesExpandedToMultiline: 0,
       existingMultilineTemplatesNormalized: 0,
       templatesSkipped: 0,
       skipReasons: {},
       formattingPassesUsed: 0,
       convergenceLimitReached: false,
-      templateParametersFormatted: 0,
-      templateParameterLinesFormatted: 0,
-      templateParameterLinesSkippedUnsafe: 0,
       templateSemanticIds: [],
       changedTemplateSemanticIds: [],
     },
@@ -88,5 +84,5 @@ export function createDetailedResult(formatted: string): FormatDetailedResult {
 }
 
 export function createMetadata(defaults = {} as ResolvedBrowserOptions): FormatterMetadata {
-  return { defaults, ruleLevels: {}, version: "0.6.0" };
+  return { defaults, ruleLevels: {}, version: "0.7.0" };
 }

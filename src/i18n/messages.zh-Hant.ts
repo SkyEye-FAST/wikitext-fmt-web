@@ -117,7 +117,6 @@ export const messages: MessageCatalog = {
   "settings.parameter-layout.compact": "緊湊",
   "settings.parameter-layout.flush": "齊頭",
   "settings.parameter-layout.indented": "縮排",
-  "settings.format-template-params": "格式化範本參數（實驗性）",
   "settings.tables": "表格",
   "settings.format-tables": "格式化表格",
   "settings.cell-separator": "儲存格分隔符",

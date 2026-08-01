@@ -51,8 +51,8 @@ importers:
         specifier: ^1.46.2
         version: 1.46.2(@codemirror/state@6.7.1)(@codemirror/view@6.43.7)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
       wikitext-fmt:
-        specifier: 0.6.0
-        version: 0.6.0(@codemirror/state@6.7.1)(@codemirror/view@6.43.7)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
+        specifier: 0.7.0
+        version: 0.7.0(@codemirror/state@6.7.1)(@codemirror/view@6.43.7)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
     devDependencies:
       '@axe-core/playwright':
         specifier: ^4.12.1
@@ -1890,8 +1890,8 @@ packages:
       vscode-json-languageservice:
         optional: true
 
-  wikitext-fmt@0.6.0:
-    resolution: {integrity: sha512-Hpa3ST1LBiHi/VfzaWAc/B5615g/Urq/Io2cExsudu/Og8pxsTmufGITulz9oNrDDAKSKZzqNhv/M3QuCrfySA==}
+  wikitext-fmt@0.7.0:
+    resolution: {integrity: sha512-k8ufm6/Imv+U1l9yzNK7KLI9b5ynp+c622MSWJMjSb1TEC1K+hv+rZvsaNBmkU6U5TyfWk014Bdvi0SUxWOhHA==}
     engines: {node: ^22.13.0 || >=24.11.0}
     hasBin: true
 
@@ -3616,7 +3616,7 @@ snapshots:
       - monaco-editor
       - stylelint-config-recommended
 
-  wikitext-fmt@0.6.0(@codemirror/state@6.7.1)(@codemirror/view@6.43.7)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)):
+  wikitext-fmt@0.7.0(@codemirror/state@6.7.1)(@codemirror/view@6.43.7)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)):
     dependencies:
       fast-glob: 3.3.3
       wikiparser-node: 1.46.2(@codemirror/state@6.7.1)(@codemirror/view@6.43.7)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
