@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+- Add a type-safe i18n system with English, Simplified Chinese (zh-Hans), and
+  Traditional Chinese (zh-Hant) UI localisation. Translate all controls,
+  labels, status messages, diagnostics, settings, and accessible names.
+- Add a language selector (Follow browser / English / 简体中文 / 繁體中文)
+  next to the existing theme selector in the page header.
+- Detect the browser language preference from `navigator.languages` with
+  normalisation rules for Chinese locale variants (zh-CN/zh-SG/zh-MY →
+  zh-Hans; zh-TW/zh-HK/zh-MO → zh-Hant).
+- Upgrade the settings storage schema from version 1 to version 2 to persist
+  the language preference. Older stored settings migrate losslessly.
+- Keep formatter-core diagnostics (failure code, stage, message, rule IDs,
+  profile values) untranslated so they remain searchable and match existing
+  tests and documentation.
+
 ## 0.1.1 — 2026-08-01
 
 - Preserve the Theme selector's accessible name when its visible label is hidden at mobile widths.

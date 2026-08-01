@@ -26,25 +26,46 @@ describe("settings storage", () => {
     expect(settings.parserConfig).toBe("mediawiki");
   });
 
-  it("migrates the version 0 settings property", () => {
+  it("migrates the version 0 settings property to v2", () => {
     const storage = memoryStorage(JSON.stringify({ version: 0, theme: "dark", lineWrapping: false, settings: { lineWidth: 88 } }));
-    expect(loadSettings(defaults, storage)).toMatchObject({ theme: "dark", lineWrapping: false, formatter: { lineWidth: 88 } });
+    expect(loadSettings(defaults, storage)).toMatchObject({ theme: "dark", language: "system", lineWrapping: false, formatter: { lineWidth: 88 } });
+  });
+
+  it("migrates version 1 settings to v2 with system language default", () => {
+    const storage = memoryStorage(JSON.stringify({ version: 1, theme: "light", lineWrapping: true, formatter: { lineWidth: 100 } }));
+    const loaded = loadSettings(defaults, storage);
+    expect(loaded).toMatchObject({ theme: "light", language: "system", lineWrapping: true, formatter: { lineWidth: 100 } });
+  });
+
+  it("retains an explicitly saved language preference in v2", () => {
+    const storage = memoryStorage();
+    const settings = { ...createDefaultSettings(defaults), language: "zh-Hans" as const };
+    saveSettings(settings, storage);
+    const loaded = loadSettings(defaults, storage);
+    expect(loaded.language).toBe("zh-Hans");
+  });
+
+  it("falls back to system on an invalid language value in v2", () => {
+    const storage = memoryStorage(JSON.stringify({ version: 2, theme: "dark", language: "klingon", lineWrapping: true, formatter: defaults }));
+    const loaded = loadSettings(defaults, storage);
+    expect(loaded.language).toBe("system");
   });
 
   it("falls back on corrupt persisted data", () => {
     expect(loadSettings(defaults, memoryStorage("not-json"))).toEqual(createDefaultSettings(defaults));
   });
 
-  it("persists only theme and settings, never source or output text", () => {
+  it("persists only theme, language, and settings, never source or output text", () => {
     const storage = memoryStorage();
     saveSettings(createDefaultSettings(defaults), storage);
     const serialized = storage.entries.get(SETTINGS_STORAGE_KEY) ?? "";
     expect(serialized).toContain('"theme":"system"');
+    expect(serialized).toContain('"language":"system"');
     expect(serialized).not.toContain("source");
     expect(serialized).not.toContain("output");
   });
 
-  it("applies the core 0.6.0 aggressive profile behavior", () => {
+  it("applies the core aggressive profile behavior", () => {
     const aggressive = applyCoreProfile(defaults, "aggressive");
     expect(aggressive).toMatchObject({
       profile: "aggressive",

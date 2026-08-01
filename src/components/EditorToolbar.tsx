@@ -9,6 +9,7 @@ import {
   Square,
   Trash2,
 } from "lucide-react";
+import { useI18n } from "../i18n/useI18n.js";
 
 interface EditorToolbarProps {
   busy: boolean;
@@ -39,27 +40,28 @@ function ToolbarButton({ icon, children, className = "", ...props }: ToolbarButt
 }
 
 export function EditorToolbar(props: EditorToolbarProps) {
+  const { t } = useI18n();
   return (
-    <nav className="editor-toolbar" aria-label="Formatter actions">
+    <nav className="editor-toolbar" aria-label={t("toolbar.aria-label")}>
       {props.busy ? (
         <ToolbarButton className="button-stop" icon={<Square size={17} />} onClick={props.onStop}>
-          Stop
+          {t("toolbar.stop")}
         </ToolbarButton>
       ) : (
         <ToolbarButton className="button-primary" icon={<Play size={17} />} onClick={props.onFormat}>
-          Format
+          {t("toolbar.format")}
         </ToolbarButton>
       )}
       <ToolbarButton icon={<Clipboard size={17} />} onClick={props.onCopy} disabled={!props.hasOutput}>
-        Copy output
+        {t("toolbar.copy-output")}
       </ToolbarButton>
       <ToolbarButton icon={<Download size={17} />} onClick={props.onDownload} disabled={!props.hasOutput}>
-        Download
+        {t("toolbar.download")}
       </ToolbarButton>
-      <ToolbarButton icon={<FileInput size={17} />} onClick={props.onOpenFile}>Open file</ToolbarButton>
-      <ToolbarButton icon={<Trash2 size={17} />} onClick={props.onClear}>Clear</ToolbarButton>
-      <ToolbarButton icon={<RotateCcw size={17} />} onClick={props.onLoadExample}>Load example</ToolbarButton>
-      <ToolbarButton icon={<Settings size={17} />} onClick={props.onOpenSettings}>Settings</ToolbarButton>
+      <ToolbarButton icon={<FileInput size={17} />} onClick={props.onOpenFile}>{t("toolbar.open-file")}</ToolbarButton>
+      <ToolbarButton icon={<Trash2 size={17} />} onClick={props.onClear}>{t("toolbar.clear")}</ToolbarButton>
+      <ToolbarButton icon={<RotateCcw size={17} />} onClick={props.onLoadExample}>{t("toolbar.load-example")}</ToolbarButton>
+      <ToolbarButton icon={<Settings size={17} />} onClick={props.onOpenSettings}>{t("toolbar.settings")}</ToolbarButton>
       <ToolbarButton
         icon={<GitCompareArrows size={17} />}
         onClick={props.onToggleDiff}
@@ -67,7 +69,7 @@ export function EditorToolbar(props: EditorToolbarProps) {
         aria-pressed={props.diffVisible}
         className={props.diffVisible ? "is-active" : ""}
       >
-        Diff
+        {t("toolbar.diff")}
       </ToolbarButton>
     </nav>
   );

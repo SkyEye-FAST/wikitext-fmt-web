@@ -1,9 +1,12 @@
 import type { ResolvedBrowserOptions } from "../formatter/protocol.js";
+import type { LanguagePreference } from "../i18n/locales.js";
+import { isLanguagePreference } from "../i18n/locales.js";
 
 export type ThemePreference = "system" | "light" | "dark";
 
 export interface AppSettings {
   theme: ThemePreference;
+  language: LanguagePreference;
   lineWrapping: boolean;
   formatter: ResolvedBrowserOptions;
 }
@@ -83,6 +86,7 @@ export function sanitizeFormatterSettings(
 export function createDefaultSettings(defaults: ResolvedBrowserOptions): AppSettings {
   return {
     theme: "system",
+    language: "system",
     lineWrapping: true,
     formatter: sanitizeFormatterSettings(defaults, defaults),
   };
@@ -128,3 +132,6 @@ export function applyCoreProfile(
 export function isThemePreference(value: unknown): value is ThemePreference {
   return value === "system" || value === "light" || value === "dark";
 }
+
+// Re-export for convenience.
+export { isLanguagePreference };

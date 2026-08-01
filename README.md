@@ -82,6 +82,21 @@ The parser configuration is read-only: **MediaWiki bundled browser configuration
 
 Only the theme, line-wrapping preference, and validated formatter settings are saved to `localStorage`. Source, output, files, diagnostics, and failure details are never persisted.
 
+## Language support
+
+The UI is available in **English**, **简体中文** (Simplified Chinese), and **繁體中文** (Traditional Chinese). A language selector sits next to the theme selector in the page header.
+
+| Setting | Behaviour |
+| --- | --- |
+| Follow browser | Detects the best match from `navigator.languages` (zh-CN/zh-SG/zh-MY → zh-Hans; zh-TW/zh-HK/zh-MO → zh-Hant; other → English). |
+| English | Forces the English UI regardless of browser settings. |
+| 简体中文 | Forces Simplified Chinese. |
+| 繁體中文 | Forces Traditional Chinese. |
+
+The language preference is stored in `localStorage` (settings schema v2) so it is available before the formatter Worker finishes loading. Changing the language updates all React UI text, CodeMirror and diff accessible names, `document.documentElement.lang`, the page title, and meta tags immediately without rebuilding the Worker or clearing source text.
+
+**The formatter core returns diagnostics, failure codes, failure messages, and rule IDs in English.** The UI translates surrounding labels (e.g. "Stage:", "Rule", "Severity", table headers, button text) but preserves the core's exact original message text so it remains searchable and matches existing tests and documentation.
+
 ## Testing and verification
 
 ```sh

@@ -4,6 +4,7 @@ import { EditorView } from "@codemirror/view";
 import { useEffect, useRef, useState } from "react";
 import { createEditorExtensions } from "../editor/createEditorState.js";
 import type { ResolvedTheme } from "../editor/themes.js";
+import { useI18n } from "../i18n/useI18n.js";
 
 interface DiffViewProps {
   original: string;
@@ -26,6 +27,7 @@ function useNarrowDiff(): boolean {
 export default function DiffView({ original, formatted, theme, lineWrapping }: DiffViewProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const narrow = useNarrowDiff();
+  const { t } = useI18n();
 
   useEffect(() => {
     const host = hostRef.current;
@@ -55,7 +57,7 @@ export default function DiffView({ original, formatted, theme, lineWrapping }: D
           ],
         }),
       });
-      view.contentDOM.setAttribute("aria-label", "Unified Wikitext diff");
+      view.contentDOM.setAttribute("aria-label", t("diff.unified.aria"));
       return () => view.destroy();
     }
 
@@ -67,16 +69,16 @@ export default function DiffView({ original, formatted, theme, lineWrapping }: D
       highlightChanges: true,
       collapseUnchanged: { margin: 3, minSize: 6 },
     });
-    merge.a.contentDOM.setAttribute("aria-label", "Original Wikitext");
-    merge.b.contentDOM.setAttribute("aria-label", "Formatted Wikitext");
+    merge.a.contentDOM.setAttribute("aria-label", t("diff.original.aria"));
+    merge.b.contentDOM.setAttribute("aria-label", t("diff.formatted.aria"));
     return () => merge.destroy();
-  }, [formatted, lineWrapping, narrow, original, theme]);
+  }, [formatted, lineWrapping, narrow, original, theme, t]);
 
   return (
     <section className="diff-pane syntax-spine" aria-labelledby="diff-title">
       <header className="pane-header">
-        <h2 id="diff-title">Original and formatted diff</h2>
-        <span className="pane-muted">{narrow ? "Unified view" : "Side-by-side view"}</span>
+        <h2 id="diff-title">{t("diff.title")}</h2>
+        <span className="pane-muted">{narrow ? t("diff.unified") : t("diff.side-by-side")}</span>
       </header>
       <div ref={hostRef} className="diff-host" data-testid="diff-view" />
     </section>
