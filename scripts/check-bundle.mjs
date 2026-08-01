@@ -8,6 +8,12 @@ const distDirectory = new URL("../dist/", import.meta.url);
 const manifest = JSON.parse(await readFile(new URL(".vite/manifest.json", distDirectory), "utf8"));
 const appGraph = JSON.parse(await readFile(new URL("app-bundle-graph.json", distDirectory), "utf8"));
 const workerGraph = JSON.parse(await readFile(new URL("formatter-worker-graph.json", distDirectory), "utf8"));
+const headers = await readFile(new URL("_headers", distDirectory), "utf8");
+
+const rootNoTransformRule = "/\n  Cache-Control: public, max-age=0, must-revalidate, no-transform";
+if (!headers.includes(rootNoTransformRule)) {
+  throw new Error("The production root must opt out of Cloudflare response transformation.");
+}
 
 function assertGraph(graph, label) {
   if (!Array.isArray(graph?.chunks) || graph.chunks.some((chunk) =>
@@ -157,4 +163,4 @@ for (const report of reports) {
     console.log(`  ${path.basename(file)} (${formatBytes(fileStat.size)})`);
   }
 }
-console.log("Manifest graph and Worker dependency checks: clear");
+console.log("Manifest graph, Worker dependencies, and production headers: clear");
