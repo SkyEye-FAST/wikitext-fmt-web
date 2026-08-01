@@ -4,6 +4,7 @@
 
 - Preserve the Theme selector's accessible name when its visible label is hidden at mobile widths.
 - Add mobile axe coverage for the responsive header controls.
+- Prevent Cloudflare from automatically injecting Web Analytics into the formatter page without weakening its Content Security Policy.
 
 ## 0.1.0 — 2026-08-01
 

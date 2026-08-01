@@ -112,7 +112,7 @@ Build command: pnpm build
 Output directory: dist
 ```
 
-Use Node 24 and leave `VITE_BASE_PATH` unset for a root deployment. `public/_headers` adds a restrictive Content Security Policy and related static security headers. No Cloudflare runtime or backend is required.
+Use Node 24 and leave `VITE_BASE_PATH` unset for a root deployment. `public/_headers` adds a restrictive Content Security Policy and related static security headers, and prevents Cloudflare from automatically injecting Web Analytics into the formatter page. No Cloudflare runtime or backend is required.
 
 ## Versioning and releases
 
