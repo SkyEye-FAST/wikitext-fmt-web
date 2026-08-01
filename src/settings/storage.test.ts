@@ -2,7 +2,7 @@ import { defaultOptions } from "wikitext-fmt/browser";
 import { describe, expect, it } from "vitest";
 import type { ResolvedBrowserOptions } from "../formatter/protocol.js";
 import { applyCoreProfile, createDefaultSettings, sanitizeFormatterSettings } from "./schema.js";
-import { loadSettings, saveSettings, SETTINGS_STORAGE_KEY } from "./storage.js";
+import { loadSettings, loadStoredLanguagePreference, saveSettings, SETTINGS_STORAGE_KEY } from "./storage.js";
 
 const defaults = { ...defaultOptions } as ResolvedBrowserOptions;
 
@@ -43,6 +43,29 @@ describe("settings storage", () => {
     saveSettings(settings, storage);
     const loaded = loadSettings(defaults, storage);
     expect(loaded.language).toBe("zh-Hans");
+  });
+
+  it("loads bootstrap language from the settings record only", () => {
+    const storage = memoryStorage(JSON.stringify({
+      version: 2,
+      theme: "dark",
+      language: "zh-Hant",
+      lineWrapping: false,
+      formatter: defaults,
+    }));
+    expect(loadStoredLanguagePreference(storage)).toBe("zh-Hant");
+    expect(storage.entries.has("wikitext-formatter.locale")).toBe(false);
+  });
+
+  it("uses system for an invalid bootstrap language", () => {
+    const storage = memoryStorage(JSON.stringify({
+      version: 2,
+      theme: "dark",
+      language: "klingon",
+      lineWrapping: false,
+      formatter: defaults,
+    }));
+    expect(loadStoredLanguagePreference(storage)).toBe("system");
   });
 
   it("falls back to system on an invalid language value in v2", () => {

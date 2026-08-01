@@ -15,6 +15,10 @@
 - Keep formatter-core diagnostics (failure code, stage, message, rule IDs,
   profile values) untranslated so they remain searchable and match existing
   tests and documentation.
+- Keep one FormatterClient lifecycle across initialization, formatting, and
+  language changes; persist the language only in the validated settings record
+  and localize browser negotiation, metadata, client errors, and responsive
+  accessibility surfaces.
 
 ## 0.1.1 — 2026-08-01
 

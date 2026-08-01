@@ -31,7 +31,8 @@ describe("formatter result classification", () => {
   it("classifies unexpected transport or execution errors separately", () => {
     expect(classifyUnexpectedError(new Error("Worker crashed"))).toEqual({
       kind: "error",
-      message: "Worker crashed",
+      code: "unknown",
+      detail: "Worker crashed",
     });
   });
 

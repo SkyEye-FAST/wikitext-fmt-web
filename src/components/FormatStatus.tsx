@@ -31,13 +31,19 @@ export function FormatStatus({ status, profile, webVersion, formatterVersion }: 
   const { t } = useI18n();
   const presentation = useStatusPresentation(status);
   const duration = "durationMs" in status ? status.durationMs : undefined;
+  const profileMessageKeys = {
+    default: "settings.profile.default",
+    production: "settings.profile.production",
+    aggressive: "settings.profile.aggressive",
+  } as const;
+  const profileKey = profileMessageKeys[profile as keyof typeof profileMessageKeys];
   return (
     <div className="format-status" role="status" aria-live="polite">
       <span className={`status-kind ${presentation.className}`}>{presentation.icon}{presentation.label}</span>
       {duration !== undefined ? (
         <span><Clock3 size={15} aria-hidden="true" /> {duration.toFixed(1)} ms</span>
       ) : null}
-      <span className="status-profile">{t("status.profile")}: <strong>{profile[0]?.toUpperCase()}{profile.slice(1)}</strong></span>
+      <span className="status-profile">{t("status.profile")}: <strong>{profileKey ? t(profileKey) : profile}</strong></span>
       <span className="status-versions">{t("status.versions", { web: webVersion, fmt: formatterVersion })}</span>
     </div>
   );

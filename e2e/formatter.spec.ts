@@ -82,6 +82,25 @@ test("switches and persists the dark theme", async ({ page }) => {
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 });
 
+test("switches, persists, and restores the interface language", async ({ page }) => {
+  await page.getByLabel("Language").selectOption("zh-Hans");
+  await expect(page.locator("html")).toHaveAttribute("lang", "zh-Hans");
+  await expect(page.getByLabel("语言")).toHaveValue("zh-Hans");
+  await expect(page.locator(".pane-stats").first()).toContainText("行");
+  await expect(page.locator(".status-profile")).toContainText("默认");
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /基于浏览器的 MediaWiki/);
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem("wikitext-formatter.settings") ?? "null") as { language?: string });
+  expect(stored.language).toBe("zh-Hans");
+  expect(await page.evaluate(() => localStorage.getItem("wikitext-formatter.locale"))).toBeNull();
+
+  await page.reload();
+  await expect(page.getByLabel("语言")).toHaveValue("zh-Hans");
+  await page.getByLabel("语言").selectOption("zh-Hant");
+  await expect(page.locator("html")).toHaveAttribute("lang", "zh-Hant");
+  await expect(page.locator(".pane-stats").first()).toContainText("個字元");
+  await expect(page.locator(".status-profile")).toContainText("預設");
+});
+
 test("traps settings focus and restores it on Escape", async ({ page }) => {
   const settingsButton = page.getByRole("button", { name: "Settings" });
   await settingsButton.click();

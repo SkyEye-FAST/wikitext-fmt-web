@@ -31,7 +31,7 @@ export function AppHeader({ theme, language, onThemeChange, onLanguageChange }: 
         </div>
       </div>
       <div className="header-actions">
-        <label className="theme-control">
+        <label className="language-control">
           <span>{t("language.label")}</span>
           <select
             aria-label={t("language.label")}

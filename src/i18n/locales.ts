@@ -2,27 +2,41 @@ export type SupportedLocale = "en" | "zh-Hans" | "zh-Hant";
 
 export type LanguagePreference = "system" | SupportedLocale;
 
-const LOCALE_STORAGE_KEY = "wikitext-formatter.locale";
-
-const zhHansPatterns = [/^zh-hans$/iu, /^zh-cn$/iu, /^zh-sg$/iu, /^zh-my$/iu];
-const zhHantPatterns = [/^zh-hant$/iu, /^zh-tw$/iu, /^zh-hk$/iu, /^zh-mo$/iu];
 const supportedLocales: readonly SupportedLocale[] = ["en", "zh-Hans", "zh-Hant"];
+
+const simplifiedRegions = new Set(["cn", "sg", "my"]);
+const traditionalRegions = new Set(["tw", "hk", "mo"]);
 
 function normalizeBrowserTag(tag: string): string {
   // Accept both hyphens and underscores as separators; normalize to hyphen.
-  return tag.replace(/_/gu, "-").toLowerCase();
+  return tag.trim().replace(/_/gu, "-").toLowerCase();
+}
+
+function matchBrowserLocale(browserTag: string): SupportedLocale | undefined {
+  const normalized = normalizeBrowserTag(browserTag);
+  if (!normalized) return undefined;
+
+  const [language, ...subtags] = normalized.split("-");
+  if (language === "en") return "en";
+  if (language !== "zh") return undefined;
+
+  const script = subtags.find((subtag) => subtag === "hans" || subtag === "hant");
+  if (script === "hans") return "zh-Hans";
+  if (script === "hant") return "zh-Hant";
+
+  const region = subtags.find((subtag) => /^[a-z]{2}$/u.test(subtag));
+  if (region && simplifiedRegions.has(region)) return "zh-Hans";
+  if (region && traditionalRegions.has(region)) return "zh-Hant";
+
+  // A bare `zh` has no script information. Simplified Chinese is the
+  // conservative default used by browsers that omit the region.
+  if (subtags.length === 0) return "zh-Hans";
+  return undefined;
 }
 
 /** Resolve a browser language tag to a supported locale, defaulting to "en". */
 export function resolveBrowserLocale(browserTag: string): SupportedLocale {
-  const normalized = normalizeBrowserTag(browserTag);
-  for (const pattern of zhHansPatterns) {
-    if (pattern.test(normalized)) return "zh-Hans";
-  }
-  for (const pattern of zhHantPatterns) {
-    if (pattern.test(normalized)) return "zh-Hant";
-  }
-  return "en";
+  return matchBrowserLocale(browserTag) ?? "en";
 }
 
 /** Detect the best locale from navigator.languages / navigator.language. */
@@ -31,9 +45,12 @@ export function detectBrowserLocale(navigator: {
   language?: string;
 }): SupportedLocale {
   const languages = navigator.languages ?? [];
-  for (const tag of languages) {
-    const locale = resolveBrowserLocale(tag);
-    if (locale !== "en") return locale;
+  if (languages.length > 0) {
+    for (const tag of languages) {
+      const locale = matchBrowserLocale(tag);
+      if (locale) return locale;
+    }
+    return "en";
   }
   if (navigator.language) {
     return resolveBrowserLocale(navigator.language);
@@ -61,26 +78,6 @@ export function isSupportedLocale(value: unknown): value is SupportedLocale {
 
 export function isLanguagePreference(value: unknown): value is LanguagePreference {
   return value === "system" || isSupportedLocale(value);
-}
-
-/** Save the user's explicit locale choice so the init screen can use it. */
-export function saveLocalePreference(preference: LanguagePreference): void {
-  try {
-    localStorage.setItem(LOCALE_STORAGE_KEY, preference);
-  } catch {
-    // localStorage may be unavailable.
-  }
-}
-
-/** Load a previously saved locale preference, or "system" for first visit. */
-export function loadLocalePreference(): LanguagePreference {
-  try {
-    const raw = localStorage.getItem(LOCALE_STORAGE_KEY);
-    if (raw && isLanguagePreference(raw)) return raw;
-  } catch {
-    // localStorage may be unavailable.
-  }
-  return "system";
 }
 
 /** HTML lang attribute value for each locale. */

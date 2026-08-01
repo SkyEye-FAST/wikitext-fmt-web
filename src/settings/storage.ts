@@ -102,6 +102,20 @@ export function loadSettings(
   }
 }
 
+/** Read only the persisted language before formatter metadata is available. */
+export function loadStoredLanguagePreference(
+  storage: Pick<Storage, "getItem"> = localStorage,
+): AppSettings["language"] {
+  try {
+    const raw = storage.getItem(SETTINGS_STORAGE_KEY);
+    if (!raw) return "system";
+    const stored = parseStored(raw);
+    return stored && isLanguagePreference(stored.language) ? stored.language : "system";
+  } catch {
+    return "system";
+  }
+}
+
 export function saveSettings(
   settings: AppSettings,
   storage: Pick<Storage, "setItem"> = localStorage,

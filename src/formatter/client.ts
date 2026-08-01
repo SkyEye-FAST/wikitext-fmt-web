@@ -15,6 +15,27 @@ export interface WorkerLike {
 
 export type WorkerFactory = () => WorkerLike;
 
+export type ClientErrorCode =
+  | "worker-not-ready"
+  | "worker-initialization-failed"
+  | "worker-invalid-response"
+  | "worker-invalid-generation"
+  | "client-disposed"
+  | "request-rejected"
+  | "unknown";
+
+export class FormatterClientError extends Error {
+  readonly code: ClientErrorCode;
+  readonly cause?: unknown;
+
+  constructor(code: ClientErrorCode, message: string, cause?: unknown) {
+    super(message);
+    this.name = "FormatterClientError";
+    this.code = code;
+    this.cause = cause;
+  }
+}
+
 export interface FormatOperation {
   result: FormatDetailedResult;
   durationMs: number;
@@ -71,14 +92,14 @@ export class FormatterClient {
 
   ready(): Promise<FormatterMetadata> {
     if (this.disposed) {
-      return Promise.reject(new WorkerStoppedError("The formatter client has been disposed."));
+      return Promise.reject(new FormatterClientError("client-disposed", "The formatter client has been disposed."));
     }
     return this.session.readiness;
   }
 
   async format(source: string, options: FormatOptions): Promise<FormatOperation> {
     if (this.disposed) {
-      throw new WorkerStoppedError("The formatter client has been disposed.");
+      throw new FormatterClientError("client-disposed", "The formatter client has been disposed.");
     }
 
     let session = this.session;
@@ -117,7 +138,13 @@ export class FormatterClient {
     } catch (error) {
       this.handleWorkerFailure(
         session,
-        error instanceof Error ? error : new Error("The formatter Worker rejected the formatting request."),
+        error instanceof Error
+          ? new FormatterClientError("request-rejected", error.message, error)
+          : new FormatterClientError(
+            "request-rejected",
+            "The formatter Worker rejected the formatting request.",
+            error,
+          ),
       );
     }
 
@@ -125,6 +152,9 @@ export class FormatterClient {
   }
 
   restart(reason?: string): Promise<FormatterMetadata> {
+    if (this.disposed) {
+      return Promise.reject(new FormatterClientError("client-disposed", "The formatter client has been disposed."));
+    }
     const error = new WorkerStoppedError(reason);
     this.stopSession(this.session, error);
     this.failPending(error);
@@ -169,7 +199,16 @@ export class FormatterClient {
     try {
       worker.postMessage({ type: "initialize", generation });
     } catch (error) {
-      this.handleWorkerFailure(session, error instanceof Error ? error : new Error("The formatter Worker failed to initialize."));
+      this.handleWorkerFailure(
+        session,
+        error instanceof Error
+          ? new FormatterClientError("worker-initialization-failed", error.message, error)
+          : new FormatterClientError(
+            "worker-initialization-failed",
+            "The formatter Worker failed to initialize.",
+            error,
+          ),
+      );
     }
   }
 
@@ -178,13 +217,25 @@ export class FormatterClient {
       return;
     }
     if (!isFormatResponse(event.data)) {
-      this.handleWorkerFailure(session, new Error("The formatter Worker sent an invalid response."));
+      this.handleWorkerFailure(
+        session,
+        new FormatterClientError(
+          "worker-invalid-response",
+          "The formatter Worker sent an invalid response.",
+        ),
+      );
       return;
     }
 
     const response: FormatResponse = event.data;
     if (response.generation !== session.generation) {
-      this.handleWorkerFailure(session, new Error("The formatter Worker sent a response for an invalid generation."));
+      this.handleWorkerFailure(
+        session,
+        new FormatterClientError(
+          "worker-invalid-generation",
+          "The formatter Worker sent a response for an invalid generation.",
+        ),
+      );
       return;
     }
     if (response.type === "ready") {
@@ -195,7 +246,10 @@ export class FormatterClient {
       return;
     }
     if (response.type === "initialization-error") {
-      this.handleWorkerFailure(session, new Error(response.message));
+      this.handleWorkerFailure(
+        session,
+        new FormatterClientError("worker-initialization-failed", response.message),
+      );
       return;
     }
 
@@ -210,7 +264,7 @@ export class FormatterClient {
     this.pending.delete(response.requestId);
 
     if (response.type === "error") {
-      pending.reject(new Error(response.message));
+      pending.reject(new FormatterClientError("unknown", response.message));
       return;
     }
 
@@ -221,7 +275,11 @@ export class FormatterClient {
   }
 
   private handleWorkerError(session: WorkerSession, event: ErrorEvent): void {
-    const error = new Error(event.message || "The formatter Worker failed to initialize.");
+    const error = new FormatterClientError(
+      session.state === "pending" ? "worker-initialization-failed" : "unknown",
+      event.message || "The formatter Worker failed unexpectedly.",
+      event,
+    );
     this.handleWorkerFailure(session, error);
   }
 

@@ -1,5 +1,6 @@
 import type { FormatDetailedResult, FormatFailure } from "wikitext-fmt/browser";
 import type { MessageCatalog } from "../i18n/messages.en.js";
+import type { ClientErrorCode, FormatterClientError } from "./client.js";
 
 export type FormatStatus =
   | { kind: "idle" }
@@ -7,7 +8,12 @@ export type FormatStatus =
   | { kind: "changed"; durationMs: number }
   | { kind: "unchanged"; durationMs: number }
   | { kind: "failure"; durationMs: number; failure: FormatFailure }
-  | { kind: "error"; message: string };
+  | {
+    kind: "error";
+    code: ClientErrorCode;
+    detail?: string;
+    messageKey?: "status.formatting-stopped";
+  };
 
 export interface RuleDiagnosticSummary {
   rule: string;
@@ -30,10 +36,30 @@ export function classifyResult(
 }
 
 export function classifyUnexpectedError(error: unknown): FormatStatus {
+  const code: ClientErrorCode = isFormatterClientError(error) ? error.code : "unknown";
   return {
     kind: "error",
-    message: error instanceof Error ? error.message : "Unexpected formatter error",
+    code,
+    detail: error instanceof Error ? error.message : String(error),
   };
+}
+
+function isFormatterClientError(error: unknown): error is FormatterClientError {
+  return error instanceof Error && "code" in error && typeof error.code === "string";
+}
+
+const CLIENT_ERROR_MESSAGE_KEYS: Record<ClientErrorCode, keyof MessageCatalog> = {
+  "worker-not-ready": "error.worker-not-ready",
+  "worker-initialization-failed": "error.worker-initialization-failed",
+  "worker-invalid-response": "error.worker-invalid-response",
+  "worker-invalid-generation": "error.worker-invalid-generation",
+  "client-disposed": "error.client-disposed",
+  "request-rejected": "error.request-rejected",
+  unknown: "error.unknown",
+};
+
+export function clientErrorMessageKey(code: ClientErrorCode): keyof MessageCatalog {
+  return CLIENT_ERROR_MESSAGE_KEYS[code];
 }
 
 type TFunction = (key: keyof MessageCatalog, params?: Record<string, string | number>) => string;

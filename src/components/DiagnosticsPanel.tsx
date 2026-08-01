@@ -1,6 +1,6 @@
 import type { FormatDetailedResult } from "wikitext-fmt/browser";
 import { AlertCircle, AlertTriangle, Info } from "lucide-react";
-import { summarizeRuleDiagnostics, type FormatStatus } from "../formatter/resultSummary.js";
+import { clientErrorMessageKey, summarizeRuleDiagnostics, type FormatStatus } from "../formatter/resultSummary.js";
 import { useI18n } from "../i18n/useI18n.js";
 
 interface DiagnosticsPanelProps {
@@ -13,7 +13,9 @@ export function DiagnosticsPanel({ result, status, notice }: DiagnosticsPanelPro
   const { t } = useI18n();
   const rows = result ? summarizeRuleDiagnostics(result, t) : [];
   const failure = status.kind === "failure" ? status.failure : undefined;
-  const unexpectedError = status.kind === "error" ? status.message : undefined;
+  const unexpectedError = status.kind === "error"
+    ? t(status.messageKey ?? clientErrorMessageKey(status.code))
+    : undefined;
   const warning = result?.warning;
 
   return (

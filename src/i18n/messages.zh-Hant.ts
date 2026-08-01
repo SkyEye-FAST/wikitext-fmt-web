@@ -45,6 +45,7 @@ export const messages: MessageCatalog = {
   "editor.output.label": "格式化輸出",
   "editor.output.muted": "唯讀",
   "editor.stats.aria": "{lines} 行，{characters} 個字元",
+  "editor.stats.visible": "{lines} 行 · {characters} 個字元",
 
   // EditorPane misc
   "editor.file-not-readable": "所選檔案在此瀏覽器中無法讀取。",
@@ -84,6 +85,7 @@ export const messages: MessageCatalog = {
   "diagnostics.severity.info": "資訊",
   "diagnostics.stage": "階段",
   "diagnostics.aria": "診斷詳細資料",
+  "layout.status-diagnostics": "格式化狀態和診斷",
 
   // Settings panel
   "settings.title": "格式化器設定",
@@ -128,7 +130,7 @@ export const messages: MessageCatalog = {
   "settings.links-metadata": "連結和中繼資料",
   "settings.categories": "分類",
   "settings.file-links": "檔案連結",
-  "settings.wikilinks": "Wikilinks",
+  "settings.wikilinks": "內部連結",
   "settings.external-links": "外部連結",
   "settings.references": "引用",
   "settings.redirects": "重新導向",
@@ -165,7 +167,7 @@ export const messages: MessageCatalog = {
   "summary.categories-moved": "已移動 {count} 個分類。",
   "summary.redirects-formatted": "已格式化重新導向指令。",
   "summary.file-links-formatted": "已格式化 {count} 個檔案連結。",
-  "summary.wikilinks-formatted": "已格式化 {count} 個 wikilink。",
+  "summary.wikilinks-formatted": "已格式化 {count} 個內部連結。",
   "summary.external-links-formatted": "已格式化 {count} 個外部連結。",
   "summary.references-formatted": "已格式化 {count} 個引用。",
   "summary.section-spacing-normalized": "已規範化章節標題周圍的間距。",
@@ -185,13 +187,22 @@ export const messages: MessageCatalog = {
   "plural.list-lines": "{count} 個清單行",
   "plural.categories": "{count} 個分類",
   "plural.file-links": "{count} 個檔案連結",
-  "plural.wikilinks": "{count} 個 wikilink",
+  "plural.wikilinks": "{count} 個內部連結",
   "plural.external-links": "{count} 個外部連結",
   "plural.references": "{count} 個引用",
   "plural.entries": "{count} 條",
 
   // Generic
   "generic.unexpected-error": "格式化器發生意外錯誤",
+
+  // Web client errors
+  "error.worker-not-ready": "格式化器 Worker 尚未就緒。",
+  "error.worker-initialization-failed": "格式化器 Worker 初始化失敗。",
+  "error.worker-invalid-response": "格式化器 Worker 傳回了無效回應。",
+  "error.worker-invalid-generation": "格式化器 Worker 傳回了無效代次。",
+  "error.client-disposed": "格式化器用戶端已不可用。",
+  "error.request-rejected": "格式化要求遭到拒絕。",
+  "error.unknown": "格式化器發生意外錯誤。",
 };
 
 export const locale: SupportedLocale = "zh-Hant";

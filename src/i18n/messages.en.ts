@@ -44,6 +44,7 @@ export interface MessageCatalog {
   "editor.output.label": string;
   "editor.output.muted": string;
   "editor.stats.aria": string;
+  "editor.stats.visible": string;
 
   // EditorPane misc
   "editor.file-not-readable": string;
@@ -82,6 +83,7 @@ export interface MessageCatalog {
   "diagnostics.severity.info": string;
   "diagnostics.stage": string;
   "diagnostics.aria": string;
+  "layout.status-diagnostics": string;
 
   // Settings panel
   "settings.title": string;
@@ -188,6 +190,15 @@ export interface MessageCatalog {
 
   // Generic
   "generic.unexpected-error": string;
+
+  // Web client errors. Formatter core diagnostics remain untranslated.
+  "error.worker-not-ready": string;
+  "error.worker-initialization-failed": string;
+  "error.worker-invalid-response": string;
+  "error.worker-invalid-generation": string;
+  "error.client-disposed": string;
+  "error.request-rejected": string;
+  "error.unknown": string;
 }
 
 export const enMessages: MessageCatalog = {
@@ -234,6 +245,7 @@ export const enMessages: MessageCatalog = {
   "editor.output.label": "Formatted output",
   "editor.output.muted": "Read-only",
   "editor.stats.aria": "{lines} lines, {characters} characters",
+  "editor.stats.visible": "{lines} lines · {characters} chars",
 
   // EditorPane misc
   "editor.file-not-readable":
@@ -277,6 +289,7 @@ export const enMessages: MessageCatalog = {
   "diagnostics.severity.info": "info",
   "diagnostics.stage": "Stage",
   "diagnostics.aria": "Diagnostic details",
+  "layout.status-diagnostics": "Formatting status and diagnostics",
 
   // Settings panel
   "settings.title": "Formatter settings",
@@ -400,6 +413,15 @@ export const enMessages: MessageCatalog = {
 
   // Generic
   "generic.unexpected-error": "Unexpected formatter error",
+
+  // Web client errors
+  "error.worker-not-ready": "The formatter Worker is not ready.",
+  "error.worker-initialization-failed": "The formatter Worker could not be initialized.",
+  "error.worker-invalid-response": "The formatter Worker returned an invalid response.",
+  "error.worker-invalid-generation": "The formatter Worker returned an invalid generation.",
+  "error.client-disposed": "The formatter client is no longer available.",
+  "error.request-rejected": "The formatting request was rejected.",
+  "error.unknown": "An unexpected formatter error occurred.",
 };
 
 // Also export as `messages` for the catalog map in I18nProvider.

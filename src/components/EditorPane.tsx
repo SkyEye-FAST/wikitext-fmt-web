@@ -38,7 +38,7 @@ const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(functi
   const initialValueRef = useRef(initialValue);
   const onDocumentChangeRef = useRef(onDocumentChange);
   const [stats, setStats] = useState(() => getDocumentStatistics(initialValue));
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
 
   useEffect(() => {
     onDocumentChangeRef.current = onDocumentChange;
@@ -121,7 +121,10 @@ const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(functi
     view.contentDOM.toggleAttribute("aria-readonly", readOnly);
   }, [label, lineWrapping, readOnly, theme]);
 
-  const statsAriaLabel = t("editor.stats.aria", { lines: stats.lines, characters: stats.characters });
+  const numberFormatter = new Intl.NumberFormat(locale);
+  const formattedLines = numberFormatter.format(stats.lines);
+  const formattedCharacters = numberFormatter.format(stats.characters);
+  const statsAriaLabel = t("editor.stats.aria", { lines: formattedLines, characters: formattedCharacters });
 
   return (
     <section className="editor-pane syntax-spine" aria-labelledby={`${id}-label`}>
@@ -131,7 +134,7 @@ const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(functi
           {mutedLabel ? <span className="pane-muted">{mutedLabel}</span> : null}
         </div>
         <span className="pane-stats" aria-label={statsAriaLabel}>
-          {stats.lines.toLocaleString()} lines · {stats.characters.toLocaleString()} chars
+          {t("editor.stats.visible", { lines: formattedLines, characters: formattedCharacters })}
         </span>
       </header>
       <div ref={hostRef} className="editor-host" data-testid={`${id}-editor`} />

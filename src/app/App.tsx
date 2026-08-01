@@ -1,5 +1,5 @@
 import type { FormatDetailedResult } from "wikitext-fmt/browser";
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AppHeader } from "../components/AppHeader.js";
 import { DiagnosticsPanel } from "../components/DiagnosticsPanel.js";
 import { EditorPane, type EditorPaneHandle } from "../components/EditorPane.js";
@@ -9,13 +9,13 @@ import { PrivacyNotice } from "../components/PrivacyNotice.js";
 import type { ResolvedTheme } from "../editor/themes.js";
 import { FormatterClient, StaleResponseError, WorkerStoppedError } from "../formatter/client.js";
 import type { ResolvedBrowserOptions } from "../formatter/protocol.js";
-import { classifyResult, classifyUnexpectedError, type FormatStatus as Status } from "../formatter/resultSummary.js";
+import { classifyResult, classifyUnexpectedError, clientErrorMessageKey, type FormatStatus as Status } from "../formatter/resultSummary.js";
 import { I18nProvider } from "../i18n/I18nProvider.js";
-import { loadLocalePreference, resolveLocale, saveLocalePreference, type LanguagePreference, type SupportedLocale } from "../i18n/locales.js";
+import { resolveLocale, type LanguagePreference, type SupportedLocale } from "../i18n/locales.js";
 import { useI18n } from "../i18n/useI18n.js";
 import { LARGE_DOCUMENT_WARNING_BYTES } from "../settings/defaults.js";
 import { createDefaultSettings, type AppSettings, type ThemePreference } from "../settings/schema.js";
-import { clearStoredSettings, loadSettings, saveSettings } from "../settings/storage.js";
+import { clearStoredSettings, loadSettings, loadStoredLanguagePreference, saveSettings } from "../settings/storage.js";
 import { EXAMPLE_WIKITEXT } from "../samples/example.js";
 import { copyText, triggerTextDownload } from "../utils/document.js";
 
@@ -23,6 +23,8 @@ const DiffView = lazy(() => import("../components/DiffView.js"));
 const SettingsPanel = lazy(() => import("../components/SettingsPanel.js"));
 
 export type FormatterClientPort = Pick<FormatterClient, "ready" | "format" | "restart" | "dispose">;
+
+const defaultFormatterClientFactory = (): FormatterClientPort => new FormatterClient();
 
 interface AppProps {
   createFormatterClient?: () => FormatterClientPort;
@@ -45,6 +47,24 @@ function useResolvedLocale(preference: LanguagePreference): SupportedLocale {
   return resolveLocale(preference, navigator);
 }
 
+function LocalizedDocumentMetadata({ sourceFilename }: { sourceFilename?: string }) {
+  const { locale, t } = useI18n();
+  useLayoutEffect(() => {
+    document.documentElement.lang = locale;
+    document.title = sourceFilename === "Example.wikitext"
+      ? t("document.title.example")
+      : t("document.title.default");
+
+    const descEl = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    if (descEl) descEl.content = t("meta.description");
+    const ogTitleEl = document.querySelector<HTMLMetaElement>('meta[property="og:title"]');
+    if (ogTitleEl) ogTitleEl.content = t("meta.og-title");
+    const ogDescEl = document.querySelector<HTMLMetaElement>('meta[property="og:description"]');
+    if (ogDescEl) ogDescEl.content = t("meta.og-description");
+  }, [locale, sourceFilename, t]);
+  return null;
+}
+
 function InitializationScreen({ status }: { status: Status }) {
   const { t } = useI18n();
   return (
@@ -53,7 +73,7 @@ function InitializationScreen({ status }: { status: Status }) {
       <h1>{t("brand.name")}</h1>
       {status.kind === "error" ? (
         <>
-          <p role="alert">{status.message}</p>
+          <p role="alert">{t(status.messageKey ?? clientErrorMessageKey(status.code))}</p>
           <button type="button" className="secondary-button" onClick={() => location.reload()}>{t("init.retry-worker")}</button>
         </>
       ) : <p>{t("init.initializing")}</p>}
@@ -61,23 +81,40 @@ function InitializationScreen({ status }: { status: Status }) {
   );
 }
 
-export default function App({ createFormatterClient = () => new FormatterClient() }: AppProps) {
-  const [languagePref, setLanguagePref] = useState<LanguagePreference>(loadLocalePreference);
+export default function App({ createFormatterClient = defaultFormatterClientFactory }: AppProps) {
+  const [clientFactory] = useState<() => FormatterClientPort>(() => createFormatterClient);
+  const [client, setClient] = useState<FormatterClientPort | null>(null);
+  const [languagePref, setLanguagePref] = useState<LanguagePreference>(loadStoredLanguagePreference);
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [formatterVersion, setFormatterVersion] = useState(__WIKITEXT_FMT_VERSION__);
   const [defaults, setDefaults] = useState<ResolvedBrowserOptions | null>(null);
+  const [sourceFilename, setSourceFilename] = useState<string>();
 
   const locale = useResolvedLocale(languagePref);
 
-  // Sync language preference so the init screen can use it.
-  useEffect(() => {
-    saveLocalePreference(languagePref);
-  }, [languagePref]);
-
   useEffect(() => {
     let active = true;
-    const client = createFormatterClient();
+    let created: FormatterClientPort;
+    try {
+      created = clientFactory();
+    } catch (error) {
+      queueMicrotask(() => {
+        if (active) setStatus(classifyUnexpectedError(error));
+      });
+      return;
+    }
+    setClient((previous) => active ? created : previous);
+    return () => {
+      active = false;
+      setClient((previous) => previous === created ? null : previous);
+      created.dispose();
+    };
+  }, [clientFactory]);
+
+  useEffect(() => {
+    if (!client) return;
+    let active = true;
     void client.ready().then(
       (metadata: { defaults: ResolvedBrowserOptions; version: string }) => {
         if (!active) return;
@@ -85,25 +122,17 @@ export default function App({ createFormatterClient = () => new FormatterClient(
         setFormatterVersion(metadata.version);
         setSettings(loadSettings(metadata.defaults));
       },
-      (error: Error) => {
+      (error: unknown) => {
         if (active) setStatus(classifyUnexpectedError(error));
       },
     );
-    return () => {
-      active = false;
-      client.dispose();
-    };
-    // Create the formatter client once on mount.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    return () => { active = false; };
+  }, [client]);
 
-  useEffect(() => {
-    document.documentElement.lang = locale;
-  }, [locale]);
-
-  if (!settings || !defaults) {
+  if (!client || !settings || !defaults) {
     return (
       <I18nProvider locale={locale}>
+        <LocalizedDocumentMetadata />
         <InitializationScreen status={status} />
       </I18nProvider>
     );
@@ -111,13 +140,16 @@ export default function App({ createFormatterClient = () => new FormatterClient(
 
   return (
     <I18nProvider locale={locale}>
+      <LocalizedDocumentMetadata sourceFilename={sourceFilename} />
       <AppMain
         initialSettings={settings}
         defaults={defaults}
         formatterVersion={formatterVersion}
         languagePref={languagePref}
         setLanguagePref={setLanguagePref}
-        createFormatterClient={createFormatterClient}
+        client={client}
+        sourceFilename={sourceFilename}
+        setSourceFilename={setSourceFilename}
       />
     </I18nProvider>
   );
@@ -129,7 +161,9 @@ interface AppMainProps {
   formatterVersion: string;
   languagePref: LanguagePreference;
   setLanguagePref: (pref: LanguagePreference) => void;
-  createFormatterClient: () => FormatterClientPort;
+  client: FormatterClientPort;
+  sourceFilename?: string;
+  setSourceFilename: (filename: string | undefined) => void;
 }
 
 function AppMain({
@@ -138,10 +172,11 @@ function AppMain({
   formatterVersion,
   languagePref,
   setLanguagePref,
-  createFormatterClient,
+  client,
+  sourceFilename,
+  setSourceFilename,
 }: AppMainProps) {
   const { t } = useI18n();
-  const clientRef = useRef<FormatterClientPort | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const sourceEditorRef = useRef<EditorPaneHandle>(null);
   const outputEditorRef = useRef<EditorPaneHandle>(null);
@@ -152,7 +187,6 @@ function AppMain({
   const [settings, setSettings] = useState<AppSettings>(initialSettings);
   const [output, setOutput] = useState("");
   const [diffSource, setDiffSource] = useState("");
-  const [sourceFilename, setSourceFilename] = useState<string>();
   const [result, setResult] = useState<FormatDetailedResult>();
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [notice, setNotice] = useState<string>();
@@ -166,34 +200,6 @@ function AppMain({
     document.documentElement.dataset.theme = resolvedTheme;
     document.documentElement.style.colorScheme = resolvedTheme;
   }, [resolvedTheme]);
-
-  // Update document title and meta tags.
-  useEffect(() => {
-    if (sourceFilename === "Example.wikitext") {
-      document.title = t("document.title.example");
-    } else {
-      document.title = t("document.title.default");
-    }
-
-    const descEl = document.querySelector<HTMLMetaElement>('meta[name="description"]');
-    if (descEl) descEl.content = t("meta.description");
-
-    const ogTitleEl = document.querySelector<HTMLMetaElement>('meta[property="og:title"]');
-    if (ogTitleEl) ogTitleEl.content = t("meta.og-title");
-
-    const ogDescEl = document.querySelector<HTMLMetaElement>('meta[property="og:description"]');
-    if (ogDescEl) ogDescEl.content = t("meta.og-description");
-  }, [sourceFilename, t]);
-
-  // Init formatter client.
-  useEffect(() => {
-    const client = createFormatterClient();
-    clientRef.current = client;
-    return () => {
-      if (clientRef.current === client) clientRef.current = null;
-      client.dispose();
-    };
-  }, [createFormatterClient]);
 
   useEffect(() => {
     outputEditorRef.current?.setValue(output);
@@ -215,10 +221,9 @@ function AppMain({
 
   const format = useCallback(async () => {
     if (busyRef.current) return;
-    const client = clientRef.current;
     const sourceEditor = sourceEditorRef.current;
     if (!client || !sourceEditor) {
-      setStatus({ kind: "error", message: t("status.worker-not-ready") });
+      setStatus({ kind: "error", code: "worker-not-ready" });
       return;
     }
     const sourceSnapshot = sourceEditor.getValue();
@@ -253,7 +258,7 @@ function AppMain({
         setBusy(false);
       }
     }
-  }, [settings.formatter, t]);
+  }, [client, settings.formatter, t]);
 
   const formatRef = useRef(format);
   useEffect(() => {
@@ -272,12 +277,11 @@ function AppMain({
   }, []);
 
   async function stopFormatting(): Promise<void> {
-    const client = clientRef.current;
     if (!client) return;
     activeFormatRef.current += 1;
     busyRef.current = false;
     setBusy(false);
-    setStatus({ kind: "error", message: t("status.formatting-stopped") });
+    setStatus({ kind: "error", code: "request-rejected", messageKey: "status.formatting-stopped" });
     try {
       await client.restart();
     } catch (error) {
@@ -403,7 +407,7 @@ function AppMain({
         ) : null}
       </main>
 
-      <aside className="lower-rail" aria-label="Formatting status and diagnostics">
+      <aside className="lower-rail" aria-label={t("layout.status-diagnostics")}>
         <div className="status-privacy-row">
           <FormatStatus status={status} profile={settings.formatter.profile} webVersion={__WIKITEXT_FMT_WEB_VERSION__} formatterVersion={formatterVersion} />
           <PrivacyNotice />

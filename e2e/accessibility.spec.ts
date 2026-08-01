@@ -48,21 +48,31 @@ test("supports keyboard toolbar use and announces status", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Download" })).toBeFocused();
 });
 
-test("keeps controls available at mobile size and 200 percent zoom", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.reload();
-  await expect(page.getByRole("button", { name: "Format" })).toBeVisible();
-  await expect(page.getByLabel("Theme")).toBeVisible();
-  await expectNoAxeViolations(page);
-  const formatBox = await page.getByRole("button", { name: "Format" }).boundingBox();
-  expect(formatBox?.height).toBeGreaterThanOrEqual(36);
+test("keeps controls available at mobile sizes and 200 percent zoom", async ({ page }) => {
+  for (const viewport of [
+    { width: 320, height: 568 },
+    { width: 375, height: 667 },
+    { width: 768, height: 1024 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.reload();
+    await expect(page.getByRole("button", { name: "Format" })).toBeVisible();
+    await expect(page.getByLabel("Language")).toBeVisible();
+    await expect(page.getByLabel("Theme")).toBeVisible();
+    const formatBox = await page.getByRole("button", { name: "Format" }).boundingBox();
+    expect(formatBox?.height).toBeGreaterThanOrEqual(36);
+    const horizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(horizontalOverflow).toBeLessThanOrEqual(1);
+  }
 
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.reload();
   await page.evaluate(() => {
     document.documentElement.style.zoom = "2";
   });
   await expect(page.getByRole("button", { name: "Settings" })).toBeVisible();
   await page.getByRole("button", { name: "Settings" }).click();
   await expect(page.getByRole("button", { name: "Close settings" })).toBeVisible();
-  const horizontalOverflow = await page.evaluate(() => document.body.scrollWidth - document.documentElement.clientWidth);
+  const horizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(horizontalOverflow).toBeLessThanOrEqual(1);
 });

@@ -9,13 +9,16 @@ describe("locale resolution", () => {
     ["zh-MY", "zh-Hans"],
     ["zh-Hans", "zh-Hans"],
     ["zh-hans", "zh-Hans"],
+    ["zh-Hans-CN", "zh-Hans"],
     ["zh-TW", "zh-Hant"],
     ["zh-tw", "zh-Hant"],
     ["zh_HK", "zh-Hant"],
     ["zh-MO", "zh-Hant"],
     ["zh-Hant", "zh-Hant"],
+    ["zh-Hant-TW", "zh-Hant"],
     ["en", "en"],
     ["en-US", "en"],
+    ["EN_us", "en"],
     ["fr", "en"],
     ["ja", "en"],
     ["de", "en"],
@@ -23,9 +26,10 @@ describe("locale resolution", () => {
     expect(resolveBrowserLocale(input)).toBe(expected);
   });
 
-  it("detects the best Chinese locale from navigator.languages", () => {
+  it("honors navigator language priority, including English", () => {
+    expect(detectBrowserLocale({ languages: ["en-US", "zh-TW"] })).toBe("en");
     expect(
-      detectBrowserLocale({ languages: ["fr", "zh-TW", "en-US"] }),
+      detectBrowserLocale({ languages: ["fr", "zh-TW"] }),
     ).toBe("zh-Hant");
     expect(
       detectBrowserLocale({ languages: ["de", "zh-CN"] }),
@@ -33,6 +37,7 @@ describe("locale resolution", () => {
     expect(
       detectBrowserLocale({ languages: ["ja", "en-GB"] }),
     ).toBe("en");
+    expect(detectBrowserLocale({ languages: ["fr", "de"] })).toBe("en");
   });
 
   it("falls back to navigator.language when languages is empty", () => {
