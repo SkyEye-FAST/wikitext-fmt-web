@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 — 2026-08-01
+
+- Preserve the Theme selector's accessible name when its visible label is hidden at mobile widths.
+- Add mobile axe coverage for the responsive header controls.
+
 ## 0.1.0 — 2026-08-01
 
 - Add the browser-only React/Vite Wikitext formatter powered by exact dependency `wikitext-fmt@0.6.0`.
