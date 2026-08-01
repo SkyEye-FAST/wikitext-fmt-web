@@ -13,9 +13,9 @@ interface DiffViewProps {
 }
 
 function useNarrowDiff(): boolean {
-  const [narrow, setNarrow] = useState(() => matchMedia("(max-width: 760px)").matches);
+  const [narrow, setNarrow] = useState(() => matchMedia("(max-width: 800px)").matches);
   useEffect(() => {
-    const media = matchMedia("(max-width: 760px)");
+    const media = matchMedia("(max-width: 800px)");
     const update = () => setNarrow(media.matches);
     media.addEventListener("change", update);
     return () => media.removeEventListener("change", update);
@@ -33,7 +33,6 @@ export default function DiffView({ original, formatted, theme, lineWrapping }: D
       return;
     }
     const extensions = createEditorExtensions({
-      doc: formatted,
       readOnly: true,
       lineWrapping,
       theme,

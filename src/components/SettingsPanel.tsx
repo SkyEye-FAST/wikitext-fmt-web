@@ -33,7 +33,7 @@ export default function SettingsPanel({
   onRestoreDefaults,
   onReset,
 }: SettingsPanelProps) {
-  const panelRef = useRef<HTMLElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const formatter = settings.formatter;
 
@@ -87,19 +87,19 @@ export default function SettingsPanel({
 
   return (
     <div className="settings-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <aside
+      <div
         ref={panelRef}
         className="settings-panel"
         role="dialog"
         aria-modal="true"
         aria-labelledby="settings-title"
       >
-        <header>
+        <div className="settings-panel-header">
           <h2 id="settings-title">Formatter settings</h2>
           <button type="button" className="icon-button" onClick={onClose} aria-label="Close settings" title="Close settings">
             <X size={20} />
           </button>
-        </header>
+        </div>
         <div className="settings-scroll">
           <fieldset>
             <legend>General</legend>
@@ -193,11 +193,11 @@ export default function SettingsPanel({
             <output>MediaWiki bundled browser configuration</output>
           </div>
         </div>
-        <footer>
+        <div className="settings-panel-footer">
           <button type="button" className="secondary-button" onClick={onRestoreDefaults}>Restore core defaults</button>
           <button type="button" className="text-button" onClick={onReset}>Reset settings</button>
-        </footer>
-      </aside>
+        </div>
+      </div>
     </div>
   );
 }

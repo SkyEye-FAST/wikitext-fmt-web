@@ -6,8 +6,11 @@ const applicationUrl = `http://127.0.0.1:4173${basePath}`;
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
+  workers: 1,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
+  timeout: 60_000,
+  expect: { timeout: 10_000 },
   reporter: process.env.CI ? "github" : "list",
   use: {
     baseURL: applicationUrl,
@@ -18,6 +21,17 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
+      testIgnore: /cross-browser-smoke\.spec\.ts/,
+    },
+    {
+      name: "firefox-smoke",
+      use: { ...devices["Desktop Firefox"] },
+      testMatch: /cross-browser-smoke\.spec\.ts/,
+    },
+    {
+      name: "webkit-smoke",
+      use: { ...devices["Desktop Safari"] },
+      testMatch: /cross-browser-smoke\.spec\.ts/,
     },
   ],
   webServer: {

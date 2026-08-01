@@ -8,10 +8,12 @@ export type ResolvedBrowserOptions = Required<FormatOptions>;
 
 export interface InitializeRequest {
   type: "initialize";
+  generation: number;
 }
 
 export interface FormatRequest {
   type: "format";
+  generation: number;
   requestId: number;
   source: string;
   options: FormatOptions;
@@ -28,16 +30,24 @@ export interface FormatterMetadata {
 export type FormatResponse =
   | {
       type: "ready";
+      generation: number;
       metadata: FormatterMetadata;
     }
   | {
       type: "result";
+      generation: number;
       requestId: number;
       result: FormatDetailedResult;
       durationMs: number;
     }
   | {
+      type: "initialization-error";
+      generation: number;
+      message: string;
+    }
+  | {
       type: "error";
+      generation: number;
       requestId: number;
       message: string;
     };
@@ -47,18 +57,38 @@ export function isFormatResponse(value: unknown): value is FormatResponse {
     return false;
   }
 
-  const candidate = value as { type?: unknown; requestId?: unknown };
+  const candidate = value as Record<string, unknown>;
+  if (!Number.isInteger(candidate.generation) || (candidate.generation as number) < 1) {
+    return false;
+  }
+
   if (candidate.type === "ready") {
-    return "metadata" in candidate;
+    const metadata = candidate.metadata;
+    return Boolean(metadata) && typeof metadata === "object" && !Array.isArray(metadata) &&
+      typeof (metadata as Record<string, unknown>).version === "string" &&
+      Boolean((metadata as Record<string, unknown>).defaults) &&
+      typeof (metadata as Record<string, unknown>).defaults === "object" &&
+      Boolean((metadata as Record<string, unknown>).ruleLevels) &&
+      typeof (metadata as Record<string, unknown>).ruleLevels === "object";
   }
 
   if (candidate.type === "result") {
-    return typeof candidate.requestId === "number" && "result" in candidate;
+    const result = candidate.result;
+    return Number.isInteger(candidate.requestId) &&
+      Number.isFinite(candidate.durationMs) &&
+      (candidate.durationMs as number) >= 0 &&
+      Boolean(result) &&
+      typeof result === "object" &&
+      typeof (result as Record<string, unknown>).formatted === "string";
+  }
+
+  if (candidate.type === "initialization-error") {
+    return typeof candidate.message === "string";
   }
 
   return (
     candidate.type === "error" &&
-    typeof candidate.requestId === "number" &&
-    "message" in candidate
+    Number.isInteger(candidate.requestId) &&
+    typeof candidate.message === "string"
   );
 }

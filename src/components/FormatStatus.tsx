@@ -1,11 +1,11 @@
 import { AlertOctagon, CheckCircle2, CircleDot, Clock3, LoaderCircle } from "lucide-react";
 import type { FormatStatus as Status } from "../formatter/resultSummary.js";
-import { FORMATTER_VERSION } from "../settings/defaults.js";
 
 interface FormatStatusProps {
   status: Status;
   profile: string;
-  version?: string;
+  webVersion: string;
+  formatterVersion: string;
 }
 
 function statusPresentation(status: Status) {
@@ -25,7 +25,7 @@ function statusPresentation(status: Status) {
   }
 }
 
-export function FormatStatus({ status, profile, version = FORMATTER_VERSION }: FormatStatusProps) {
+export function FormatStatus({ status, profile, webVersion, formatterVersion }: FormatStatusProps) {
   const presentation = statusPresentation(status);
   const duration = "durationMs" in status ? status.durationMs : undefined;
   return (
@@ -34,8 +34,8 @@ export function FormatStatus({ status, profile, version = FORMATTER_VERSION }: F
       {duration !== undefined ? (
         <span><Clock3 size={15} aria-hidden="true" /> {duration.toFixed(1)} ms</span>
       ) : null}
-      <span>Profile: <strong>{profile[0]?.toUpperCase()}{profile.slice(1)}</strong></span>
-      <span>Package: <strong>wikitext-fmt {version}</strong></span>
+      <span className="status-profile">Profile: <strong>{profile[0]?.toUpperCase()}{profile.slice(1)}</strong></span>
+      <span className="status-versions">Web <strong>{webVersion}</strong> · Formatter <strong>{formatterVersion}</strong></span>
     </div>
   );
 }
