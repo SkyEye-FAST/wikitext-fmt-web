@@ -19,6 +19,11 @@ test("has no automated accessibility violations in primary states", async ({ pag
   await expect(page.getByText("Formatted with changes")).toBeVisible();
   await expectNoAxeViolations(page);
 
+  await page.getByRole("button", { name: "Diff" }).click();
+  await expect(page.getByTestId("diff-view")).toBeVisible();
+  await expectNoAxeViolations(page);
+  await page.getByRole("button", { name: "Diff" }).click();
+
   await page.getByRole("button", { name: "Settings" }).click();
   await expect(page.getByRole("dialog", { name: "Formatter settings" })).toBeVisible();
   await expectNoAxeViolations(page);

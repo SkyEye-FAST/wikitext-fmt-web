@@ -20,7 +20,7 @@ export function DiagnosticsPanel({ result, status, notice }: DiagnosticsPanelPro
         <h2 id="diagnostics-title">Diagnostics</h2>
         <span>{rows.length} rule {rows.length === 1 ? "entry" : "entries"}</span>
       </header>
-      <div className="diagnostic-content">
+      <div className="diagnostic-content" aria-label="Diagnostic details" tabIndex={0}>
         {failure ? (
           <div className="diagnostic-callout failure-callout" role="alert">
             <AlertCircle size={18} aria-hidden="true" />
