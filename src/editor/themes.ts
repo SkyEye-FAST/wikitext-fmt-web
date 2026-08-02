@@ -29,9 +29,10 @@ const sharedTheme = {
   ".cm-activeLine, .cm-activeLineGutter": {
     backgroundColor: "var(--editor-active-line)",
   },
-  ".cm-selectionBackground, &.cm-focused .cm-selectionBackground, ::selection": {
-    backgroundColor: "var(--selection) !important",
-  },
+  ".cm-selectionBackground, &.cm-focused .cm-selectionBackground, ::selection":
+    {
+      backgroundColor: "var(--selection) !important",
+    },
   ".cm-cursor, .cm-dropCursor": { borderLeftColor: "var(--accent)" },
   ".cm-panels": {
     backgroundColor: "var(--surface-raised)",
@@ -52,13 +53,30 @@ export function createEditorTheme(theme: ResolvedTheme) {
 }
 
 export function createSyntaxTheme() {
-  return syntaxHighlighting(HighlightStyle.define([
-    { tag: [tags.heading, tags.keyword], color: "var(--accent)", fontWeight: "700" },
-    { tag: [tags.link, tags.url], color: "var(--accent)", textDecoration: "underline" },
-    { tag: [tags.string, tags.atom], color: "var(--success)" },
-    { tag: [tags.tagName, tags.attributeName, tags.meta], color: "var(--warning)" },
-    { tag: [tags.number, tags.bool], color: "var(--syntax-number)" },
-    { tag: tags.comment, color: "var(--text-subtle)", fontStyle: "italic" },
-    { tag: tags.invalid, color: "var(--failure)", textDecoration: "underline wavy" },
-  ]));
+  return syntaxHighlighting(
+    HighlightStyle.define([
+      {
+        tag: [tags.heading, tags.keyword],
+        color: "var(--accent)",
+        fontWeight: "700",
+      },
+      {
+        tag: [tags.link, tags.url],
+        color: "var(--accent)",
+        textDecoration: "underline",
+      },
+      { tag: [tags.string, tags.atom], color: "var(--success)" },
+      {
+        tag: [tags.tagName, tags.attributeName, tags.meta],
+        color: "var(--warning)",
+      },
+      { tag: [tags.number, tags.bool], color: "var(--syntax-number)" },
+      { tag: tags.comment, color: "var(--text-subtle)", fontStyle: "italic" },
+      {
+        tag: tags.invalid,
+        color: "var(--failure)",
+        textDecoration: "underline wavy",
+      },
+    ]),
+  );
 }

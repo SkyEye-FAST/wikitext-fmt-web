@@ -2,7 +2,11 @@ export type SupportedLocale = "en" | "zh-Hans" | "zh-Hant";
 
 export type LanguagePreference = "system" | SupportedLocale;
 
-const supportedLocales: readonly SupportedLocale[] = ["en", "zh-Hans", "zh-Hant"];
+const supportedLocales: readonly SupportedLocale[] = [
+  "en",
+  "zh-Hans",
+  "zh-Hant",
+];
 
 const simplifiedRegions = new Set(["cn", "sg", "my"]);
 const traditionalRegions = new Set(["tw", "hk", "mo"]);
@@ -20,7 +24,9 @@ function matchBrowserLocale(browserTag: string): SupportedLocale | undefined {
   if (language === "en") return "en";
   if (language !== "zh") return undefined;
 
-  const script = subtags.find((subtag) => subtag === "hans" || subtag === "hant");
+  const script = subtags.find(
+    (subtag) => subtag === "hans" || subtag === "hant",
+  );
   if (script === "hans") return "zh-Hans";
   if (script === "hant") return "zh-Hant";
 
@@ -72,11 +78,14 @@ export function resolveLocale(
 
 export function isSupportedLocale(value: unknown): value is SupportedLocale {
   return (
-    typeof value === "string" && supportedLocales.includes(value as SupportedLocale)
+    typeof value === "string" &&
+    supportedLocales.includes(value as SupportedLocale)
   );
 }
 
-export function isLanguagePreference(value: unknown): value is LanguagePreference {
+export function isLanguagePreference(
+  value: unknown,
+): value is LanguagePreference {
   return value === "system" || isSupportedLocale(value);
 }
 

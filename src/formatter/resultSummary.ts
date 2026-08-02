@@ -1,6 +1,7 @@
 import type { FormatDetailedResult, FormatFailure } from "wikitext-fmt/browser";
+
 import type { ResultFreshness } from "../app/formatRun.js";
-import type { MessageCatalog } from "../i18n/messages.en.js";
+import type { MessageCatalog } from "../i18n/types.js";
 import type { ClientErrorCode, FormatterClientError } from "./client.js";
 
 export type FormatStatus =
@@ -9,14 +10,17 @@ export type FormatStatus =
   | { kind: "changed"; durationMs: number }
   | { kind: "unchanged"; durationMs: number }
   | { kind: "failure"; durationMs: number; failure: FormatFailure }
-  | { kind: "outdated"; freshness: Exclude<ResultFreshness, "none" | "current"> }
+  | {
+      kind: "outdated";
+      freshness: Exclude<ResultFreshness, "none" | "current">;
+    }
   | { kind: "applied" }
   | {
-    kind: "error";
-    code: ClientErrorCode;
-    detail?: string;
-    messageKey?: "status.formatting-stopped";
-  };
+      kind: "error";
+      code: ClientErrorCode;
+      detail?: string;
+      messageKey?: "status.formatting-stopped";
+    };
 
 export interface RuleDiagnosticSummary {
   rule: string;
@@ -39,7 +43,9 @@ export function classifyResult(
 }
 
 export function classifyUnexpectedError(error: unknown): FormatStatus {
-  const code: ClientErrorCode = isFormatterClientError(error) ? error.code : "unknown";
+  const code: ClientErrorCode = isFormatterClientError(error)
+    ? error.code
+    : "unknown";
   return {
     kind: "error",
     code,
@@ -48,24 +54,32 @@ export function classifyUnexpectedError(error: unknown): FormatStatus {
 }
 
 function isFormatterClientError(error: unknown): error is FormatterClientError {
-  return error instanceof Error && "code" in error && typeof error.code === "string";
+  return (
+    error instanceof Error && "code" in error && typeof error.code === "string"
+  );
 }
 
-const CLIENT_ERROR_MESSAGE_KEYS: Record<ClientErrorCode, keyof MessageCatalog> = {
-  "worker-not-ready": "error.worker-not-ready",
-  "worker-initialization-failed": "error.worker-initialization-failed",
-  "worker-invalid-response": "error.worker-invalid-response",
-  "worker-invalid-generation": "error.worker-invalid-generation",
-  "client-disposed": "error.client-disposed",
-  "request-rejected": "error.request-rejected",
-  unknown: "error.unknown",
-};
+const CLIENT_ERROR_MESSAGE_KEYS: Record<ClientErrorCode, keyof MessageCatalog> =
+  {
+    "worker-not-ready": "error.worker-not-ready",
+    "worker-initialization-failed": "error.worker-initialization-failed",
+    "worker-invalid-response": "error.worker-invalid-response",
+    "worker-invalid-generation": "error.worker-invalid-generation",
+    "client-disposed": "error.client-disposed",
+    "request-rejected": "error.request-rejected",
+    unknown: "error.unknown",
+  };
 
-export function clientErrorMessageKey(code: ClientErrorCode): keyof MessageCatalog {
+export function clientErrorMessageKey(
+  code: ClientErrorCode,
+): keyof MessageCatalog {
   return CLIENT_ERROR_MESSAGE_KEYS[code];
 }
 
-type TFunction = (key: keyof MessageCatalog, params?: Record<string, string | number>) => string;
+type TFunction = (
+  key: keyof MessageCatalog,
+  params?: Record<string, string | number>,
+) => string;
 
 export function summarizeRuleDiagnostics(
   result: FormatDetailedResult,
@@ -80,14 +94,18 @@ export function summarizeRuleDiagnostics(
     rows.push({
       rule: "templates",
       severity: "info",
-      message: t("summary.templates-changed", { count: templates.templatesChanged }),
+      message: t("summary.templates-changed", {
+        count: templates.templatesChanged,
+      }),
     });
   }
   if (templates.templatesSkippedAmbiguous > 0) {
     rows.push({
       rule: "templates",
       severity: "warning",
-      message: t("summary.templates-skipped", { count: templates.templatesSkippedAmbiguous }),
+      message: t("summary.templates-skipped", {
+        count: templates.templatesSkippedAmbiguous,
+      }),
     });
   }
   if (tables.tablesChanged > 0) {
@@ -101,7 +119,9 @@ export function summarizeRuleDiagnostics(
     rows.push({
       rule: "tables",
       severity: "warning",
-      message: t("summary.tables-skipped", { count: tables.tablesSkippedAmbiguous }),
+      message: t("summary.tables-skipped", {
+        count: tables.tablesSkippedAmbiguous,
+      }),
     });
   }
   if (lists.listLinesChanged > 0) {
@@ -115,7 +135,9 @@ export function summarizeRuleDiagnostics(
     rows.push({
       rule: "categories",
       severity: "info",
-      message: t("summary.categories-moved", { count: result.footerDiagnostics.categoriesMoved }),
+      message: t("summary.categories-moved", {
+        count: result.footerDiagnostics.categoriesMoved,
+      }),
     });
   }
   if (result.redirectDiagnostics.redirectsFormatted > 0) {
@@ -129,28 +151,36 @@ export function summarizeRuleDiagnostics(
     rows.push({
       rule: "file-links",
       severity: "info",
-      message: t("summary.file-links-formatted", { count: result.fileLinkDiagnostics.fileLinksFormatted }),
+      message: t("summary.file-links-formatted", {
+        count: result.fileLinkDiagnostics.fileLinksFormatted,
+      }),
     });
   }
   if (result.wikilinkDiagnostics.wikilinksFormatted > 0) {
     rows.push({
       rule: "wikilinks",
       severity: "info",
-      message: t("summary.wikilinks-formatted", { count: result.wikilinkDiagnostics.wikilinksFormatted }),
+      message: t("summary.wikilinks-formatted", {
+        count: result.wikilinkDiagnostics.wikilinksFormatted,
+      }),
     });
   }
   if (result.externalLinkDiagnostics.externalLinksFormatted > 0) {
     rows.push({
       rule: "external-links",
       severity: "info",
-      message: t("summary.external-links-formatted", { count: result.externalLinkDiagnostics.externalLinksFormatted }),
+      message: t("summary.external-links-formatted", {
+        count: result.externalLinkDiagnostics.externalLinksFormatted,
+      }),
     });
   }
   if (result.referenceDiagnostics.referencesFormatted > 0) {
     rows.push({
       rule: "references",
       severity: "info",
-      message: t("summary.references-formatted", { count: result.referenceDiagnostics.referencesFormatted }),
+      message: t("summary.references-formatted", {
+        count: result.referenceDiagnostics.referencesFormatted,
+      }),
     });
   }
   if (
@@ -169,7 +199,9 @@ export function summarizeRuleDiagnostics(
       rows.push({
         rule: `${equivalence.structure}-equivalence`,
         severity: "warning",
-        message: equivalence.reason ?? t("summary.equivalence-failed", { structure: equivalence.structure }),
+        message:
+          equivalence.reason ??
+          t("summary.equivalence-failed", { structure: equivalence.structure }),
       });
     }
   }

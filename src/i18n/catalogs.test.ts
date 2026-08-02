@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { MessageCatalog } from "./messages.en.js";
-import { enMessages } from "./messages.en.js";
-import { messages as zhHansMessages } from "./messages.zh-Hans.js";
-import { messages as zhHantMessages } from "./messages.zh-Hant.js";
+
+import enMessages from "./messages.en.json";
+import zhHansMessages from "./messages.zh-Hans.json";
+import zhHantMessages from "./messages.zh-Hant.json";
+import type { MessageCatalog } from "./types.js";
 import { createT } from "./useI18n.js";
 
 function extractPlaceholders(value: string): string[] {
@@ -13,7 +14,8 @@ function extractPlaceholders(value: string): string[] {
   const seen = new Set<string>();
 
   // Match ICU plural patterns and extract the parameter name.
-  const icuRe = /\{(\w+)\s*,\s*plural\s*,\s*one\s*\{[^}]*\}\s*other\s*\{[^}]*\}\s*\}/gu;
+  const icuRe =
+    /\{(\w+)\s*,\s*plural\s*,\s*one\s*\{[^}]*\}\s*other\s*\{[^}]*\}\s*\}/gu;
   for (const m of value.matchAll(icuRe)) {
     if (m[1]) seen.add(m[1]);
   }

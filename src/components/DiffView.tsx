@@ -1,7 +1,9 @@
+import { useEffect, useRef, useState } from "react";
+
 import { MergeView, unifiedMergeView } from "@codemirror/merge";
 import { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
-import { useEffect, useRef, useState } from "react";
+
 import { createEditorExtensions } from "../editor/createEditorState.js";
 import type { ResolvedTheme } from "../editor/themes.js";
 import { useI18n } from "../i18n/useI18n.js";
@@ -15,7 +17,9 @@ interface DiffViewProps {
 }
 
 function useNarrowDiff(): boolean {
-  const [narrow, setNarrow] = useState(() => matchMedia("(max-width: 800px)").matches);
+  const [narrow, setNarrow] = useState(
+    () => matchMedia("(max-width: 800px)").matches,
+  );
   useEffect(() => {
     const media = matchMedia("(max-width: 800px)");
     const update = () => setNarrow(media.matches);
@@ -25,7 +29,13 @@ function useNarrowDiff(): boolean {
   return narrow;
 }
 
-export default function DiffView({ original, formatted, outdated, theme, lineWrapping }: DiffViewProps) {
+export default function DiffView({
+  original,
+  formatted,
+  outdated,
+  theme,
+  lineWrapping,
+}: DiffViewProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const narrow = useNarrowDiff();
   const { t } = useI18n();
@@ -76,11 +86,22 @@ export default function DiffView({ original, formatted, outdated, theme, lineWra
   }, [formatted, lineWrapping, narrow, original, theme, t]);
 
   return (
-    <section className="diff-pane syntax-spine" aria-labelledby="diff-title" aria-describedby={outdated ? "diff-provenance" : undefined}>
+    <section
+      className="diff-pane syntax-spine"
+      aria-labelledby="diff-title"
+      aria-describedby={outdated ? "diff-provenance" : undefined}
+    >
       <header className="pane-header">
         <h2 id="diff-title">{t("diff.title")}</h2>
-        <span id={outdated ? "diff-provenance" : undefined} className="pane-muted">
-          {outdated ? t("diff.previous-run") : narrow ? t("diff.unified") : t("diff.side-by-side")}
+        <span
+          id={outdated ? "diff-provenance" : undefined}
+          className="pane-muted"
+        >
+          {outdated
+            ? t("diff.previous-run")
+            : narrow
+              ? t("diff.unified")
+              : t("diff.side-by-side")}
         </span>
       </header>
       <div ref={hostRef} className="diff-host" data-testid="diff-view" />

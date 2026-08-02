@@ -1,8 +1,9 @@
 import type { FormatDetailedResult, FormatOptions } from "wikitext-fmt/browser";
+
 import {
-  isFormatResponse,
-  type FormatterMetadata,
   type FormatResponse,
+  type FormatterMetadata,
+  isFormatResponse,
   type WorkerRequest,
 } from "./protocol.js";
 
@@ -64,7 +65,9 @@ export class StaleResponseError extends Error {
 }
 
 export class WorkerStoppedError extends Error {
-  constructor(message = "Formatting was stopped. The formatter Worker was restarted.") {
+  constructor(
+    message = "Formatting was stopped. The formatter Worker was restarted.",
+  ) {
     super(message);
     this.name = "WorkerStoppedError";
   }
@@ -92,14 +95,25 @@ export class FormatterClient {
 
   ready(): Promise<FormatterMetadata> {
     if (this.disposed) {
-      return Promise.reject(new FormatterClientError("client-disposed", "The formatter client has been disposed."));
+      return Promise.reject(
+        new FormatterClientError(
+          "client-disposed",
+          "The formatter client has been disposed.",
+        ),
+      );
     }
     return this.session.readiness;
   }
 
-  async format(source: string, options: FormatOptions): Promise<FormatOperation> {
+  async format(
+    source: string,
+    options: FormatOptions,
+  ): Promise<FormatOperation> {
     if (this.disposed) {
-      throw new FormatterClientError("client-disposed", "The formatter client has been disposed.");
+      throw new FormatterClientError(
+        "client-disposed",
+        "The formatter client has been disposed.",
+      );
     }
 
     let session = this.session;
@@ -141,10 +155,10 @@ export class FormatterClient {
         error instanceof Error
           ? new FormatterClientError("request-rejected", error.message, error)
           : new FormatterClientError(
-            "request-rejected",
-            "The formatter Worker rejected the formatting request.",
-            error,
-          ),
+              "request-rejected",
+              "The formatter Worker rejected the formatting request.",
+              error,
+            ),
       );
     }
 
@@ -153,7 +167,12 @@ export class FormatterClient {
 
   restart(reason?: string): Promise<FormatterMetadata> {
     if (this.disposed) {
-      return Promise.reject(new FormatterClientError("client-disposed", "The formatter client has been disposed."));
+      return Promise.reject(
+        new FormatterClientError(
+          "client-disposed",
+          "The formatter client has been disposed.",
+        ),
+      );
     }
     const error = new WorkerStoppedError(reason);
     this.stopSession(this.session, error);
@@ -202,17 +221,24 @@ export class FormatterClient {
       this.handleWorkerFailure(
         session,
         error instanceof Error
-          ? new FormatterClientError("worker-initialization-failed", error.message, error)
+          ? new FormatterClientError(
+              "worker-initialization-failed",
+              error.message,
+              error,
+            )
           : new FormatterClientError(
-            "worker-initialization-failed",
-            "The formatter Worker failed to initialize.",
-            error,
-          ),
+              "worker-initialization-failed",
+              "The formatter Worker failed to initialize.",
+              error,
+            ),
       );
     }
   }
 
-  private handleMessage(session: WorkerSession, event: MessageEvent<unknown>): void {
+  private handleMessage(
+    session: WorkerSession,
+    event: MessageEvent<unknown>,
+  ): void {
     if (this.disposed || session !== this.session) {
       return;
     }
@@ -248,7 +274,10 @@ export class FormatterClient {
     if (response.type === "initialization-error") {
       this.handleWorkerFailure(
         session,
-        new FormatterClientError("worker-initialization-failed", response.message),
+        new FormatterClientError(
+          "worker-initialization-failed",
+          response.message,
+        ),
       );
       return;
     }

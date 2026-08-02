@@ -1,6 +1,6 @@
+import { describe, expect, it } from "vitest";
 // @vitest-environment node
 import { formatWikitextSafeDetailed, ruleLevels } from "wikitext-fmt/browser";
-import { describe, expect, it } from "vitest";
 
 describe("wikitext-fmt 0.7.0 browser integration", () => {
   it("exposes the canonical diagnostics and rule metadata", () => {
@@ -13,7 +13,11 @@ describe("wikitext-fmt 0.7.0 browser integration", () => {
   it.each([
     ["heading", "==Title==\n", "== Title ==\n"],
     ["template", "{{foo|a=1|b=2}}\n", "{{foo\n| a = 1\n| b = 2\n}}\n"],
-    ["table", "{| class=wikitable\n|a||b\n|}\n", "{| class=wikitable\n| a\n| b\n|}\n"],
+    [
+      "table",
+      "{| class=wikitable\n|a||b\n|}\n",
+      "{| class=wikitable\n| a\n| b\n|}\n",
+    ],
     ["list", "*one\n**two\n", "* one\n** two\n"],
   ])("formats %s syntax", (_name, source, expected) => {
     const result = formatWikitextSafeDetailed(source);
@@ -26,22 +30,29 @@ describe("wikitext-fmt 0.7.0 browser integration", () => {
     ["empty caption", "{|\n|+\n| A\n|}\n", "{|\n|+\n| A\n|}\n"],
     [
       "caption, table, and row attributes",
-      "{|class=\"wikitable\"\n|-class=\"row\"\n|+style=\"text-align:center\"|Caption\n|A||B\n|}\n",
-      "{| class=\"wikitable\"\n|- class=\"row\"\n|+ style=\"text-align:center\" | Caption\n| A\n| B\n|}\n",
+      '{|class="wikitable"\n|-class="row"\n|+style="text-align:center"|Caption\n|A||B\n|}\n',
+      '{| class="wikitable"\n|- class="row"\n|+ style="text-align:center" | Caption\n| A\n| B\n|}\n',
     ],
   ])("normalizes %s layout", (_name, source, expected) => {
     const result = formatWikitextSafeDetailed(source);
     expect(result.failure).toBeUndefined();
     expect(result.formatted).toBe(expected);
     expect(result.formatted).not.toMatch(/[ \t]+$/mu);
-    expect(formatWikitextSafeDetailed(result.formatted).formatted).toBe(result.formatted);
+    expect(formatWikitextSafeDetailed(result.formatted).formatted).toBe(
+      result.formatted,
+    );
   });
 
   it("keeps inline separators only in preserve mode", () => {
-    const source = "{|class=\"wikitable\"\n|-class=\"row\"\n|+Caption\n!A!!B\n|A||B\n|}\n";
-    const result = formatWikitextSafeDetailed(source, { tableCellSeparatorStyle: "preserve" });
+    const source =
+      '{|class="wikitable"\n|-class="row"\n|+Caption\n!A!!B\n|A||B\n|}\n';
+    const result = formatWikitextSafeDetailed(source, {
+      tableCellSeparatorStyle: "preserve",
+    });
     expect(result.failure).toBeUndefined();
-    expect(result.formatted).toBe("{| class=\"wikitable\"\n|- class=\"row\"\n|+ Caption\n! A!!B\n| A||B\n|}\n");
+    expect(result.formatted).toBe(
+      '{| class="wikitable"\n|- class="row"\n|+ Caption\n! A!!B\n| A||B\n|}\n',
+    );
     expect(result.formatted).not.toMatch(/[ \t]+$/mu);
   });
 
@@ -53,7 +64,9 @@ describe("wikitext-fmt 0.7.0 browser integration", () => {
     const result = formatWikitextSafeDetailed(source);
     expect(result.failure).toBeUndefined();
     expect(result.formatted).toBe(source);
-    expect(formatWikitextSafeDetailed(result.formatted).formatted).toBe(result.formatted);
+    expect(formatWikitextSafeDetailed(result.formatted).formatted).toBe(
+      result.formatted,
+    );
   });
 
   it("leaves canonical input unchanged", () => {
@@ -69,9 +82,14 @@ describe("wikitext-fmt 0.7.0 browser integration", () => {
   });
 
   it("returns a structured fail-closed result for unsupported browser parser configuration", () => {
-    const result = formatWikitextSafeDetailed("source", { parserConfig: "unsupported" });
+    const result = formatWikitextSafeDetailed("source", {
+      parserConfig: "unsupported",
+    });
     expect(result.formatted).toBe("source");
-    expect(result.failure).toMatchObject({ code: "unsupported-parser-config", stage: "parser-config" });
+    expect(result.failure).toMatchObject({
+      code: "unsupported-parser-config",
+      stage: "parser-config",
+    });
     expect(result.warning).toBe(result.failure?.message);
   });
 

@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { detectBrowserLocale, isLanguagePreference, isSupportedLocale, resolveBrowserLocale, resolveLocale } from "./locales.js";
+
+import {
+  detectBrowserLocale,
+  isLanguagePreference,
+  isSupportedLocale,
+  resolveBrowserLocale,
+  resolveLocale,
+} from "./locales.js";
 
 describe("locale resolution", () => {
   it.each([
@@ -28,25 +35,15 @@ describe("locale resolution", () => {
 
   it("honors navigator language priority, including English", () => {
     expect(detectBrowserLocale({ languages: ["en-US", "zh-TW"] })).toBe("en");
-    expect(
-      detectBrowserLocale({ languages: ["fr", "zh-TW"] }),
-    ).toBe("zh-Hant");
-    expect(
-      detectBrowserLocale({ languages: ["de", "zh-CN"] }),
-    ).toBe("zh-Hans");
-    expect(
-      detectBrowserLocale({ languages: ["ja", "en-GB"] }),
-    ).toBe("en");
+    expect(detectBrowserLocale({ languages: ["fr", "zh-TW"] })).toBe("zh-Hant");
+    expect(detectBrowserLocale({ languages: ["de", "zh-CN"] })).toBe("zh-Hans");
+    expect(detectBrowserLocale({ languages: ["ja", "en-GB"] })).toBe("en");
     expect(detectBrowserLocale({ languages: ["fr", "de"] })).toBe("en");
   });
 
   it("falls back to navigator.language when languages is empty", () => {
-    expect(
-      detectBrowserLocale({ language: "zh-HK" }),
-    ).toBe("zh-Hant");
-    expect(
-      detectBrowserLocale({ language: "fr" }),
-    ).toBe("en");
+    expect(detectBrowserLocale({ language: "zh-HK" })).toBe("zh-Hant");
+    expect(detectBrowserLocale({ language: "fr" })).toBe("en");
   });
 
   it("returns en when no language information is available", () => {

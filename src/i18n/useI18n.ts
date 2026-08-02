@@ -1,15 +1,19 @@
 import { useContext } from "react";
+
 import { I18nContext } from "./I18nContext.js";
-import type { MessageCatalog } from "./messages.en.js";
-import { enMessages } from "./messages.en.js";
 import type { SupportedLocale } from "./locales.js";
 import { htmlLang } from "./locales.js";
+import enMessages from "./messages.en.json";
+import type { MessageCatalog } from "./types.js";
 
 export interface I18n {
   /** The currently active locale. */
   locale: SupportedLocale;
   /** Translate a key with optional parameters. Supports ICU-style plural. */
-  t: (key: keyof MessageCatalog, params?: Record<string, string | number>) => string;
+  t: (
+    key: keyof MessageCatalog,
+    params?: Record<string, string | number>,
+  ) => string;
   /** The HTML lang attribute value. */
   htmlLang: string;
 }
@@ -25,7 +29,12 @@ function interpolate(
 ): string {
   return template.replace(
     INTERPOLATION_RE,
-    (_match, key: string, one: string | undefined, other: string | undefined) => {
+    (
+      _match,
+      key: string,
+      one: string | undefined,
+      other: string | undefined,
+    ) => {
       const value = params[key];
       if (one !== undefined && other !== undefined) {
         // Plural form
@@ -39,9 +48,7 @@ function interpolate(
 }
 
 /** Fallback t() function that uses English messages. */
-export function createT(
-  messages: MessageCatalog,
-): I18n["t"] {
+export function createT(messages: MessageCatalog): I18n["t"] {
   return (key, params) => {
     const template = messages[key] ?? enMessages[key] ?? String(key);
     if (!params) return template;

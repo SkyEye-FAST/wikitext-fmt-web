@@ -1,6 +1,9 @@
 import { act, createRef } from "react";
-import { render, screen } from "@testing-library/react";
+
 import { describe, expect, it, vi } from "vitest";
+
+import { render, screen } from "@testing-library/react";
+
 import { EditorPane, type EditorPaneHandle } from "./EditorPane.js";
 
 describe("EditorPane", () => {

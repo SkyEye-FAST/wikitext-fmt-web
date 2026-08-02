@@ -50,7 +50,7 @@ export type FormatResponse =
       generation: number;
       requestId: number;
       message: string;
-      };
+    };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -70,11 +70,13 @@ function isTemplateDiagnostics(value: unknown): boolean {
     "templatesSkipped",
     "formattingPassesUsed",
   ];
-  return numericFields.every((field) => typeof value[field] === "number") &&
+  return (
+    numericFields.every((field) => typeof value[field] === "number") &&
     typeof value.convergenceLimitReached === "boolean" &&
     isRecord(value.skipReasons) &&
     Array.isArray(value.templateSemanticIds) &&
-    Array.isArray(value.changedTemplateSemanticIds);
+    Array.isArray(value.changedTemplateSemanticIds)
+  );
 }
 
 export function isFormatResponse(value: unknown): value is FormatResponse {
@@ -83,30 +85,39 @@ export function isFormatResponse(value: unknown): value is FormatResponse {
   }
 
   const candidate = value as Record<string, unknown>;
-  if (!Number.isInteger(candidate.generation) || (candidate.generation as number) < 1) {
+  if (
+    !Number.isInteger(candidate.generation) ||
+    (candidate.generation as number) < 1
+  ) {
     return false;
   }
 
   if (candidate.type === "ready") {
     const metadata = candidate.metadata;
-    return Boolean(metadata) && typeof metadata === "object" && !Array.isArray(metadata) &&
+    return (
+      Boolean(metadata) &&
+      typeof metadata === "object" &&
+      !Array.isArray(metadata) &&
       typeof (metadata as Record<string, unknown>).version === "string" &&
       Boolean((metadata as Record<string, unknown>).defaults) &&
       typeof (metadata as Record<string, unknown>).defaults === "object" &&
       Boolean((metadata as Record<string, unknown>).ruleLevels) &&
-      typeof (metadata as Record<string, unknown>).ruleLevels === "object";
+      typeof (metadata as Record<string, unknown>).ruleLevels === "object"
+    );
   }
 
   if (candidate.type === "result") {
     const result = candidate.result;
     const resultRecord = isRecord(result) ? result : undefined;
-    return Number.isInteger(candidate.requestId) &&
+    return (
+      Number.isInteger(candidate.requestId) &&
       Number.isFinite(candidate.durationMs) &&
       (candidate.durationMs as number) >= 0 &&
       Boolean(resultRecord) &&
       typeof resultRecord?.formatted === "string" &&
       isTemplateDiagnostics(resultRecord.templateDiagnostics) &&
-      !("templateParameterDiagnostics" in resultRecord);
+      !("templateParameterDiagnostics" in resultRecord)
+    );
   }
 
   if (candidate.type === "initialization-error") {

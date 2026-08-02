@@ -1,4 +1,13 @@
-import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+
 import { AppHeader } from "../components/AppHeader.js";
 import { DiagnosticsPanel } from "../components/DiagnosticsPanel.js";
 import { EditorPane, type EditorPaneHandle } from "../components/EditorPane.js";
@@ -6,26 +15,57 @@ import { EditorToolbar } from "../components/EditorToolbar.js";
 import { FormatStatus } from "../components/FormatStatus.js";
 import { PrivacyNotice } from "../components/PrivacyNotice.js";
 import type { ResolvedTheme } from "../editor/themes.js";
-import { FormatterClient, StaleResponseError, WorkerStoppedError } from "../formatter/client.js";
+import {
+  FormatterClient,
+  StaleResponseError,
+  WorkerStoppedError,
+} from "../formatter/client.js";
 import type { ResolvedBrowserOptions } from "../formatter/protocol.js";
-import { classifyResult, classifyUnexpectedError, clientErrorMessageKey, type FormatStatus as Status } from "../formatter/resultSummary.js";
-import { isApplicableFormatRun, resolveResultFreshness, type FormatRun, type ResultFreshness } from "./formatRun.js";
+import {
+  classifyResult,
+  classifyUnexpectedError,
+  clientErrorMessageKey,
+  type FormatStatus as Status,
+} from "../formatter/resultSummary.js";
 import { I18nProvider } from "../i18n/I18nProvider.js";
-import { resolveLocale, type LanguagePreference, type SupportedLocale } from "../i18n/locales.js";
-import type { MessageCatalog } from "../i18n/messages.en.js";
+import {
+  type LanguagePreference,
+  resolveLocale,
+  type SupportedLocale,
+} from "../i18n/locales.js";
+import type { MessageCatalog } from "../i18n/types.js";
 import { useI18n } from "../i18n/useI18n.js";
-import { LARGE_DOCUMENT_WARNING_BYTES } from "../settings/defaults.js";
-import { createDefaultSettings, type AppSettings, type ThemePreference } from "../settings/schema.js";
-import { clearStoredSettings, loadSettings, loadStoredLanguagePreference, saveSettings } from "../settings/storage.js";
 import { EXAMPLE_WIKITEXT } from "../samples/example.js";
+import { LARGE_DOCUMENT_WARNING_BYTES } from "../settings/defaults.js";
+import {
+  type AppSettings,
+  createDefaultSettings,
+  type ThemePreference,
+} from "../settings/schema.js";
+import {
+  clearStoredSettings,
+  loadSettings,
+  loadStoredLanguagePreference,
+  saveSettings,
+} from "../settings/storage.js";
 import { copyText, triggerTextDownload } from "../utils/document.js";
+import {
+  type FormatRun,
+  isApplicableFormatRun,
+  resolveResultFreshness,
+  type ResultFreshness,
+} from "./formatRun.js";
 
 const DiffView = lazy(() => import("../components/DiffView.js"));
 const SettingsPanel = lazy(() => import("../components/SettingsPanel.js"));
 
-export type FormatterClientPort = Pick<FormatterClient, "ready" | "format" | "restart" | "dispose">;
+export type FormatterClientPort = Pick<
+  FormatterClient,
+  "ready" | "format" | "restart" | "dispose"
+>;
 
-const defaultFormatterClientFactory = (): FormatterClientPort => new FormatterClient();
+const defaultFormatterClientFactory = (): FormatterClientPort =>
+  new FormatterClient();
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -36,16 +76,25 @@ function areOptionValuesEqual(left: unknown, right: unknown): boolean {
     return true;
   }
   if (Array.isArray(left) || Array.isArray(right)) {
-    return Array.isArray(left) && Array.isArray(right) &&
-      left.length === right.length && left.every((value, index) => areOptionValuesEqual(value, right[index]));
+    return (
+      Array.isArray(left) &&
+      Array.isArray(right) &&
+      left.length === right.length &&
+      left.every((value, index) => areOptionValuesEqual(value, right[index]))
+    );
   }
   if (!isRecord(left) || !isRecord(right)) {
     return false;
   }
   const leftKeys = Object.keys(left);
   const rightKeys = Object.keys(right);
-  return leftKeys.length === rightKeys.length && leftKeys.every((key) =>
-    Object.hasOwn(right, key) && areOptionValuesEqual(left[key], right[key]),
+  return (
+    leftKeys.length === rightKeys.length &&
+    leftKeys.every(
+      (key) =>
+        Object.hasOwn(right, key) &&
+        areOptionValuesEqual(left[key], right[key]),
+    )
   );
 }
 
@@ -77,19 +126,30 @@ function useResolvedLocale(preference: LanguagePreference): SupportedLocale {
   return resolveLocale(preference, navigator);
 }
 
-function LocalizedDocumentMetadata({ sourceFilename }: { sourceFilename?: string }) {
+function LocalizedDocumentMetadata({
+  sourceFilename,
+}: {
+  sourceFilename?: string;
+}) {
   const { locale, t } = useI18n();
   useLayoutEffect(() => {
     document.documentElement.lang = locale;
-    document.title = sourceFilename === "Example.wikitext"
-      ? t("document.title.example")
-      : t("document.title.default");
+    document.title =
+      sourceFilename === "Example.wikitext"
+        ? t("document.title.example")
+        : t("document.title.default");
 
-    const descEl = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    const descEl = document.querySelector<HTMLMetaElement>(
+      'meta[name="description"]',
+    );
     if (descEl) descEl.content = t("meta.description");
-    const ogTitleEl = document.querySelector<HTMLMetaElement>('meta[property="og:title"]');
+    const ogTitleEl = document.querySelector<HTMLMetaElement>(
+      'meta[property="og:title"]',
+    );
     if (ogTitleEl) ogTitleEl.content = t("meta.og-title");
-    const ogDescEl = document.querySelector<HTMLMetaElement>('meta[property="og:description"]');
+    const ogDescEl = document.querySelector<HTMLMetaElement>(
+      'meta[property="og:description"]',
+    );
     if (ogDescEl) ogDescEl.content = t("meta.og-description");
   }, [locale, sourceFilename, t]);
   return null;
@@ -99,25 +159,45 @@ function InitializationScreen({ status }: { status: Status }) {
   const { t } = useI18n();
   return (
     <main className="initialization-screen">
-      <span className="brand-mark" aria-hidden="true">{"{ }"}</span>
+      <span className="brand-mark" aria-hidden="true">
+        {"{ }"}
+      </span>
       <h1>{t("brand.name")}</h1>
       {status.kind === "error" ? (
         <>
-          <p role="alert">{t(status.messageKey ?? clientErrorMessageKey(status.code))}</p>
-          <button type="button" className="secondary-button" onClick={() => location.reload()}>{t("init.retry-worker")}</button>
+          <p role="alert">
+            {t(status.messageKey ?? clientErrorMessageKey(status.code))}
+          </p>
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => location.reload()}
+          >
+            {t("init.retry-worker")}
+          </button>
         </>
-      ) : <p>{t("init.initializing")}</p>}
+      ) : (
+        <p>{t("init.initializing")}</p>
+      )}
     </main>
   );
 }
 
-export default function App({ createFormatterClient = defaultFormatterClientFactory }: AppProps) {
-  const [clientFactory] = useState<() => FormatterClientPort>(() => createFormatterClient);
+export default function App({
+  createFormatterClient = defaultFormatterClientFactory,
+}: AppProps) {
+  const [clientFactory] = useState<() => FormatterClientPort>(
+    () => createFormatterClient,
+  );
   const [client, setClient] = useState<FormatterClientPort | null>(null);
-  const [languagePref, setLanguagePref] = useState<LanguagePreference>(loadStoredLanguagePreference);
+  const [languagePref, setLanguagePref] = useState<LanguagePreference>(
+    loadStoredLanguagePreference,
+  );
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [settings, setSettings] = useState<AppSettings | null>(null);
-  const [formatterVersion, setFormatterVersion] = useState(__WIKITEXT_FMT_VERSION__);
+  const [formatterVersion, setFormatterVersion] = useState(
+    __WIKITEXT_FMT_VERSION__,
+  );
   const [defaults, setDefaults] = useState<ResolvedBrowserOptions | null>(null);
   const [sourceFilename, setSourceFilename] = useState<string>();
 
@@ -134,10 +214,10 @@ export default function App({ createFormatterClient = defaultFormatterClientFact
       });
       return;
     }
-    setClient((previous) => active ? created : previous);
+    setClient((previous) => (active ? created : previous));
     return () => {
       active = false;
-      setClient((previous) => previous === created ? null : previous);
+      setClient((previous) => (previous === created ? null : previous));
       created.dispose();
     };
   }, [clientFactory]);
@@ -156,7 +236,9 @@ export default function App({ createFormatterClient = defaultFormatterClientFact
         if (active) setStatus(classifyUnexpectedError(error));
       },
     );
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [client]);
 
   if (!client || !settings || !defaults) {
@@ -222,7 +304,9 @@ function AppMain({
   const [settings, setSettings] = useState<AppSettings>(initialSettings);
   const [formatRun, setFormatRun] = useState<FormatRun>();
   const [freshness, setFreshness] = useState<ResultFreshness>("none");
-  const [activityStatus, setActivityStatusState] = useState<Status>({ kind: "idle" });
+  const [activityStatus, setActivityStatusState] = useState<Status>({
+    kind: "idle",
+  });
   const activityStatusRef = useRef<Status>({ kind: "idle" });
   const [notice, setNotice] = useState<keyof MessageCatalog>();
   const [diffVisible, setDiffVisible] = useState(false);
@@ -281,35 +365,49 @@ function AppMain({
     }
   }, [setActivityStatus, updateResultFreshness]);
 
-  const replaceSourceDocument = useCallback((source: string) => {
-    sourceReplacementRef.current = true;
-    sourceRevisionRef.current += 1;
-    try {
-      sourceEditorRef.current?.setValue(source);
-    } finally {
-      sourceReplacementRef.current = false;
-    }
-    updateResultFreshness();
-  }, [updateResultFreshness]);
+  const replaceSourceDocument = useCallback(
+    (source: string) => {
+      sourceReplacementRef.current = true;
+      sourceRevisionRef.current += 1;
+      try {
+        sourceEditorRef.current?.setValue(source);
+      } finally {
+        sourceReplacementRef.current = false;
+      }
+      updateResultFreshness();
+    },
+    [updateResultFreshness],
+  );
 
-  const updateFormatter = useCallback((formatter: ResolvedBrowserOptions) => {
-    if (areFormatterOptionsEqual(formatterOptionsRef.current, formatter)) {
-      return;
-    }
-    formatterOptionsRef.current = formatter;
-    formatterRevisionRef.current += 1;
-    updateResultFreshness();
-    setSettings((currentSettings) => ({ ...currentSettings, formatter }));
-  }, [updateResultFreshness]);
-
-  const replaceAllSettings = useCallback((nextSettings: AppSettings) => {
-    if (!areFormatterOptionsEqual(formatterOptionsRef.current, nextSettings.formatter)) {
-      formatterOptionsRef.current = nextSettings.formatter;
+  const updateFormatter = useCallback(
+    (formatter: ResolvedBrowserOptions) => {
+      if (areFormatterOptionsEqual(formatterOptionsRef.current, formatter)) {
+        return;
+      }
+      formatterOptionsRef.current = formatter;
       formatterRevisionRef.current += 1;
       updateResultFreshness();
-    }
-    setSettings(nextSettings);
-  }, [updateResultFreshness]);
+      setSettings((currentSettings) => ({ ...currentSettings, formatter }));
+    },
+    [updateResultFreshness],
+  );
+
+  const replaceAllSettings = useCallback(
+    (nextSettings: AppSettings) => {
+      if (
+        !areFormatterOptionsEqual(
+          formatterOptionsRef.current,
+          nextSettings.formatter,
+        )
+      ) {
+        formatterOptionsRef.current = nextSettings.formatter;
+        formatterRevisionRef.current += 1;
+        updateResultFreshness();
+      }
+      setSettings(nextSettings);
+    },
+    [updateResultFreshness],
+  );
 
   const format = useCallback(async () => {
     if (busyRef.current) return;
@@ -351,7 +449,10 @@ function AppMain({
       setFreshness("current");
       setActivityStatus({ kind: "idle" });
     } catch (error) {
-      if (operationToken === activeFormatRef.current && !(error instanceof StaleResponseError)) {
+      if (
+        operationToken === activeFormatRef.current &&
+        !(error instanceof StaleResponseError)
+      ) {
         setActivityStatus(classifyUnexpectedError(error));
         if (!(error instanceof WorkerStoppedError)) {
           void client.restart().catch(() => undefined);
@@ -386,7 +487,11 @@ function AppMain({
     activeFormatRef.current += 1;
     busyRef.current = false;
     setBusy(false);
-    setActivityStatus({ kind: "error", code: "request-rejected", messageKey: "status.formatting-stopped" });
+    setActivityStatus({
+      kind: "error",
+      code: "request-rejected",
+      messageKey: "status.formatting-stopped",
+    });
     try {
       await client.restart();
     } catch (error) {
@@ -429,9 +534,11 @@ function AppMain({
       setActivityStatus({ kind: "idle" });
       setSourceFilename(file.name);
       setDiffVisible(false);
-      setNotice(file.size > LARGE_DOCUMENT_WARNING_BYTES
-        ? "editor.large-file-warning"
-        : undefined);
+      setNotice(
+        file.size > LARGE_DOCUMENT_WARNING_BYTES
+          ? "editor.large-file-warning"
+          : undefined,
+      );
     } catch {
       setNotice("editor.file-not-readable");
     }
@@ -479,11 +586,16 @@ function AppMain({
   if (activityStatus.kind !== "idle") {
     status = activityStatus;
   } else if (formatRun && freshness === "current") {
-    status = classifyResult(formatRun.sourceSnapshot, formatRun.result, formatRun.durationMs);
+    status = classifyResult(
+      formatRun.sourceSnapshot,
+      formatRun.result,
+      formatRun.durationMs,
+    );
   } else if (formatRun) {
-    const staleFreshness = freshness === "source-outdated" || freshness === "options-outdated"
-      ? freshness
-      : "outdated";
+    const staleFreshness =
+      freshness === "source-outdated" || freshness === "options-outdated"
+        ? freshness
+        : "outdated";
     status = { kind: "outdated", freshness: staleFreshness };
   } else {
     status = activityStatus;
@@ -528,12 +640,34 @@ function AppMain({
       />
 
       <main className="workspace">
-        <div className={`editor-grid ${diffVisible ? "is-visually-hidden" : ""}`} aria-hidden={diffVisible} inert={diffVisible}>
-          <EditorPane ref={sourceEditorRef} id="source" label={t("editor.source.label")} mutedLabel={t("editor.source.muted")} onDocumentChange={handleSourceDocumentChange} lineWrapping={settings.lineWrapping} theme={resolvedTheme} />
-          <EditorPane ref={outputEditorRef} id="output" label={t("editor.output.label")} mutedLabel={t("editor.output.muted")} readOnly lineWrapping={settings.lineWrapping} theme={resolvedTheme} />
+        <div
+          className={`editor-grid ${diffVisible ? "is-visually-hidden" : ""}`}
+          aria-hidden={diffVisible}
+          inert={diffVisible}
+        >
+          <EditorPane
+            ref={sourceEditorRef}
+            id="source"
+            label={t("editor.source.label")}
+            mutedLabel={t("editor.source.muted")}
+            onDocumentChange={handleSourceDocumentChange}
+            lineWrapping={settings.lineWrapping}
+            theme={resolvedTheme}
+          />
+          <EditorPane
+            ref={outputEditorRef}
+            id="output"
+            label={t("editor.output.label")}
+            mutedLabel={t("editor.output.muted")}
+            readOnly
+            lineWrapping={settings.lineWrapping}
+            theme={resolvedTheme}
+          />
         </div>
         {diffVisible ? (
-          <Suspense fallback={<div className="lazy-loading">{t("diff.loading")}</div>}>
+          <Suspense
+            fallback={<div className="lazy-loading">{t("diff.loading")}</div>}
+          >
             <DiffView
               original={formatRun?.sourceSnapshot ?? ""}
               formatted={output}
@@ -547,10 +681,19 @@ function AppMain({
 
       <aside className="lower-rail" aria-label={t("layout.status-diagnostics")}>
         <div className="status-privacy-row">
-          <FormatStatus status={status} profile={settings.formatter.profile} webVersion={__WIKITEXT_FMT_WEB_VERSION__} formatterVersion={formatterVersion} />
+          <FormatStatus
+            status={status}
+            profile={settings.formatter.profile}
+            webVersion={__WIKITEXT_FMT_WEB_VERSION__}
+            formatterVersion={formatterVersion}
+          />
           <PrivacyNotice />
         </div>
-        <DiagnosticsPanel result={formatRun?.result} status={status} notice={notice} />
+        <DiagnosticsPanel
+          result={formatRun?.result}
+          status={status}
+          notice={notice}
+        />
       </aside>
 
       {settingsOpen ? (

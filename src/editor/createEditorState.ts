@@ -5,7 +5,11 @@ import {
   historyKeymap,
   indentWithTab,
 } from "@codemirror/commands";
-import { bracketMatching, foldGutter, indentOnInput } from "@codemirror/language";
+import {
+  bracketMatching,
+  foldGutter,
+  indentOnInput,
+} from "@codemirror/language";
 import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
 import { EditorState, type Extension } from "@codemirror/state";
 import {
@@ -19,9 +23,14 @@ import {
   lineNumbers,
   rectangularSelection,
 } from "@codemirror/view";
-import { createEditorTheme, createSyntaxTheme, type ResolvedTheme } from "./themes.js";
-import { createWikitextExtensions } from "./createWikitextExtensions.js";
+
 import type { DocumentStatistics } from "../utils/document.js";
+import { createWikitextExtensions } from "./createWikitextExtensions.js";
+import {
+  createEditorTheme,
+  createSyntaxTheme,
+  type ResolvedTheme,
+} from "./themes.js";
 
 export interface EditorExtensionOptions {
   readOnly: boolean;
@@ -34,7 +43,9 @@ export interface EditorStateOptions extends EditorExtensionOptions {
   doc: string;
 }
 
-export function createEditorExtensions(options: EditorExtensionOptions): Extension[] {
+export function createEditorExtensions(
+  options: EditorExtensionOptions,
+): Extension[] {
   const extensions: Extension[] = [
     lineNumbers(),
     highlightActiveLineGutter(),

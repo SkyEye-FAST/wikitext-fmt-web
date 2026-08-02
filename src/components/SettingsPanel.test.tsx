@@ -1,7 +1,9 @@
+import { describe, expect, it, vi } from "vitest";
 import { defaultOptions } from "wikitext-fmt/browser";
+
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+
 import type { ResolvedBrowserOptions } from "../formatter/protocol.js";
 import { createDefaultSettings } from "../settings/schema.js";
 import SettingsPanel from "./SettingsPanel.js";
@@ -13,7 +15,9 @@ describe("SettingsPanel", () => {
     const onReset = vi.fn();
     render(
       <SettingsPanel
-        settings={createDefaultSettings({ ...defaultOptions } as ResolvedBrowserOptions)}
+        settings={createDefaultSettings({
+          ...defaultOptions,
+        } as ResolvedBrowserOptions)}
         onChange={vi.fn()}
         onFormatterChange={vi.fn()}
         onClose={vi.fn()}
@@ -21,10 +25,14 @@ describe("SettingsPanel", () => {
         onReset={onReset}
       />,
     );
-    await user.click(screen.getByRole("button", { name: "Restore core defaults" }));
+    await user.click(
+      screen.getByRole("button", { name: "Restore core defaults" }),
+    );
     await user.click(screen.getByRole("button", { name: "Reset settings" }));
     expect(onRestoreDefaults).toHaveBeenCalledOnce();
     expect(onReset).toHaveBeenCalledOnce();
-    expect(screen.getByText("MediaWiki bundled browser configuration")).toBeInTheDocument();
+    expect(
+      screen.getByText("MediaWiki bundled browser configuration"),
+    ).toBeInTheDocument();
   });
 });

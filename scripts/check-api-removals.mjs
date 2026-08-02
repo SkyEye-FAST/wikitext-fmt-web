@@ -47,7 +47,9 @@ for (const pathname of files) {
 }
 
 if (violations.length > 0) {
-  throw new Error(`Removed core API references found:\n${violations.join("\n")}`);
+  throw new Error(
+    `Removed core API references found:\n${violations.join("\n")}`,
+  );
 }
 
 console.log("web API-removal guard passed");

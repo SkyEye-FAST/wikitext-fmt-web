@@ -1,5 +1,7 @@
-import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+
+import { render, screen } from "@testing-library/react";
+
 import { FormatStatus } from "./FormatStatus.js";
 
 describe("FormatStatus", () => {
@@ -13,6 +15,8 @@ describe("FormatStatus", () => {
       />,
     );
 
-    expect(screen.getByText(/Web/).parentElement).toHaveTextContent("Web 0.2.0 · Formatter 0.7.0");
+    expect(screen.getByText(/Web/).parentElement).toHaveTextContent(
+      "Web 0.2.0 · Formatter 0.7.0",
+    );
   });
 });

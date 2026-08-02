@@ -1,10 +1,25 @@
+import {
+  forwardRef,
+  memo,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
+
 import { StateEffect } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
-import { forwardRef, memo, useEffect, useImperativeHandle, useRef, useState } from "react";
-import { createEditorExtensions, createEditorState } from "../editor/createEditorState.js";
+
+import {
+  createEditorExtensions,
+  createEditorState,
+} from "../editor/createEditorState.js";
 import type { ResolvedTheme } from "../editor/themes.js";
 import { useI18n } from "../i18n/useI18n.js";
-import { getDocumentStatistics, type DocumentStatistics } from "../utils/document.js";
+import {
+  type DocumentStatistics,
+  getDocumentStatistics,
+} from "../utils/document.js";
 
 export interface EditorPaneHandle {
   getValue(): string;
@@ -23,123 +38,153 @@ interface EditorPaneProps {
   mutedLabel?: string;
 }
 
-const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(function EditorPane({
-  id,
-  label,
-  initialValue = "",
-  onDocumentChange,
-  readOnly = false,
-  lineWrapping,
-  theme,
-  mutedLabel,
-}: EditorPaneProps, forwardedRef) {
-  const hostRef = useRef<HTMLDivElement>(null);
-  const viewRef = useRef<EditorView | null>(null);
-  const initialValueRef = useRef(initialValue);
-  const onDocumentChangeRef = useRef(onDocumentChange);
-  const [stats, setStats] = useState(() => getDocumentStatistics(initialValue));
-  const { locale, t } = useI18n();
-
-  useEffect(() => {
-    onDocumentChangeRef.current = onDocumentChange;
-  }, [onDocumentChange]);
-
-  useImperativeHandle(forwardedRef, () => ({
-    getValue: () => viewRef.current?.state.doc.toString() ?? initialValueRef.current,
-    setValue: (value) => {
-      initialValueRef.current = value;
-      const view = viewRef.current;
-      if (!view) {
-        setStats(getDocumentStatistics(value));
-        return;
-      }
-      // Full-string comparison happens only for explicit document replacement,
-      // never for ordinary editor updates.
-      if (view.state.doc.length === value.length && view.state.doc.sliceString(0) === value) {
-        return;
-      }
-      const selection = view.state.selection.main;
-      view.dispatch({
-        changes: { from: 0, to: view.state.doc.length, insert: value },
-        selection: {
-          anchor: Math.min(selection.anchor, value.length),
-          head: Math.min(selection.head, value.length),
-        },
-      });
-    },
-    focus: () => viewRef.current?.focus(),
-  }), []);
-
-  useEffect(() => {
-    const host = hostRef.current;
-    if (!host) {
-      return;
-    }
-    const state = createEditorState({
-      doc: initialValueRef.current,
-      readOnly,
+const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(
+  function EditorPane(
+    {
+      id,
+      label,
+      initialValue = "",
+      onDocumentChange,
+      readOnly = false,
       lineWrapping,
       theme,
-      onDocumentChange: (nextStatistics) => {
-        setStats(nextStatistics);
-        onDocumentChangeRef.current?.(nextStatistics);
-      },
+      mutedLabel,
+    }: EditorPaneProps,
+    forwardedRef,
+  ) {
+    const hostRef = useRef<HTMLDivElement>(null);
+    const viewRef = useRef<EditorView | null>(null);
+    const initialValueRef = useRef(initialValue);
+    const onDocumentChangeRef = useRef(onDocumentChange);
+    const [stats, setStats] = useState(() =>
+      getDocumentStatistics(initialValue),
+    );
+    const { locale, t } = useI18n();
+
+    useEffect(() => {
+      onDocumentChangeRef.current = onDocumentChange;
+    }, [onDocumentChange]);
+
+    useImperativeHandle(
+      forwardedRef,
+      () => ({
+        getValue: () =>
+          viewRef.current?.state.doc.toString() ?? initialValueRef.current,
+        setValue: (value) => {
+          initialValueRef.current = value;
+          const view = viewRef.current;
+          if (!view) {
+            setStats(getDocumentStatistics(value));
+            return;
+          }
+          // Full-string comparison happens only for explicit document replacement,
+          // never for ordinary editor updates.
+          if (
+            view.state.doc.length === value.length &&
+            view.state.doc.sliceString(0) === value
+          ) {
+            return;
+          }
+          const selection = view.state.selection.main;
+          view.dispatch({
+            changes: { from: 0, to: view.state.doc.length, insert: value },
+            selection: {
+              anchor: Math.min(selection.anchor, value.length),
+              head: Math.min(selection.head, value.length),
+            },
+          });
+        },
+        focus: () => viewRef.current?.focus(),
+      }),
+      [],
+    );
+
+    useEffect(() => {
+      const host = hostRef.current;
+      if (!host) {
+        return;
+      }
+      const state = createEditorState({
+        doc: initialValueRef.current,
+        readOnly,
+        lineWrapping,
+        theme,
+        onDocumentChange: (nextStatistics) => {
+          setStats(nextStatistics);
+          onDocumentChangeRef.current?.(nextStatistics);
+        },
+      });
+      const view = new EditorView({ state, parent: host });
+      view.contentDOM.setAttribute("aria-label", label);
+      if (readOnly) {
+        view.contentDOM.setAttribute("aria-readonly", "true");
+      }
+      viewRef.current = view;
+      return () => {
+        view.destroy();
+        viewRef.current = null;
+      };
+      // EditorView lifetime is intentionally tied only to this pane.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
+      const view = viewRef.current;
+      if (!view) {
+        return;
+      }
+      view.dispatch({
+        effects: StateEffect.reconfigure.of(
+          createEditorExtensions({
+            readOnly,
+            lineWrapping,
+            theme,
+            onDocumentChange: (nextStatistics) => {
+              setStats(nextStatistics);
+              onDocumentChangeRef.current?.(nextStatistics);
+            },
+          }),
+        ),
+      });
+      view.contentDOM.setAttribute("aria-label", label);
+      view.contentDOM.toggleAttribute("aria-readonly", readOnly);
+    }, [label, lineWrapping, readOnly, theme]);
+
+    const numberFormatter = new Intl.NumberFormat(locale);
+    const formattedLines = numberFormatter.format(stats.lines);
+    const formattedCharacters = numberFormatter.format(stats.characters);
+    const statsAriaLabel = t("editor.stats.aria", {
+      lines: formattedLines,
+      characters: formattedCharacters,
     });
-    const view = new EditorView({ state, parent: host });
-    view.contentDOM.setAttribute("aria-label", label);
-    if (readOnly) {
-      view.contentDOM.setAttribute("aria-readonly", "true");
-    }
-    viewRef.current = view;
-    return () => {
-      view.destroy();
-      viewRef.current = null;
-    };
-    // EditorView lifetime is intentionally tied only to this pane.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
-  useEffect(() => {
-    const view = viewRef.current;
-    if (!view) {
-      return;
-    }
-    view.dispatch({
-      effects: StateEffect.reconfigure.of(
-        createEditorExtensions({
-          readOnly,
-          lineWrapping,
-          theme,
-          onDocumentChange: (nextStatistics) => {
-            setStats(nextStatistics);
-            onDocumentChangeRef.current?.(nextStatistics);
-          },
-        }),
-      ),
-    });
-    view.contentDOM.setAttribute("aria-label", label);
-    view.contentDOM.toggleAttribute("aria-readonly", readOnly);
-  }, [label, lineWrapping, readOnly, theme]);
-
-  const numberFormatter = new Intl.NumberFormat(locale);
-  const formattedLines = numberFormatter.format(stats.lines);
-  const formattedCharacters = numberFormatter.format(stats.characters);
-  const statsAriaLabel = t("editor.stats.aria", { lines: formattedLines, characters: formattedCharacters });
-
-  return (
-    <section className="editor-pane syntax-spine" aria-labelledby={`${id}-label`}>
-      <header className="pane-header">
-        <div>
-          <h2 id={`${id}-label`}>{label}</h2>
-          {mutedLabel ? <span className="pane-muted">{mutedLabel}</span> : null}
-        </div>
-        <span className="pane-stats" aria-label={statsAriaLabel}>
-          {t("editor.stats.visible", { lines: formattedLines, characters: formattedCharacters })}
-        </span>
-      </header>
-      <div ref={hostRef} className="editor-host" data-testid={`${id}-editor`} />
-    </section>
-  );
-});
+    return (
+      <section
+        className="editor-pane syntax-spine"
+        aria-labelledby={`${id}-label`}
+      >
+        <header className="pane-header">
+          <div>
+            <h2 id={`${id}-label`}>{label}</h2>
+            {mutedLabel ? (
+              <span className="pane-muted">{mutedLabel}</span>
+            ) : null}
+          </div>
+          <span className="pane-stats" aria-label={statsAriaLabel}>
+            {t("editor.stats.visible", {
+              lines: formattedLines,
+              characters: formattedCharacters,
+            })}
+          </span>
+        </header>
+        <div
+          ref={hostRef}
+          className="editor-host"
+          data-testid={`${id}-editor`}
+        />
+      </section>
+    );
+  },
+);
 
 export const EditorPane = memo(EditorPaneComponent);

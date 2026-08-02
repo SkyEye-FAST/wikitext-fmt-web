@@ -1,11 +1,12 @@
 import { type ReactNode, useMemo } from "react";
-import type { MessageCatalog } from "./messages.en.js";
-import { enMessages } from "./messages.en.js";
-import { messages as zhHansMessages } from "./messages.zh-Hans.js";
-import { messages as zhHantMessages } from "./messages.zh-Hant.js";
+
+import { I18nContext } from "./I18nContext.js";
 import type { SupportedLocale } from "./locales.js";
 import { htmlLang } from "./locales.js";
-import { I18nContext } from "./I18nContext.js";
+import enMessages from "./messages.en.json";
+import zhHansMessages from "./messages.zh-Hans.json";
+import zhHantMessages from "./messages.zh-Hant.json";
+import type { MessageCatalog } from "./types.js";
 import { createT, type I18n } from "./useI18n.js";
 
 const catalogs: Record<SupportedLocale, MessageCatalog> = {
