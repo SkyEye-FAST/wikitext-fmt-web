@@ -75,7 +75,7 @@ export const messages: MessageCatalog = {
   "status.outdated.detail": "產生此結果後，原始碼或格式化設定已變更。",
   "status.applied": "已套用格式化輸出",
   "status.profile": "設定檔",
-  "status.versions": "Web {web} · 格式化器 {fmt}",
+  "status.versions": "Web {web} · Formatter {fmt}",
 
   // Privacy
   "privacy.notice": "格式化會在你的瀏覽器中本機進行，不會上傳你的 Wikitext。",
@@ -158,7 +158,8 @@ export const messages: MessageCatalog = {
   "status.source-changed":
     "格式化過程中原始碼已變更，先前的結果已捨棄，請重新格式化以更新輸出。",
   "status.formatting-stopped": "格式化已停止。格式化器 Worker 已重新啟動。",
-  "status.result-discarded": "格式化過程中原始碼或格式化設定已變更，這次結果已捨棄。",
+  "status.result-discarded":
+    "格式化過程中原始碼或格式化設定已變更，這次結果已捨棄。",
 
   // Clipboard and copy
   "copy.success": "格式化輸出已複製到剪貼簿。",
