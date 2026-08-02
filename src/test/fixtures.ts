@@ -1,5 +1,9 @@
 import type { FormatDetailedResult } from "wikitext-fmt/browser";
-import type { FormatterMetadata, ResolvedBrowserOptions } from "../formatter/protocol.js";
+
+import type {
+  FormatterMetadata,
+  ResolvedBrowserOptions,
+} from "../formatter/protocol.js";
 
 export function createDetailedResult(formatted: string): FormatDetailedResult {
   return {
@@ -27,7 +31,10 @@ export function createDetailedResult(formatted: string): FormatDetailedResult {
       interlanguageLinksMoved: 0,
       interlanguageLinksFormatted: 0,
     },
-    redirectDiagnostics: { redirectsFormatted: 0, localizedRedirectAliasesCanonicalized: 0 },
+    redirectDiagnostics: {
+      redirectsFormatted: 0,
+      localizedRedirectAliasesCanonicalized: 0,
+    },
     fileLinkDiagnostics: {
       fileLinksFormatted: 0,
       localizedFileNamespaceAliasesCanonicalized: 0,
@@ -42,7 +49,10 @@ export function createDetailedResult(formatted: string): FormatDetailedResult {
       wikilinksSkippedUnsafe: 0,
       skipReasons: {},
     },
-    externalLinkDiagnostics: { externalLinksFormatted: 0, externalLinksSkippedUnsafe: 0 },
+    externalLinkDiagnostics: {
+      externalLinksFormatted: 0,
+      externalLinksSkippedUnsafe: 0,
+    },
     referenceDiagnostics: {
       referencesFormatted: 0,
       referenceGroupsFormatted: 0,
@@ -83,6 +93,8 @@ export function createDetailedResult(formatted: string): FormatDetailedResult {
   };
 }
 
-export function createMetadata(defaults = {} as ResolvedBrowserOptions): FormatterMetadata {
+export function createMetadata(
+  defaults = {} as ResolvedBrowserOptions,
+): FormatterMetadata {
   return { defaults, ruleLevels: {}, version: "0.7.0" };
 }

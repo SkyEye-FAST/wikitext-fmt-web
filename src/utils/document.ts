@@ -34,7 +34,10 @@ export async function copyText(
   await clipboard.writeText(text);
 }
 
-export function triggerTextDownload(text: string, sourceFilename?: string): void {
+export function triggerTextDownload(
+  text: string,
+  sourceFilename?: string,
+): void {
   const { blob, filename } = createTextDownload(text, sourceFilename);
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");

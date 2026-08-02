@@ -1,6 +1,8 @@
-import react from "@vitejs/plugin-react";
-import { defineConfig } from "vitest/config";
 import type { Plugin } from "vite";
+import { defineConfig } from "vitest/config";
+
+import react from "@vitejs/plugin-react";
+
 import { getPackageVersions } from "./scripts/package-metadata.mjs";
 
 const versions = getPackageVersions();
@@ -29,15 +31,22 @@ function bundleGraphPlugin(fileName: string): Plugin {
           name: output.name,
           isEntry: output.isEntry,
           isDynamicEntry: output.isDynamicEntry,
-          facadeModuleId: output.facadeModuleId ? normalizeModuleId(output.facadeModuleId, root) : null,
+          facadeModuleId: output.facadeModuleId
+            ? normalizeModuleId(output.facadeModuleId, root)
+            : null,
           imports: output.imports,
           dynamicImports: output.dynamicImports,
-          modules: Object.keys(output.modules).map((id) => normalizeModuleId(id, root)),
+          modules: Object.keys(output.modules).map((id) =>
+            normalizeModuleId(id, root),
+          ),
         });
       }
       // Vite also applies top-level Rollup plugins while bundling a Worker.
       // Only let the application graph plugin emit from the HTML entry build.
-      if (fileName === "app-bundle-graph.json" && !chunks.some((chunk) => chunk.name === "index")) {
+      if (
+        fileName === "app-bundle-graph.json" &&
+        !chunks.some((chunk) => chunk.name === "index")
+      ) {
         return;
       }
       this.emitFile({

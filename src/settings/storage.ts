@@ -1,10 +1,10 @@
 import type { ResolvedBrowserOptions } from "../formatter/protocol.js";
 import { isLanguagePreference } from "../i18n/locales.js";
 import {
+  type AppSettings,
   createDefaultSettings,
   isThemePreference,
   sanitizeFormatterSettings,
-  type AppSettings,
 } from "./schema.js";
 
 export const SETTINGS_STORAGE_KEY = "wikitext-formatter.settings";
@@ -39,14 +39,20 @@ function migrateV1ToV2(value: StoredSettingsV1): StoredSettingsV2 {
   };
 }
 
-function migrateV0ToV2(value: Record<string, unknown>): StoredSettingsV2 | undefined {
+function migrateV0ToV2(
+  value: Record<string, unknown>,
+): StoredSettingsV2 | undefined {
   const settings = value.settings;
   if (!isRecord(settings)) return undefined;
   return {
     version: 2,
-    theme: typeof value.theme === "string" && isThemePreference(value.theme) ? value.theme : "system",
+    theme:
+      typeof value.theme === "string" && isThemePreference(value.theme)
+        ? value.theme
+        : "system",
     language: "system",
-    lineWrapping: typeof value.lineWrapping === "boolean" ? value.lineWrapping : true,
+    lineWrapping:
+      typeof value.lineWrapping === "boolean" ? value.lineWrapping : true,
     formatter: settings as unknown as ResolvedBrowserOptions,
   };
 }
@@ -92,9 +98,13 @@ export function loadSettings(
 
     return {
       theme: isThemePreference(stored.theme) ? stored.theme : fallback.theme,
-      language: isLanguagePreference(stored.language) ? stored.language : fallback.language,
+      language: isLanguagePreference(stored.language)
+        ? stored.language
+        : fallback.language,
       lineWrapping:
-        typeof stored.lineWrapping === "boolean" ? stored.lineWrapping : fallback.lineWrapping,
+        typeof stored.lineWrapping === "boolean"
+          ? stored.lineWrapping
+          : fallback.lineWrapping,
       formatter: sanitizeFormatterSettings(stored.formatter, defaults),
     };
   } catch {
@@ -110,7 +120,9 @@ export function loadStoredLanguagePreference(
     const raw = storage.getItem(SETTINGS_STORAGE_KEY);
     if (!raw) return "system";
     const stored = parseStored(raw);
-    return stored && isLanguagePreference(stored.language) ? stored.language : "system";
+    return stored && isLanguagePreference(stored.language)
+      ? stored.language
+      : "system";
   } catch {
     return "system";
   }

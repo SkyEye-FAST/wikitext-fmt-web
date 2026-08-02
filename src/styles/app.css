@@ -39,7 +39,9 @@ input:focus-visible,
 textarea:focus-visible,
 a:focus-visible,
 .cm-editor.cm-focused {
-  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus);
+  box-shadow:
+    0 0 0 2px var(--surface),
+    0 0 0 4px var(--focus);
 }
 
 a {
@@ -374,11 +376,21 @@ a {
   line-height: 1.35;
 }
 
-.is-success { color: var(--success); }
-.is-failure { color: var(--failure); }
-.is-stale { color: var(--warning); }
-.is-running { color: var(--accent); }
-.is-neutral { color: var(--text-muted); }
+.is-success {
+  color: var(--success);
+}
+.is-failure {
+  color: var(--failure);
+}
+.is-stale {
+  color: var(--warning);
+}
+.is-running {
+  color: var(--accent);
+}
+.is-neutral {
+  color: var(--text-muted);
+}
 
 .privacy-notice {
   margin: 0;
@@ -656,7 +668,9 @@ a {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 980px) {

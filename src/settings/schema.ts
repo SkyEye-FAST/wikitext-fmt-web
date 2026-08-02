@@ -23,8 +23,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-function enumValue<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
-  return typeof value === "string" && allowed.includes(value as T) ? (value as T) : fallback;
+function enumValue<T extends string>(
+  value: unknown,
+  allowed: readonly T[],
+  fallback: T,
+): T {
+  return typeof value === "string" && allowed.includes(value as T)
+    ? (value as T)
+    : fallback;
 }
 
 function booleanValue(value: unknown, fallback: boolean): boolean {
@@ -54,35 +60,97 @@ export function sanitizeFormatterSettings(
     profile: enumValue(source.profile, profiles, defaults.profile),
     parserConfig: defaults.parserConfig,
     lineWidth,
-    formatHeadings: booleanValue(source.formatHeadings, defaults.formatHeadings),
-    formatTemplates: booleanValue(source.formatTemplates, defaults.formatTemplates),
-    inlineTemplateSpacing: enumValue(source.inlineTemplateSpacing, inlineSpacing, defaults.inlineTemplateSpacing),
-    templateParameterLayout: enumValue(source.templateParameterLayout, parameterLayouts, defaults.templateParameterLayout),
-    formatCategories: booleanValue(source.formatCategories, defaults.formatCategories),
+    formatHeadings: booleanValue(
+      source.formatHeadings,
+      defaults.formatHeadings,
+    ),
+    formatTemplates: booleanValue(
+      source.formatTemplates,
+      defaults.formatTemplates,
+    ),
+    inlineTemplateSpacing: enumValue(
+      source.inlineTemplateSpacing,
+      inlineSpacing,
+      defaults.inlineTemplateSpacing,
+    ),
+    templateParameterLayout: enumValue(
+      source.templateParameterLayout,
+      parameterLayouts,
+      defaults.templateParameterLayout,
+    ),
+    formatCategories: booleanValue(
+      source.formatCategories,
+      defaults.formatCategories,
+    ),
     formatLists: booleanValue(source.formatLists, defaults.formatLists),
-    formatFileLinks: booleanValue(source.formatFileLinks, defaults.formatFileLinks),
-    formatWikilinks: booleanValue(source.formatWikilinks, defaults.formatWikilinks),
-    formatExternalLinks: booleanValue(source.formatExternalLinks, defaults.formatExternalLinks),
-    formatReferences: booleanValue(source.formatReferences, defaults.formatReferences),
-    formatInterlanguageLinks: booleanValue(source.formatInterlanguageLinks, defaults.formatInterlanguageLinks),
-    interlanguagePlacement: enumValue(source.interlanguagePlacement, placements, defaults.interlanguagePlacement),
+    formatFileLinks: booleanValue(
+      source.formatFileLinks,
+      defaults.formatFileLinks,
+    ),
+    formatWikilinks: booleanValue(
+      source.formatWikilinks,
+      defaults.formatWikilinks,
+    ),
+    formatExternalLinks: booleanValue(
+      source.formatExternalLinks,
+      defaults.formatExternalLinks,
+    ),
+    formatReferences: booleanValue(
+      source.formatReferences,
+      defaults.formatReferences,
+    ),
+    formatInterlanguageLinks: booleanValue(
+      source.formatInterlanguageLinks,
+      defaults.formatInterlanguageLinks,
+    ),
+    interlanguagePlacement: enumValue(
+      source.interlanguagePlacement,
+      placements,
+      defaults.interlanguagePlacement,
+    ),
     interlanguagePrefixes,
-    formatSectionSpacing: booleanValue(source.formatSectionSpacing, defaults.formatSectionSpacing),
-    formatBehaviorSwitches: booleanValue(source.formatBehaviorSwitches, defaults.formatBehaviorSwitches),
-    formatRedirects: booleanValue(source.formatRedirects, defaults.formatRedirects),
-    behaviorSwitchPlacement: enumValue(source.behaviorSwitchPlacement, placements, defaults.behaviorSwitchPlacement),
+    formatSectionSpacing: booleanValue(
+      source.formatSectionSpacing,
+      defaults.formatSectionSpacing,
+    ),
+    formatBehaviorSwitches: booleanValue(
+      source.formatBehaviorSwitches,
+      defaults.formatBehaviorSwitches,
+    ),
+    formatRedirects: booleanValue(
+      source.formatRedirects,
+      defaults.formatRedirects,
+    ),
+    behaviorSwitchPlacement: enumValue(
+      source.behaviorSwitchPlacement,
+      placements,
+      defaults.behaviorSwitchPlacement,
+    ),
     localizationSource: defaults.localizationSource,
     localizedSyntaxStyle: defaults.localizedSyntaxStyle,
     localizationAliases: { ...defaults.localizationAliases },
     formatTables: booleanValue(source.formatTables, defaults.formatTables),
-    tableCellSeparatorStyle: enumValue(source.tableCellSeparatorStyle, tableSeparators, defaults.tableCellSeparatorStyle),
-    normalizeBlankLines: booleanValue(source.normalizeBlankLines, defaults.normalizeBlankLines),
+    tableCellSeparatorStyle: enumValue(
+      source.tableCellSeparatorStyle,
+      tableSeparators,
+      defaults.tableCellSeparatorStyle,
+    ),
+    normalizeBlankLines: booleanValue(
+      source.normalizeBlankLines,
+      defaults.normalizeBlankLines,
+    ),
     level: enumValue(source.level, levels, defaults.level),
-    htmlVoidTagStyle: enumValue(source.htmlVoidTagStyle, voidStyles, defaults.htmlVoidTagStyle),
+    htmlVoidTagStyle: enumValue(
+      source.htmlVoidTagStyle,
+      voidStyles,
+      defaults.htmlVoidTagStyle,
+    ),
   };
 }
 
-export function createDefaultSettings(defaults: ResolvedBrowserOptions): AppSettings {
+export function createDefaultSettings(
+  defaults: ResolvedBrowserOptions,
+): AppSettings {
   return {
     theme: "system",
     language: "system",
