@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 // @vitest-environment node
-import { formatWikitextSafeDetailed, ruleLevels } from "wikitext-fmt/browser";
+import {
+  formatWikitextSafeDetailed,
+  resolveFormatProfile,
+  ruleLevels,
+} from "wikitext-fmt/browser";
 
-describe("wikitext-fmt 0.7.0 browser integration", () => {
+describe("wikitext-fmt 0.8.1 browser integration", () => {
   it("exposes the canonical diagnostics and rule metadata", () => {
     const result = formatWikitextSafeDetailed("{{foo|a=1}}\n");
     expect(result).toHaveProperty("templateDiagnostics");
@@ -10,9 +14,38 @@ describe("wikitext-fmt 0.7.0 browser integration", () => {
     expect(ruleLevels).not.toHaveProperty("templateParameters");
   });
 
+  it("formats references and relocates parser-confirmed interlanguage links", () => {
+    const production = resolveFormatProfile("production");
+    const reference = formatWikitextSafeDetailed(
+      '<ref name="a"/>\n',
+      production,
+    );
+    expect(reference.failure).toBeUndefined();
+    expect(reference.formatted).toBe('<ref name="a" />\n');
+
+    const interlanguage = formatWikitextSafeDetailed(
+      "[[en:Example]]\n\nBody\n",
+      production,
+    );
+    expect(interlanguage.failure).toBeUndefined();
+    expect(interlanguage.formatted).toBe("Body\n\n[[en:Example]]\n");
+    expect(interlanguage.footerDiagnostics).toMatchObject({
+      interlanguageLinksEligible: 1,
+      interlanguageLinksMoved: 1,
+    });
+
+    const genericInterwiki = formatWikitextSafeDetailed(
+      "[[w:Example]]\n\nBody\n",
+      production,
+    );
+    expect(genericInterwiki.failure).toBeUndefined();
+    expect(genericInterwiki.formatted).toBe("[[w:Example]]\n\nBody\n");
+    expect(genericInterwiki.footerDiagnostics.interlanguageLinksMoved).toBe(0);
+  });
+
   it.each([
     ["heading", "==Title==\n", "== Title ==\n"],
-    ["template", "{{foo|a=1|b=2}}\n", "{{foo\n| a = 1\n| b = 2\n}}\n"],
+    ["template", "{{foo| a=1|b =2}}\n", "{{foo|a=1|b=2}}\n"],
     [
       "table",
       "{| class=wikitable\n|a||b\n|}\n",

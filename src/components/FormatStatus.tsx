@@ -83,7 +83,6 @@ export function FormatStatus({
   const profileMessageKeys = {
     default: "settings.profile.default",
     production: "settings.profile.production",
-    aggressive: "settings.profile.aggressive",
   } as const;
   const profileKey =
     profileMessageKeys[profile as keyof typeof profileMessageKeys];

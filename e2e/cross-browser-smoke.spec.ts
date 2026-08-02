@@ -4,9 +4,10 @@ test("runs the critical formatter workflow", async ({ page }) => {
   await page.goto(".");
   await expect(page).toHaveTitle(/Wikitext Formatter/);
   await expect(page.getByRole("button", { name: "Format" })).toBeVisible();
-  await expect(page.getByRole("status")).toContainText("Web 0.2.0 · Formatter 0.7.0");
+  await expect(page.getByRole("status")).toContainText("Web 0.3.0 · Formatter 0.8.1");
 
   await page.getByRole("button", { name: "Load example" }).click();
+  await expect(page).toHaveTitle("Wikitext Formatter");
   await page.getByRole("button", { name: "Format" }).click();
   await expect(page.getByText("Formatted with changes")).toBeVisible();
   await expect(page.locator('[data-testid="output-editor"] .cm-content')).toContainText("Example article");

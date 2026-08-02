@@ -33,6 +33,52 @@ test("formats with the keyboard shortcut", async ({ page }) => {
   await expect(page.getByText("Formatted with changes")).toBeVisible();
 });
 
+test("uses production for parser-confirmed references and interlanguage footers", async ({ page }) => {
+  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByLabel("Profile").selectOption("production");
+  await page.getByRole("button", { name: "Close settings" }).click();
+
+  const fileInput = page.locator('input[type="file"]');
+  await fileInput.setInputFiles({
+    name: "Production.wikitext",
+    mimeType: "text/plain",
+    buffer: Buffer.from('<ref name="a"/>\n[[en:Example]]\n\nBody\n'),
+  });
+  await page.getByRole("button", { name: "Format" }).click();
+  await expect(page.getByText("Formatted with changes")).toBeVisible();
+  await expect(
+    page.locator('[data-testid="output-editor"] .cm-content'),
+  ).toContainText('<ref name="a" />');
+  await expect
+    .poll(() =>
+      page.locator('[data-testid="output-editor"] .cm-content').evaluate(
+        (content) =>
+          [...content.querySelectorAll(".cm-line")]
+            .map((line) => line.textContent)
+            .join("\n"),
+      ),
+    )
+    .toBe('<ref name="a" />\n\nBody\n\n[[en:Example]]\n');
+
+  await fileInput.setInputFiles({
+    name: "Generic-interwiki.wikitext",
+    mimeType: "text/plain",
+    buffer: Buffer.from("[[w:Example]]\n\nBody\n"),
+  });
+  await page.getByRole("button", { name: "Format" }).click();
+  await expect(page.getByText("Already formatted")).toBeVisible();
+  await expect
+    .poll(() =>
+      page.locator('[data-testid="output-editor"] .cm-content').evaluate(
+        (content) =>
+          [...content.querySelectorAll(".cm-line")]
+            .map((line) => line.textContent)
+            .join("\n"),
+      ),
+    )
+    .toBe("[[w:Example]]\n\nBody\n");
+});
+
 test("opens a local file and downloads output without transmitting source", async ({ page }) => {
   const transmittedBodies: string[] = [];
   page.on("request", (request) => {

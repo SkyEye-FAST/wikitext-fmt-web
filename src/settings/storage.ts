@@ -8,7 +8,15 @@ import {
 } from "./schema.js";
 
 export const SETTINGS_STORAGE_KEY = "wikitext-formatter.settings";
-const STORAGE_VERSION = 2;
+const STORAGE_VERSION = 3;
+
+interface StoredSettingsV3 {
+  version: 3;
+  theme: AppSettings["theme"];
+  language: AppSettings["language"];
+  lineWrapping: boolean;
+  formatter: ResolvedBrowserOptions;
+}
 
 interface StoredSettingsV2 {
   version: 2;
@@ -39,6 +47,26 @@ function migrateV1ToV2(value: StoredSettingsV1): StoredSettingsV2 {
   };
 }
 
+function migrateV2ToV3(value: StoredSettingsV2): StoredSettingsV3 {
+  const legacyFormatter: unknown = value.formatter;
+  const formatter = isRecord(legacyFormatter)
+    ? {
+        ...legacyFormatter,
+        profile:
+          legacyFormatter.profile === "aggressive"
+            ? "production"
+            : legacyFormatter.profile,
+      }
+    : legacyFormatter;
+  return {
+    version: 3,
+    theme: value.theme,
+    language: value.language,
+    lineWrapping: value.lineWrapping,
+    formatter: formatter as ResolvedBrowserOptions,
+  };
+}
+
 function migrateV0ToV2(
   value: Record<string, unknown>,
 ): StoredSettingsV2 | undefined {
@@ -57,7 +85,7 @@ function migrateV0ToV2(
   };
 }
 
-function parseStored(raw: string): StoredSettingsV2 | undefined {
+function parseStored(raw: string): StoredSettingsV3 | undefined {
   let value: unknown;
   try {
     value = JSON.parse(raw);
@@ -66,19 +94,25 @@ function parseStored(raw: string): StoredSettingsV2 | undefined {
   }
   if (!isRecord(value)) return undefined;
 
-  // Already version 2.
+  // Already version 3.
+  if (value.version === 3) {
+    return value as unknown as StoredSettingsV3;
+  }
+
+  // Version 2 → 3 migration.
   if (value.version === 2) {
-    return value as unknown as StoredSettingsV2;
+    return migrateV2ToV3(value as unknown as StoredSettingsV2);
   }
 
   // Version 1 → 2 migration.
   if (value.version === 1) {
-    return migrateV1ToV2(value as unknown as StoredSettingsV1);
+    return migrateV2ToV3(migrateV1ToV2(value as unknown as StoredSettingsV1));
   }
 
   // Version 0 → 2 migration (legacy nested settings).
   if (value.version === 0) {
-    return migrateV0ToV2(value);
+    const v2 = migrateV0ToV2(value);
+    return v2 ? migrateV2ToV3(v2) : undefined;
   }
 
   return undefined;
@@ -132,7 +166,7 @@ export function saveSettings(
   settings: AppSettings,
   storage: Pick<Storage, "setItem"> = localStorage,
 ): void {
-  const payload: StoredSettingsV2 = {
+  const payload: StoredSettingsV3 = {
     version: STORAGE_VERSION,
     theme: settings.theme,
     language: settings.language,

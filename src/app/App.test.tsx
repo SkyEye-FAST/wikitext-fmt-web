@@ -98,6 +98,24 @@ describe("App formatting snapshots", () => {
     expect(screen.getByRole("button", { name: "Apply output" })).toBeDisabled();
   });
 
+  it("keeps the application title after loading the example", async () => {
+    const metadata = createMetadata({ ...defaultOptions });
+    const client: FormatterClientPort = {
+      ready: vi.fn().mockResolvedValue(metadata),
+      format: vi.fn(),
+      restart: vi.fn().mockResolvedValue(metadata),
+      dispose: vi.fn(),
+    };
+    const user = userEvent.setup();
+    render(<App createFormatterClient={() => client} />);
+
+    await user.click(
+      await screen.findByRole("button", { name: "Load example" }),
+    );
+
+    expect(document.title).toBe("Wikitext Formatter");
+  });
+
   it("marks a completed output outdated only when formatter options change", async () => {
     const metadata = createMetadata({ ...defaultOptions });
     const client: FormatterClientPort = {

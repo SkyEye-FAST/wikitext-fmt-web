@@ -10,13 +10,13 @@ describe("FormatStatus", () => {
       <FormatStatus
         status={{ kind: "idle" }}
         profile="default"
-        webVersion="0.2.0"
-        formatterVersion="0.7.0"
+        webVersion="0.3.0"
+        formatterVersion="0.8.1"
       />,
     );
 
     expect(screen.getByText(/Web/).parentElement).toHaveTextContent(
-      "Web 0.2.0 · Formatter 0.7.0",
+      "Web 0.3.0 · Formatter 0.8.1",
     );
   });
 });

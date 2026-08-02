@@ -2,7 +2,11 @@ import { useEffect, useRef } from "react";
 
 import { X } from "lucide-react";
 
-import type { ResolvedBrowserOptions } from "../formatter/protocol.js";
+import type {
+  FormatterProfileOverrides,
+  FormatterProfiles,
+  ResolvedBrowserOptions,
+} from "../formatter/protocol.js";
 import { useI18n } from "../i18n/useI18n.js";
 import { applyCoreProfile, type AppSettings } from "../settings/schema.js";
 
@@ -13,6 +17,8 @@ interface SettingsPanelProps {
   onClose: () => void;
   onRestoreDefaults: () => void;
   onReset: () => void;
+  profiles: FormatterProfiles;
+  profileOverrides: FormatterProfileOverrides;
 }
 
 interface ToggleFieldProps {
@@ -41,6 +47,8 @@ export default function SettingsPanel({
   onClose,
   onRestoreDefaults,
   onReset,
+  profiles,
+  profileOverrides,
 }: SettingsPanelProps) {
   const { t } = useI18n();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -132,6 +140,8 @@ export default function SettingsPanel({
                     applyCoreProfile(
                       formatter,
                       event.target.value as ResolvedBrowserOptions["profile"],
+                      profiles,
+                      profileOverrides,
                     ),
                   )
                 }
@@ -139,9 +149,6 @@ export default function SettingsPanel({
                 <option value="default">{t("settings.profile.default")}</option>
                 <option value="production">
                   {t("settings.profile.production")}
-                </option>
-                <option value="aggressive">
-                  {t("settings.profile.aggressive")}
                 </option>
               </select>
             </label>

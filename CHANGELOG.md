@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+## 0.3.0 — 2026-08-02
+
+### Added
+
+- Read the formatter's supported profiles and profile overrides from the browser
+  Worker, and provide the supported default and production profiles in Settings.
+- Upgrade persisted settings to schema version 3, including a safe migration of
+  the former aggressive profile to production.
+- Add release metadata validation and a tag-triggered GitHub Release workflow
+  that publishes the single reviewed static distribution artifact with checksums.
+
+### Changed
+
+- Upgrade the exact browser dependency from `wikitext-fmt@0.8.0` to the repaired
+  `wikitext-fmt@0.8.1` release.
+- Derive profile-controlled settings from core-provided metadata rather than
+  duplicating profile values in the Web application.
+
+### Fixed
+
+- Restore browser formatting of references and parser-confirmed interlanguage
+  links through the published core 0.8.1 adapter fix, with direct integration
+  coverage.
+- Keep the browser tab title as `Wikitext Formatter` after loading the example;
+  the example filename remains available for local download naming.
+
 ## 0.2.0 — 2026-08-02
 
 ### Added

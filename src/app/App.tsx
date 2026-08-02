@@ -20,7 +20,10 @@ import {
   StaleResponseError,
   WorkerStoppedError,
 } from "../formatter/client.js";
-import type { ResolvedBrowserOptions } from "../formatter/protocol.js";
+import type {
+  FormatterMetadata,
+  ResolvedBrowserOptions,
+} from "../formatter/protocol.js";
 import {
   classifyResult,
   classifyUnexpectedError,
@@ -126,18 +129,11 @@ function useResolvedLocale(preference: LanguagePreference): SupportedLocale {
   return resolveLocale(preference, navigator);
 }
 
-function LocalizedDocumentMetadata({
-  sourceFilename,
-}: {
-  sourceFilename?: string;
-}) {
+function LocalizedDocumentMetadata() {
   const { locale, t } = useI18n();
   useLayoutEffect(() => {
     document.documentElement.lang = locale;
-    document.title =
-      sourceFilename === "Example.wikitext"
-        ? t("document.title.example")
-        : t("document.title.default");
+    document.title = t("document.title.default");
 
     const descEl = document.querySelector<HTMLMetaElement>(
       'meta[name="description"]',
@@ -151,7 +147,7 @@ function LocalizedDocumentMetadata({
       'meta[property="og:description"]',
     );
     if (ogDescEl) ogDescEl.content = t("meta.og-description");
-  }, [locale, sourceFilename, t]);
+  }, [locale, t]);
   return null;
 }
 
@@ -199,6 +195,8 @@ export default function App({
     __WIKITEXT_FMT_VERSION__,
   );
   const [defaults, setDefaults] = useState<ResolvedBrowserOptions | null>(null);
+  const [formatterMetadata, setFormatterMetadata] =
+    useState<FormatterMetadata | null>(null);
   const [sourceFilename, setSourceFilename] = useState<string>();
 
   const locale = useResolvedLocale(languagePref);
@@ -226,9 +224,10 @@ export default function App({
     if (!client) return;
     let active = true;
     void client.ready().then(
-      (metadata: { defaults: ResolvedBrowserOptions; version: string }) => {
+      (metadata) => {
         if (!active) return;
         setDefaults(metadata.defaults);
+        setFormatterMetadata(metadata);
         setFormatterVersion(metadata.version);
         setSettings(loadSettings(metadata.defaults));
       },
@@ -241,7 +240,7 @@ export default function App({
     };
   }, [client]);
 
-  if (!client || !settings || !defaults) {
+  if (!client || !settings || !defaults || !formatterMetadata) {
     return (
       <I18nProvider locale={locale}>
         <LocalizedDocumentMetadata />
@@ -252,10 +251,12 @@ export default function App({
 
   return (
     <I18nProvider locale={locale}>
-      <LocalizedDocumentMetadata sourceFilename={sourceFilename} />
+      <LocalizedDocumentMetadata />
       <AppMain
         initialSettings={settings}
         defaults={defaults}
+        profiles={formatterMetadata.profiles}
+        profileOverrides={formatterMetadata.profileOverrides}
         formatterVersion={formatterVersion}
         languagePref={languagePref}
         setLanguagePref={setLanguagePref}
@@ -270,6 +271,8 @@ export default function App({
 interface AppMainProps {
   initialSettings: AppSettings;
   defaults: ResolvedBrowserOptions;
+  profiles: FormatterMetadata["profiles"];
+  profileOverrides: FormatterMetadata["profileOverrides"];
   formatterVersion: string;
   languagePref: LanguagePreference;
   setLanguagePref: (pref: LanguagePreference) => void;
@@ -281,6 +284,8 @@ interface AppMainProps {
 function AppMain({
   initialSettings,
   defaults,
+  profiles,
+  profileOverrides,
   formatterVersion,
   languagePref,
   setLanguagePref,
@@ -704,6 +709,8 @@ function AppMain({
             onFormatterChange={updateFormatter}
             onClose={() => setSettingsOpen(false)}
             onRestoreDefaults={() => updateFormatter({ ...defaults })}
+            profiles={profiles}
+            profileOverrides={profileOverrides}
             onReset={resetAllSettings}
           />
         </Suspense>

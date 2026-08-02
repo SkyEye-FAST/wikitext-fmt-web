@@ -1,6 +1,6 @@
 {
   "name": "wikitext-fmt-web",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Browser-based MediaWiki Wikitext formatter powered by wikitext-fmt",
   "license": "GPL-3.0-or-later",
@@ -21,6 +21,7 @@
     "check:api-removals": "node scripts/check-api-removals.mjs",
     "check:bundle": "node scripts/check-bundle.mjs",
     "check:metadata": "node scripts/check-metadata.mjs",
+    "check:release-metadata": "node scripts/release-metadata.mjs",
     "check": "pnpm lint && pnpm check:api-removals && pnpm typecheck && pnpm test:run && pnpm build && pnpm check:bundle && pnpm check:metadata"
   },
   "dependencies": {
@@ -38,7 +39,7 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "wikiparser-node": "^1.46.2",
-    "wikitext-fmt": "0.7.0"
+    "wikitext-fmt": "0.8.1"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",

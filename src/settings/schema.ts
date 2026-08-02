@@ -1,4 +1,8 @@
-import type { ResolvedBrowserOptions } from "../formatter/protocol.js";
+import type {
+  FormatterProfileOverrides,
+  FormatterProfiles,
+  ResolvedBrowserOptions,
+} from "../formatter/protocol.js";
 import type { LanguagePreference } from "../i18n/locales.js";
 import { isLanguagePreference } from "../i18n/locales.js";
 
@@ -11,7 +15,7 @@ export interface AppSettings {
   formatter: ResolvedBrowserOptions;
 }
 
-const profiles = ["default", "production", "aggressive"] as const;
+const profiles = ["default", "production"] as const;
 const levels = ["safe", "normal", "experimental"] as const;
 const inlineSpacing = ["auto", "compact", "spaced"] as const;
 const parameterLayouts = ["compact", "flush", "indented"] as const;
@@ -162,36 +166,19 @@ export function createDefaultSettings(
 export function applyCoreProfile(
   formatter: ResolvedBrowserOptions,
   profile: ResolvedBrowserOptions["profile"],
+  resolvedProfiles: FormatterProfiles,
+  profileOverrides: FormatterProfileOverrides,
 ): ResolvedBrowserOptions {
-  if (profile === "aggressive") {
-    return {
-      ...formatter,
-      profile,
-      level: "experimental",
-      formatTemplates: true,
-      formatTables: true,
-      tableCellSeparatorStyle: "auto",
-      formatReferences: true,
-      formatExternalLinks: true,
-      formatSectionSpacing: true,
-    };
-  }
-
-  if (profile === "production" || profile === "default") {
-    return {
-      ...formatter,
-      profile,
-      level: "normal",
-      formatTemplates: true,
-      formatTables: true,
-      tableCellSeparatorStyle: "auto",
-      formatReferences: false,
-      formatExternalLinks: false,
-      formatSectionSpacing: false,
-    };
-  }
-
-  return { ...formatter, profile };
+  const controlledKeys = new Set(
+    Object.values(profileOverrides).flatMap((overrides) => Object.keys(overrides)),
+  );
+  const profileFields = Object.fromEntries(
+    [...controlledKeys].map((key) => [
+      key,
+      resolvedProfiles[profile][key as keyof ResolvedBrowserOptions],
+    ]),
+  ) as Partial<ResolvedBrowserOptions>;
+  return { ...formatter, ...profileFields, profile };
 }
 
 export function isThemePreference(value: unknown): value is ThemePreference {

@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { defaultOptions } from "wikitext-fmt/browser";
+import {
+  defaultOptions,
+  formatProfiles,
+  getFormatProfileOverrides,
+  resolveFormatProfile,
+  type FormatProfile,
+} from "wikitext-fmt/browser";
 
 import type { ResolvedBrowserOptions } from "../formatter/protocol.js";
 import {
@@ -39,7 +45,7 @@ describe("settings storage", () => {
     expect(settings.parserConfig).toBe("mediawiki");
   });
 
-  it("migrates the version 0 settings property to v2", () => {
+  it("migrates the version 0 settings property to v3", () => {
     const storage = memoryStorage(
       JSON.stringify({
         version: 0,
@@ -56,7 +62,7 @@ describe("settings storage", () => {
     });
   });
 
-  it("migrates version 1 settings to v2 with system language default", () => {
+  it("migrates version 1 settings to v3 with system language default", () => {
     const storage = memoryStorage(
       JSON.stringify({
         version: 1,
@@ -74,7 +80,7 @@ describe("settings storage", () => {
     });
   });
 
-  it("retains an explicitly saved language preference in v2", () => {
+  it("retains an explicitly saved language preference in v3", () => {
     const storage = memoryStorage();
     const settings = {
       ...createDefaultSettings(defaults),
@@ -112,7 +118,7 @@ describe("settings storage", () => {
     expect(loadStoredLanguagePreference(storage)).toBe("system");
   });
 
-  it("falls back to system on an invalid language value in v2", () => {
+  it("falls back to system on an invalid language value in a v2 record", () => {
     const storage = memoryStorage(
       JSON.stringify({
         version: 2,
@@ -132,7 +138,7 @@ describe("settings storage", () => {
     );
   });
 
-  it("drops the removed template-parameter setting from version-2 records without resetting supported settings", () => {
+  it("migrates v2 aggressive settings to production and removes unknown fields on save", () => {
     const storage = memoryStorage(
       JSON.stringify({
         version: 2,
@@ -142,6 +148,7 @@ describe("settings storage", () => {
         formatter: {
           ...defaults,
           lineWidth: 144,
+          profile: "aggressive",
           formatTemplates: false,
           formatTables: false,
           formatTemplateParameters: true,
@@ -156,6 +163,7 @@ describe("settings storage", () => {
       lineWrapping: false,
       formatter: {
         lineWidth: 144,
+        profile: "production",
         formatTemplates: false,
         formatTables: false,
       },
@@ -164,6 +172,7 @@ describe("settings storage", () => {
 
     saveSettings(loaded, storage);
     const saved = JSON.parse(storage.entries.get(SETTINGS_STORAGE_KEY) ?? "{}");
+    expect(saved.version).toBe(3);
     expect(saved.formatter).not.toHaveProperty("formatTemplateParameters");
     expect(saved).not.toHaveProperty("source");
     expect(saved).not.toHaveProperty("output");
@@ -179,14 +188,63 @@ describe("settings storage", () => {
     expect(serialized).not.toContain("output");
   });
 
-  it("applies the core aggressive profile behavior", () => {
-    const aggressive = applyCoreProfile(defaults, "aggressive");
-    expect(aggressive).toMatchObject({
-      profile: "aggressive",
-      level: "experimental",
+  it("uses core metadata to apply only profile-controlled settings", () => {
+    const profiles = Object.fromEntries(
+      formatProfiles.map((profile) => [
+        profile,
+        resolveFormatProfile(profile),
+      ]),
+    ) as Record<FormatProfile, ResolvedBrowserOptions>;
+    const profileOverrides = Object.fromEntries(
+      formatProfiles.map((profile) => [
+        profile,
+        getFormatProfileOverrides(profile),
+      ]),
+    ) as Parameters<typeof applyCoreProfile>[3];
+    const custom = {
+      ...defaults,
+      lineWidth: 88,
+      inlineTemplateSpacing: "compact" as const,
+      templateParameterLayout: "indented" as const,
+    };
+    const production = applyCoreProfile(
+      custom,
+      "production",
+      profiles,
+      profileOverrides,
+    );
+    expect(production).toMatchObject({
+      profile: "production",
+      level: "normal",
       formatReferences: true,
       formatExternalLinks: true,
       formatSectionSpacing: true,
+      formatInterlanguageLinks: true,
+      interlanguagePlacement: "footer",
+      lineWidth: 88,
+      inlineTemplateSpacing: "compact",
+      templateParameterLayout: "indented",
     });
+
+    expect(
+      applyCoreProfile(production, "default", profiles, profileOverrides),
+    ).toMatchObject({
+      ...custom,
+      profile: "default",
+      formatReferences: false,
+      formatExternalLinks: false,
+      formatSectionSpacing: false,
+      formatInterlanguageLinks: false,
+      interlanguagePlacement: "preserve",
+    });
+  });
+
+  it("fails closed for an unknown storage version", () => {
+    expect(
+      loadSettings(
+        defaults,
+        memoryStorage(JSON.stringify({ version: 99, formatter: defaults })),
+      ),
+    ).toEqual(createDefaultSettings(defaults));
   });
 });

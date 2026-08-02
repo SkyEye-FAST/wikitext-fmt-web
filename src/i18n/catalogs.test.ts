@@ -142,8 +142,8 @@ describe("i18n catalog consistency", () => {
 describe("interpolation and plurals", () => {
   it("interpolates named parameters", () => {
     const t = createT(enMessages);
-    expect(t("status.versions", { web: "0.2.0", fmt: "0.7.0" })).toBe(
-      "Web 0.2.0 · Formatter 0.7.0",
+    expect(t("status.versions", { web: "0.3.0", fmt: "0.8.1" })).toBe(
+      "Web 0.3.0 · Formatter 0.8.1",
     );
     expect(t("editor.stats.aria", { lines: 10, characters: 200 })).toBe(
       "10 lines, 200 characters",

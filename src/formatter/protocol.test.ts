@@ -5,6 +5,7 @@ import {
   type FormatResponse,
   isFormatResponse,
 } from "./protocol.js";
+import { createMetadata } from "../test/fixtures.js";
 
 describe("Worker protocol", () => {
   it("accepts typed monotonically identifiable messages", () => {
@@ -37,9 +38,29 @@ describe("Worker protocol", () => {
       isFormatResponse({
         type: "ready",
         generation: 1,
-        metadata: { version: "0.7.0", defaults: {}, ruleLevels: {} },
+        metadata: { version: "0.8.1", defaults: {}, ruleLevels: {} },
+      }),
+    ).toBe(false);
+    expect(
+      isFormatResponse({
+        type: "ready",
+        generation: 1,
+        metadata: createMetadata(),
       }),
     ).toBe(true);
+    expect(
+      isFormatResponse({
+        type: "ready",
+        generation: 1,
+        metadata: {
+          ...createMetadata(),
+          profileOverrides: {
+            default: {},
+            production: { invented: true },
+          },
+        },
+      }),
+    ).toBe(false);
     expect(
       isFormatResponse({
         type: "result",

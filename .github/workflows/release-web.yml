@@ -1,0 +1,80 @@
+name: Web release
+
+on:
+  push:
+    tags:
+      - "web-v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Proposed web-v<semver> tag to verify
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.release.outputs.tag }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'push' && github.ref || 'master' }}
+      - uses: pnpm/action-setup@v6
+        with:
+          cache: true
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24.11.0"
+      - id: release
+        name: Validate release metadata and default-branch ancestry
+        run: |
+          tag="${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}"
+          node scripts/release-metadata.mjs --tag "$tag" --notes release-artifacts/release-notes.md
+          git fetch origin master --depth=1
+          git merge-base --is-ancestor HEAD origin/master
+          version="$(node -p "require('./package.json').version")"
+          printf 'tag=%s\nversion=%s\n' "$tag" "$version" >> "$GITHUB_OUTPUT"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm exec playwright install --with-deps chromium firefox webkit
+      - run: pnpm e2e
+      - name: Package the reviewed distribution once
+        run: |
+          version="${{ steps.release.outputs.version }}"
+          tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner -czf "release-artifacts/wikitext-fmt-web-$version.tar.gz" dist
+          sha256sum "release-artifacts/wikitext-fmt-web-$version.tar.gz" > release-artifacts/SHA256SUMS
+      - uses: actions/upload-artifact@v7
+        with:
+          name: web-release-${{ steps.release.outputs.tag }}
+          path: release-artifacts/
+          if-no-files-found: error
+
+  github-release:
+    if: github.event_name == 'push'
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: web-release-${{ needs.verify.outputs.tag }}
+          path: release-artifacts
+      - name: Create the GitHub Release from verified artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.verify.outputs.tag }}
+          VERSION: ${{ needs.verify.outputs.version }}
+        run: |
+          gh release create "$TAG" \
+            "release-artifacts/wikitext-fmt-web-$VERSION.tar.gz" \
+            release-artifacts/SHA256SUMS \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Wikitext Formatter Web $VERSION" \
+            --notes-file release-artifacts/release-notes.md

@@ -1,4 +1,10 @@
-import type { FormatDetailedResult } from "wikitext-fmt/browser";
+import {
+  formatProfiles,
+  getFormatProfileOverrides,
+  resolveFormatProfile,
+  type FormatDetailedResult,
+  type FormatProfile,
+} from "wikitext-fmt/browser";
 
 import type {
   FormatterMetadata,
@@ -28,8 +34,12 @@ export function createDetailedResult(formatted: string): FormatDetailedResult {
       localizedCategoryAliasesCanonicalized: 0,
       localizedDefaultsortAliasesCanonicalized: 0,
       localizedBehaviorSwitchesCanonicalized: 0,
+      interlanguageLinksInspected: 0,
+      interlanguageLinksEligible: 0,
+      interlanguageLinksSkipped: 0,
       interlanguageLinksMoved: 0,
       interlanguageLinksFormatted: 0,
+      interlanguageLinkSkipReasons: {},
     },
     redirectDiagnostics: {
       redirectsFormatted: 0,
@@ -94,7 +104,23 @@ export function createDetailedResult(formatted: string): FormatDetailedResult {
 }
 
 export function createMetadata(
-  defaults = {} as ResolvedBrowserOptions,
+  defaults = resolveFormatProfile("default"),
 ): FormatterMetadata {
-  return { defaults, ruleLevels: {}, version: "0.7.0" };
+  return {
+    defaults,
+    profiles: Object.fromEntries(
+      formatProfiles.map((profile) => [
+        profile,
+        resolveFormatProfile(profile),
+      ]),
+    ) as Record<FormatProfile, ResolvedBrowserOptions>,
+    profileOverrides: Object.fromEntries(
+      formatProfiles.map((profile) => [
+        profile,
+        getFormatProfileOverrides(profile),
+      ]),
+    ) as FormatterMetadata["profileOverrides"],
+    ruleLevels: {},
+    version: "0.8.1",
+  };
 }

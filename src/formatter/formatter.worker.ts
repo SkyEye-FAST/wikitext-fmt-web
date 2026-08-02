@@ -1,6 +1,10 @@
 /// <reference lib="webworker" />
 
-import type { FormatLevel } from "wikitext-fmt/browser";
+import type {
+  FormatLevel,
+  FormatProfile,
+  ResolvedFormatOptions,
+} from "wikitext-fmt/browser";
 
 import type { FormatResponse, WorkerRequest } from "./protocol.js";
 
@@ -29,7 +33,19 @@ function postReady(
     type: "ready",
     generation,
     metadata: {
-      defaults: { ...formatter.defaultOptions },
+      defaults: formatter.resolveFormatProfile("default"),
+      profiles: Object.fromEntries(
+        formatter.formatProfiles.map((profile) => [
+          profile,
+          formatter.resolveFormatProfile(profile),
+        ]),
+      ) as Record<FormatProfile, ResolvedFormatOptions>,
+      profileOverrides: Object.fromEntries(
+        formatter.formatProfiles.map((profile) => [
+          profile,
+          formatter.getFormatProfileOverrides(profile),
+        ]),
+      ) as Record<FormatProfile, Readonly<Partial<ResolvedFormatOptions>>>,
       ruleLevels: { ...formatter.ruleLevels } as Record<string, FormatLevel>,
       version: __WIKITEXT_FMT_VERSION__,
     },

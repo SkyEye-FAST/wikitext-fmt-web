@@ -100,7 +100,7 @@ describe("FormatterClient", () => {
     expect(workers).toHaveLength(2);
     workers[1]?.emit(ready(2));
     await stopped;
-    await expect(restarted).resolves.toMatchObject({ version: "0.7.0" });
+    await expect(restarted).resolves.toMatchObject({ version: "0.8.1" });
   });
 
   it("surfaces unexpected Worker errors", async () => {
@@ -137,7 +137,7 @@ describe("FormatterClient", () => {
 
     await expect(operation).rejects.toBeInstanceOf(WorkerStoppedError);
     workers[1]?.emit(ready(2));
-    await expect(restarted).resolves.toMatchObject({ version: "0.7.0" });
+    await expect(restarted).resolves.toMatchObject({ version: "0.8.1" });
   });
 
   it("ignores late messages and errors from a superseded Worker generation", async () => {
@@ -199,7 +199,7 @@ describe("FormatterClient", () => {
       generation: 1,
       metadata: { ...createMetadata(), version: "duplicate" },
     });
-    await expect(client.ready()).resolves.toMatchObject({ version: "0.7.0" });
+    await expect(client.ready()).resolves.toMatchObject({ version: "0.8.1" });
   });
 
   it("recreates a failed runtime Worker before the next format", async () => {

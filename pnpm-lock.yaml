@@ -51,8 +51,8 @@ importers:
         specifier: ^1.46.2
         version: 1.46.2(@codemirror/state@6.7.1)(@codemirror/view@6.43.7)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
       wikitext-fmt:
-        specifier: 0.7.0
-        version: 0.7.0(@codemirror/state@6.7.1)(@codemirror/view@6.43.7)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
+        specifier: 0.8.1
+        version: 0.8.1(@codemirror/state@6.7.1)(@codemirror/view@6.43.7)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
     devDependencies:
       '@axe-core/playwright':
         specifier: ^4.12.1
@@ -203,6 +203,15 @@ packages:
 
   '@bhsd/browser@2.0.0':
     resolution: {integrity: sha512-jQdcrSdhXFNu8M9J1f+Fx1WpcVmJ7OiGqndTdSff77LkGSufSfvE6SES0vxbkMdi1gSDBOcGw/ST/4e6mVuduw==}
+
+  '@bhsd/cm-util@2.2.0':
+    resolution: {integrity: sha512-2BbTYlTEw+3FGf2fXCSysLuGG8/lzU6nGTRjxdXt5FyaLPpH7OB/UQ5SS0wpHbv8pza0i2RvXrT2WV4e4ytSmg==}
+    engines: {node: ^20.19.0 || ^22.13.0 || >=24.11.0}
+    peerDependencies:
+      monaco-editor: '>=0.11.0'
+    peerDependenciesMeta:
+      monaco-editor:
+        optional: true
 
   '@bhsd/cm-util@2.4.0':
     resolution: {integrity: sha512-S7DcPnR3ps9uF1Xk/cpYhys5MbauUI78189ReQrD/7bVg6QtBI25msOqBJeyBHDy6BfO5yOMDo5oNp50hokYBA==}
@@ -1890,8 +1899,8 @@ packages:
       vscode-json-languageservice:
         optional: true
 
-  wikitext-fmt@0.7.0:
-    resolution: {integrity: sha512-k8ufm6/Imv+U1l9yzNK7KLI9b5ynp+c622MSWJMjSb1TEC1K+hv+rZvsaNBmkU6U5TyfWk014Bdvi0SUxWOhHA==}
+  wikitext-fmt@0.8.1:
+    resolution: {integrity: sha512-pG76YwhPXw24rxLq/LL4D/PHlHONDmTiGpFSz4CX+2KRtDYZR73ormwj4baZTWJuTtBPjxSwCPP+vecqbqan8w==}
     engines: {node: ^22.13.0 || >=24.11.0}
     hasBin: true
 
@@ -2057,6 +2066,8 @@ snapshots:
       '@bhsd/common': 4.0.1(culori@4.0.2)
     transitivePeerDependencies:
       - culori
+
+  '@bhsd/cm-util@2.2.0': {}
 
   '@bhsd/cm-util@2.4.0(@codemirror/state@6.7.1)(@codemirror/view@6.43.7)':
     optionalDependencies:
@@ -3616,8 +3627,9 @@ snapshots:
       - monaco-editor
       - stylelint-config-recommended
 
-  wikitext-fmt@0.7.0(@codemirror/state@6.7.1)(@codemirror/view@6.43.7)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)):
+  wikitext-fmt@0.8.1(@codemirror/state@6.7.1)(@codemirror/view@6.43.7)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)):
     dependencies:
+      '@bhsd/cm-util': 2.2.0
       fast-glob: 3.3.3
       wikiparser-node: 1.46.2(@codemirror/state@6.7.1)(@codemirror/view@6.43.7)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
     transitivePeerDependencies:

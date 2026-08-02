@@ -2,6 +2,6 @@ packages:
   - "."
 
 minimumReleaseAgeExclude:
-  - "wikitext-fmt@0.7.0"
+  - wikitext-fmt@0.8.1
   - '@types/react-dom@19.2.4'
   - '@types/react@19.2.18'

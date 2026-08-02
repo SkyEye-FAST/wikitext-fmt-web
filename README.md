@@ -15,7 +15,7 @@ Formatting runs locally in your browser. Source text is not uploaded, logged, pl
 - Core formatter settings, system/light/dark themes, and responsive desktop/mobile layouts.
 - No backend, analytics, advertising, external parser CDN, service worker, or Wikitext preview rendering.
 
-This project is independent of the core formatter repository and consumes the exact published npm dependency `wikitext-fmt: "0.7.0"` as an ordinary external application. It is not affiliated with the Wikimedia Foundation.
+This project is independent of the core formatter repository and consumes the exact published npm dependency `wikitext-fmt: "0.8.1"` as an ordinary external application. It is not affiliated with the Wikimedia Foundation.
 
 ## Requirements and development
 
@@ -95,7 +95,7 @@ The UI is available in **English**, **简体中文** (Simplified Chinese), and *
 | 简体中文 | Forces Simplified Chinese. |
 | 繁體中文 | Forces Traditional Chinese. |
 
-The language preference is stored in `localStorage` (settings schema v2) so it is available before the formatter Worker finishes loading. Changing the language updates all React UI text, CodeMirror and diff accessible names, `document.documentElement.lang`, the page title, and meta tags immediately without rebuilding the Worker or clearing source text.
+The language preference is stored in `localStorage` (settings schema v3) so it is available before the formatter Worker finishes loading. Changing the language updates all React UI text, CodeMirror and diff accessible names, `document.documentElement.lang`, the page title, and meta tags immediately without rebuilding the Worker or clearing source text.
 
 **The formatter core returns diagnostics, failure codes, failure messages, and rule IDs in English.** The UI translates surrounding labels (e.g. "Stage:", "Rule", "Severity", table headers, button text) but preserves the core's exact original message text so it remains searchable and matches existing tests and documentation.
 
@@ -112,7 +112,7 @@ pnpm e2e
 pnpm check
 ```
 
-Vitest and React Testing Library cover settings validation/migration, storage privacy, Worker typing/lifecycle/stale responses, classification, structured failure rendering, helpers, statistics, and settings reset actions. Integration tests run the real installed `wikitext-fmt@0.7.0` browser package for headings, templates, table captions and attributes, split/preserve separators, lists, unchanged text, structured fail-closed output, CRLF, and idempotency.
+Vitest and React Testing Library cover settings validation/migration, storage privacy, Worker typing/lifecycle/stale responses, classification, structured failure rendering, helpers, statistics, and settings reset actions. Integration tests run the real installed `wikitext-fmt@0.8.1` browser package for headings, templates, table captions and attributes, split/preserve separators, lists, references, interlanguage links, unchanged text, structured fail-closed output, CRLF, and idempotency.
 
 Playwright provides full Chromium coverage plus focused Firefox and WebKit smoke coverage. It covers iterative format → stale output → Diff → reformat → apply → undo flows, changed status, output inspection, setting changes, persistence without source retention, keyboard formatting, Stop/recreation, local file/download behavior, unique-marker network and storage privacy checks, axe accessibility scans, 200% zoom, and responsive layouts.
 
