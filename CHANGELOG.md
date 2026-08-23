@@ -2,10 +2,15 @@
 
 ## Unreleased
 
+## 0.3.1 — 2026-08-24
+
 ### Changed
 
 - Upgrade the exact browser dependency from `wikitext-fmt@0.8.1` to
   `wikitext-fmt@0.9.1`.
+- Refresh the CodeMirror integration, including
+  `@bhsd/codemirror-wikitext@0.11.0`, `@codemirror/commands@6.11.0`, and
+  `@codemirror/view@6.43.9`.
 
 ### Fixed
 

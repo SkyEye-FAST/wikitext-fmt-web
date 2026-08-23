@@ -22,6 +22,23 @@ function changelogSection(changelog, heading) {
     .trim();
 }
 
+function releaseHeading(changelog, version) {
+  const escapedVersion = version.replaceAll(".", "\\.");
+  const headingPattern = new RegExp(
+    `^${escapedVersion} — \\d{4}-\\d{2}-\\d{2}$`,
+    "u",
+  );
+  const matches = [...changelog.matchAll(/^## (?!#)(.+)$/gmu)]
+    .map((match) => match[1])
+    .filter((heading) => heading !== undefined && headingPattern.test(heading));
+  if (matches.length !== 1 || !matches[0]) {
+    throw new Error(
+      `CHANGELOG.md must contain exactly one "## ${version} — YYYY-MM-DD" release heading.`,
+    );
+  }
+  return matches[0];
+}
+
 const tag = argument("--tag");
 const notesPath = argument("--notes");
 if (!tag) {
@@ -44,7 +61,7 @@ const changelog = await readFile(new URL("../CHANGELOG.md", import.meta.url), "u
 if (changelogSection(changelog, "Unreleased") !== "") {
   throw new Error("CHANGELOG.md Unreleased must be empty for a release.");
 }
-const releaseNotes = changelogSection(changelog, `${version} — 2026-08-02`);
+const releaseNotes = changelogSection(changelog, releaseHeading(changelog, version));
 if (!releaseNotes) {
   throw new Error(`CHANGELOG.md ${version} release notes must be non-empty.`);
 }
