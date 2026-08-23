@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Changed
+
+- Upgrade the exact browser dependency from `wikitext-fmt@0.8.1` to
+  `wikitext-fmt@0.9.1`.
+
+### Fixed
+
+- Inherit core fixes for parser-confirmed lists in nested template parameters,
+  self-closing extension-tag boundaries, and case-insensitive redirect magic
+  words, with direct browser integration coverage.
+
 ## 0.3.0 — 2026-08-02
 
 ### Added

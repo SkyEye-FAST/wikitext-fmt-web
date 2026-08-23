@@ -51,8 +51,8 @@ importers:
         specifier: ^1.46.2
         version: 1.46.2(@codemirror/state@6.7.1)(@codemirror/view@6.43.8)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
       wikitext-fmt:
-        specifier: 0.8.1
-        version: 0.8.1(@codemirror/state@6.7.1)(@codemirror/view@6.43.8)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
+        specifier: 0.9.1
+        version: 0.9.1(@codemirror/state@6.7.1)(@codemirror/view@6.43.8)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
     devDependencies:
       '@axe-core/playwright':
         specifier: ^4.12.1
@@ -1903,8 +1903,8 @@ packages:
       vscode-json-languageservice:
         optional: true
 
-  wikitext-fmt@0.8.1:
-    resolution: {integrity: sha512-pG76YwhPXw24rxLq/LL4D/PHlHONDmTiGpFSz4CX+2KRtDYZR73ormwj4baZTWJuTtBPjxSwCPP+vecqbqan8w==}
+  wikitext-fmt@0.9.1:
+    resolution: {integrity: sha512-5RiDy5LymRT6/xI7GLB38dOMC4YHymE64l0mSEhT125wFfh2QUsHTnarrN78JT/5OUTmcRAPHlhk1iquvppa0A==}
     engines: {node: ^22.13.0 || >=24.11.0}
     hasBin: true
 
@@ -3633,7 +3633,7 @@ snapshots:
       - monaco-editor
       - stylelint-config-recommended
 
-  wikitext-fmt@0.8.1(@codemirror/state@6.7.1)(@codemirror/view@6.43.8)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)):
+  wikitext-fmt@0.9.1(@codemirror/state@6.7.1)(@codemirror/view@6.43.8)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)):
     dependencies:
       '@bhsd/cm-util': 2.2.0
       fast-glob: 3.3.3

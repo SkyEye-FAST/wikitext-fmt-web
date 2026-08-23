@@ -121,6 +121,6 @@ export function createMetadata(
       ]),
     ) as FormatterMetadata["profileOverrides"],
     ruleLevels: {},
-    version: "0.8.1",
+    version: "0.9.1",
   };
 }

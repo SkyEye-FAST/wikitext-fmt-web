@@ -15,7 +15,7 @@ Formatting runs locally in your browser. Source text is not uploaded, logged, pl
 - Core formatter settings, system/light/dark themes, and responsive desktop/mobile layouts.
 - No backend, analytics, advertising, external parser CDN, service worker, or Wikitext preview rendering.
 
-This project is independent of the core formatter repository and consumes the exact published npm dependency `wikitext-fmt: "0.8.1"` as an ordinary external application. It is not affiliated with the Wikimedia Foundation.
+This project is independent of the core formatter repository and consumes the exact published npm dependency `wikitext-fmt: "0.9.1"` as an ordinary external application. It is not affiliated with the Wikimedia Foundation.
 
 ## Requirements and development
 
@@ -112,7 +112,7 @@ pnpm e2e
 pnpm check
 ```
 
-Vitest and React Testing Library cover settings validation/migration, storage privacy, Worker typing/lifecycle/stale responses, classification, structured failure rendering, helpers, statistics, and settings reset actions. Integration tests run the real installed `wikitext-fmt@0.8.1` browser package for headings, templates, table captions and attributes, split/preserve separators, lists, references, interlanguage links, unchanged text, structured fail-closed output, CRLF, and idempotency.
+Vitest and React Testing Library cover settings validation/migration, storage privacy, Worker typing/lifecycle/stale responses, classification, structured failure rendering, helpers, statistics, and settings reset actions. Integration tests run the real installed `wikitext-fmt@0.9.1` browser package for headings, templates, table captions and attributes, split/preserve separators, nested and top-level list boundaries, redirects, references, interlanguage links, unchanged text, structured fail-closed output, CRLF, and idempotency.
 
 Playwright provides full Chromium coverage plus focused Firefox and WebKit smoke coverage. It covers iterative format → stale output → Diff → reformat → apply → undo flows, changed status, output inspection, setting changes, persistence without source retention, keyboard formatting, Stop/recreation, local file/download behavior, unique-marker network and storage privacy checks, axe accessibility scans, 200% zoom, and responsive layouts.
 

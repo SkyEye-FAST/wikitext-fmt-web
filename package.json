@@ -39,7 +39,7 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "wikiparser-node": "^1.46.2",
-    "wikitext-fmt": "0.8.1"
+    "wikitext-fmt": "0.9.1"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",

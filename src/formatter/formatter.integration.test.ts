@@ -6,7 +6,7 @@ import {
   ruleLevels,
 } from "wikitext-fmt/browser";
 
-describe("wikitext-fmt 0.8.1 browser integration", () => {
+describe("wikitext-fmt 0.9.1 browser integration", () => {
   it("exposes the canonical diagnostics and rule metadata", () => {
     const result = formatWikitextSafeDetailed("{{foo|a=1}}\n");
     expect(result).toHaveProperty("templateDiagnostics");
@@ -41,6 +41,51 @@ describe("wikitext-fmt 0.8.1 browser integration", () => {
     expect(genericInterwiki.failure).toBeUndefined();
     expect(genericInterwiki.formatted).toBe("[[w:Example]]\n\nBody\n");
     expect(genericInterwiki.footerDiagnostics.interlanguageLinksMoved).toBe(0);
+  });
+
+  it("handles nested list, redirect, and extension-tag boundaries", () => {
+    const source = [
+      "#ReDiReCt[[Target]]",
+      "{{News List",
+      "| 1 = {{新闻单元",
+      "| 内容 = 说明：",
+      "*item",
+      "#正文[[Page]]",
+      "}}",
+      "}}",
+      '<ref name="used" />',
+      "*outside",
+      "<ref>later</ref>",
+      "",
+    ].join("\n");
+    const expected = [
+      "#ReDiReCt [[Target]]",
+      "{{News List",
+      "| 1 = {{新闻单元",
+      "| 内容 = 说明：",
+      "* item",
+      "# 正文[[Page]]",
+      "}}",
+      "}}",
+      '<ref name="used" />',
+      "* outside",
+      "<ref>later</ref>",
+      "",
+    ].join("\n");
+
+    const result = formatWikitextSafeDetailed(source);
+    expect(result.failure).toBeUndefined();
+    expect(result.formatted).toBe(expected);
+    expect(result.listDiagnostics).toMatchObject({
+      listLinesChanged: 3,
+      structuredContentLinesChanged: 1,
+    });
+    expect(result.redirectDiagnostics).toMatchObject({
+      redirectsFormatted: 1,
+    });
+    expect(formatWikitextSafeDetailed(result.formatted).formatted).toBe(
+      expected,
+    );
   });
 
   it.each([
