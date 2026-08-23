@@ -48,7 +48,10 @@ jobs:
         run: |
           version="${{ steps.release.outputs.version }}"
           tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner -czf "release-artifacts/wikitext-fmt-web-$version.tar.gz" dist
-          sha256sum "release-artifacts/wikitext-fmt-web-$version.tar.gz" > release-artifacts/SHA256SUMS
+          (
+            cd release-artifacts
+            sha256sum "wikitext-fmt-web-$version.tar.gz" > SHA256SUMS
+          )
       - uses: actions/upload-artifact@v7
         with:
           name: web-release-${{ steps.release.outputs.tag }}
