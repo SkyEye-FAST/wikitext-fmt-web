@@ -25,7 +25,7 @@
     "check": "pnpm lint && pnpm check:api-removals && pnpm typecheck && pnpm test:run && pnpm build && pnpm check:bundle && pnpm check:metadata"
   },
   "dependencies": {
-    "@bhsd/codemirror-wikitext": "^0.11.0",
+    "@bhsd/codemirror-wikitext": "^0.11.1",
     "@codemirror/autocomplete": "^6.20.3",
     "@codemirror/commands": "^6.11.0",
     "@codemirror/language": "^6.12.4",
