@@ -72,6 +72,9 @@ function buildMetadataPlugin(): Plugin {
 }
 
 export default defineConfig({
+  resolve: {
+    dedupe: ["@codemirror/state", "@codemirror/view", "@codemirror/language"],
+  },
   base: process.env.VITE_BASE_PATH ?? "/",
   define: {
     __WIKITEXT_FMT_VERSION__: JSON.stringify(versions.formatterVersion),
@@ -105,6 +108,11 @@ export default defineConfig({
     include: ["src/**/*.test.{ts,tsx}"],
     setupFiles: ["./src/test/setup.ts"],
     restoreMocks: true,
+    server: {
+      deps: {
+        inline: [/@bhsd\//, /@codemirror\//, /^codemirror/],
+      },
+    },
     coverage: {
       reporter: ["text", "html"],
     },
