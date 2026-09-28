@@ -9,14 +9,14 @@ importers:
   .:
     dependencies:
       '@bhsd/codemirror-wikitext':
-        specifier: ^0.11.0
-        version: 0.11.0(@codemirror/autocomplete@6.20.3)(@codemirror/commands@6.11.0)(@codemirror/language@6.12.4)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/state@6.7.1)(@codemirror/view@6.43.9)(ajv@8.20.0)(culori@4.0.2)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
+        specifier: ^0.12.0
+        version: 0.12.0(@codemirror/autocomplete@6.20.3)(@codemirror/commands@6.11.1)(@codemirror/language@6.12.4)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.2)(@codemirror/state@6.7.6)(@codemirror/view@6.43.13)(ajv@8.20.0)(culori@4.0.2)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
       '@codemirror/autocomplete':
         specifier: ^6.20.3
         version: 6.20.3
       '@codemirror/commands':
-        specifier: ^6.11.0
-        version: 6.11.0
+        specifier: ^6.11.1
+        version: 6.11.1
       '@codemirror/language':
         specifier: ^6.12.4
         version: 6.12.4
@@ -24,14 +24,14 @@ importers:
         specifier: ^6.12.2
         version: 6.12.2
       '@codemirror/search':
-        specifier: ^6.7.1
-        version: 6.7.1
+        specifier: ^6.7.2
+        version: 6.7.2
       '@codemirror/state':
-        specifier: ^6.7.1
-        version: 6.7.1
+        specifier: ^6.7.6
+        version: 6.7.6
       '@codemirror/view':
-        specifier: ^6.43.9
-        version: 6.43.9
+        specifier: ^6.43.13
+        version: 6.43.13
       '@lezer/highlight':
         specifier: ^1.2.3
         version: 1.2.3
@@ -49,10 +49,10 @@ importers:
         version: 19.2.8(react@19.2.8)
       wikiparser-node:
         specifier: ^1.46.2
-        version: 1.46.2(@codemirror/state@6.7.1)(@codemirror/view@6.43.9)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
+        version: 1.46.2(@codemirror/state@6.7.6)(@codemirror/view@6.43.13)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
       wikitext-fmt:
         specifier: 0.9.1
-        version: 0.9.1(@codemirror/state@6.7.1)(@codemirror/view@6.43.9)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
+        version: 0.9.1(@codemirror/state@6.7.6)(@codemirror/view@6.43.13)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
     devDependencies:
       '@axe-core/playwright':
         specifier: ^4.12.1
@@ -243,14 +243,21 @@ packages:
       monaco-editor:
         optional: true
 
-  '@bhsd/codemirror-css-color-picker@9.0.0':
-    resolution: {integrity: sha512-4ZvdCVAF83f52REx1GECjCLJWq1zjKexLsM6AvlYPjsyIK+o+Dd2TyE8BYIwjF7ezreuPx1XrHml0SDzKhaDNQ==}
+  '@bhsd/codemirror-css-color-picker@9.0.1':
+    resolution: {integrity: sha512-NbndZdXzsmr8tjssa267AcvDnRQtXwDGd8N0d1iHwFza6ATRZpxazuMAJiEJ/rSiI28X9STA5gdajrmNv9qTIA==}
     peerDependencies:
       '@codemirror/language': ^6.0.0
       '@codemirror/view': ^6.0.0
 
-  '@bhsd/codemirror-wikitext@0.11.0':
-    resolution: {integrity: sha512-rZlCPaq+/AqpMwd6y0qPNfhVrEtpIWWJgpr+0dUJWwabr6ATxaEcHvZ6wyF9fQdrr6BWE1T1i2ICsLTHAs5tEw==}
+  '@bhsd/codemirror-stickyscroll@0.1.1':
+    resolution: {integrity: sha512-w1EsPbARpWkzDiRN1Ed6nQO982CEez+ksRKOhiKRUQApNILZOH0/Vdqmk4opVRs196K43VvhM3DKYWyImWXhzQ==}
+    peerDependencies:
+      '@codemirror/language': ^6.3.0
+      '@codemirror/state': ^6.0.0
+      '@codemirror/view': ^6.0.0
+
+  '@bhsd/codemirror-wikitext@0.12.0':
+    resolution: {integrity: sha512-oPcX+W0maYvwesto6svcZvnKeMv5B+TShA7ouMYPf98DNKF017vmasEile8gQBR5jQxXKJ+aMw60JD4dxLrvUg==}
     peerDependencies:
       '@codemirror/autocomplete': ^6.0.0
       '@codemirror/commands': ^6.0.0
@@ -301,8 +308,8 @@ packages:
   '@codemirror/autocomplete@6.20.3':
     resolution: {integrity: sha512-tlosUqb+3BbxCxZdu4tKeRghPFC+QM7q4X5YhKV2eCmPG+1r2F3f4AaSz5sCrFqUtX4Jh20VFTKecl16MgiV9g==}
 
-  '@codemirror/commands@6.11.0':
-    resolution: {integrity: sha512-/K4Rl5BN0OtTiPWmJCdqODu38XnDMsDxKY5rgrPnCkutPTJf2wVbkoixLfealF5Kwse/s8P8M5jAiURiwSwnFA==}
+  '@codemirror/commands@6.11.1':
+    resolution: {integrity: sha512-O/4hG3SC1YwcmQ0d2UVNDs+AsaNWd1iHVxbTeEBuqH+6bExAiPK3iS/BvpY6rZGURALv4ZD3sIgcCmRvw3ehBg==}
 
   '@codemirror/language@6.12.4':
     resolution: {integrity: sha512-1q4PaT+o6PbgpkJt4Q8Fv5XJxTy4FUZ4MWETtyiDw3J0Pyr9E2vqcKL+k9wcvjNTIsauxvE7OfmWj3FRPHQ76A==}
@@ -313,14 +320,14 @@ packages:
   '@codemirror/merge@6.12.2':
     resolution: {integrity: sha512-V8JvyAPjHbPupqP7BeMcsdsYCbyPij74jxIbaIJDORI+VZzW44zFmon8bF+oxGWvOKhcRmkiUMXd8MxHr3YA2w==}
 
-  '@codemirror/search@6.7.1':
-    resolution: {integrity: sha512-uMe5UO6PamJtSHrXhhHOzSX3ReWtiJrva6GnPMwSOrZtiExb5X5eExhr2OUZQVvdxPsKpY3Ro2mFbQadpPWmHA==}
+  '@codemirror/search@6.7.2':
+    resolution: {integrity: sha512-gUYkYhT2+n/+VGZ+8EzE5WFkYZUZYm1VOKDudIsNqh42uRVQJ0a6Yss9sdKT3MeOYfuL1N6AZA57oza0Oyr0LA==}
 
-  '@codemirror/state@6.7.1':
-    resolution: {integrity: sha512-9QzNDgE4EYDnAHfrTlR2lwiPciiOymLtwKK+8yHQzCc7GXhAP9xdEbEJFy2IWB1j9UGUl9BsgMmTo/ImA02T7A==}
+  '@codemirror/state@6.7.6':
+    resolution: {integrity: sha512-kAz+AncRtKuIknedxT1bq4XwXv4UowhbkHU1myPrtVb/jZtImWuV5BXzv5vK6i3kYACsdiZiQKFQQ5Mq7elW8w==}
 
-  '@codemirror/view@6.43.9':
-    resolution: {integrity: sha512-sTuUzTpPMFebRhg6dawChoKKgndIwfjmJgKVxBefPElcU2NwQ6AFroupk0SFqEerQyZOGRfDNnSN8Dw/lMAsXw==}
+  '@codemirror/view@6.43.13':
+    resolution: {integrity: sha512-sihaFrUzAsYBQsL9J2t69y8nfMQGwcYmggAZsk+kjPbjYZMyuf2hU8tUNTZ+P+isb6XRr8JE22TZlJxBoVdH1A==}
 
   '@csstools/color-helpers@6.1.0':
     resolution: {integrity: sha512-064IFJdjTfUqnjpCVpMOdbr8FLQBhinbZj6yRv2An2E41O/pLEXqfFRWqGq/SxlE5PEUYTlvWsG2r8MswAVvkg==}
@@ -485,14 +492,17 @@ packages:
   '@lezer/common@1.5.2':
     resolution: {integrity: sha512-sxQE460fPZyU3sdc8lafxiPwJHBzZRy/udNFynGQky1SePYBdhkBl1kOagA9uT3pxR8K09bOrmTUqA9wb/PjSQ==}
 
+  '@lezer/common@1.5.3':
+    resolution: {integrity: sha512-H0iErY4e43LpXbYDyBci5W4v/RwTgGV3YzYOlJPiGZ8RY8w51kVE+xLn1tg3Z6UmSfyETvtsUK3r7YsgDQEI7Q==}
+
   '@lezer/highlight@1.2.3':
     resolution: {integrity: sha512-qXdH7UqTvGfdVBINrgKhDsVTJTxactNNxLk7+UMwZhU13lMHaOBlJe9Vqp907ya56Y3+ed2tlqzys7jDkTmW0g==}
 
   '@lezer/lr@1.4.10':
     resolution: {integrity: sha512-rnCpTIBafOx4mRp43xOxDJbFipJm/c0cia/V5TiGlhmMa+wsSdoGmUN3w5Bqrks/09Q/D4tNAmWaT8p6NRi77A==}
 
-  '@marijn/find-cluster-break@1.0.3':
-    resolution: {integrity: sha512-FY+MKLBoTsLNJF/eLWaOsXGdz6uh3Iu1axjPf6TUq92IYumcTcXWHoS747JARLkcdlJ/Waiaxc5wQfFO8jC6NA==}
+  '@marijn/find-cluster-break@1.0.4':
+    resolution: {integrity: sha512-Wy0V7+SGUjnF9/TkiM1hKVDPj7jKXduPNboMVtHTA8dySMURWqfg/JZ9E2Sq8JgSJmkl7k7Qe9FLeMSrSraWmQ==}
 
   '@napi-rs/wasm-runtime@1.2.1':
     resolution: {integrity: sha512-KjZdi8Q1wh89gsVmghvbrMgWl6ZWmRmHV6wjB7/g4Zf0dyO+hH3neZUtuDNPO00qq5YE5RITVWvrIZKRaAmzGQ==}
@@ -966,6 +976,10 @@ packages:
     resolution: {integrity: sha512-zwfzJecQ/Uej6tusMqwAqU/6KL2XaB2VZ2Jg54Je6ahNBGNH6Ek6g3jjNCF0fG9EWQKGZNddNjU5F1ZQn/sBnA==}
     engines: {node: '>=20.19.0'}
 
+  entities@8.1.0:
+    resolution: {integrity: sha512-kxL7msIffSuh9aaFAMD7rxAIuTRMAHMeBtgHW2yUdWw732ZNh4MehkF2gdjvtdmikkaIP9bFDDJOPlsvm7avrA==}
+    engines: {node: '>=20.19.0'}
+
   env-paths@2.2.1:
     resolution: {integrity: sha512-+h1lkLKhZMTYjog1VEpJNG7NZJWcuc2DDk/qsqSTRRCOXiLjeQ1d1/udrUGhqMxUgAlwKNZ0cf2uqan5GLuS2A==}
     engines: {node: '>=6'}
@@ -1382,8 +1396,8 @@ packages:
   magic-string@1.4.2:
     resolution: {integrity: sha512-vG+rjFRj1PqdIBozIxAGMjPlOhaVe+GXpbttY/iSK7rGcJRMlwNJO7dcUwmUqkymsFLJiNGI06t4D7Fr7yRC9g==}
 
-  marked@18.0.10:
-    resolution: {integrity: sha512-FJeH4bRpYoXiggcgriCGItKCSv3xkngJc4QCZ/rkQCogU3VYaLxYJoZl8Nw/b4+x7iij/pd+09mZ6A1dXzpL0A==}
+  marked@18.0.14:
+    resolution: {integrity: sha512-mBHK6FBHuBAlhgRe88w9F0O1AbwwXJUcQibUbC/QcdTbVGAD7aWza+xt3N6oT/jCZx3/OMeS+8rnuiHZcQ9s7A==}
     engines: {node: '>= 20'}
     hasBin: true
 
@@ -1630,6 +1644,9 @@ packages:
   style-mod@4.1.3:
     resolution: {integrity: sha512-i/n8VsZydrugj3Iuzll8+x/00GH2vnYsk1eomD8QiRrSAeW6ItbCQDtfXCeJHd0iwiNagqjQkvpvREEPtW3IoQ==}
 
+  style-mod@4.1.4:
+    resolution: {integrity: sha512-XXWIQt633/EpAFx8aZDOTjBzrCaGmhvEQlQo6MVPfa2OzO2cWo+4hV9h+6UkHYlXGfy+ODXKUdP7Pthmcu5ATw==}
+
   stylelint-config-recommended@18.0.0:
     resolution: {integrity: sha512-mxgT2XY6YZ3HWWe3Di8umG6aBmWmHTblTgu/f10rqFXnyWxjKWwNdjSWkgkwCtxIKnqjSJzvFmPT5yabVIRxZg==}
     engines: {node: '>=20.19.0'}
@@ -1825,6 +1842,9 @@ packages:
   vscode-languageserver-types@3.18.0:
     resolution: {integrity: sha512-8TsGPNMIMiiBdkORgRSvLjuiEIiAFtO+KssmYWxQ+uSVvlf7RjK8YKCOjPzZ+YA04jXEV7+7LvkSmHkhpNS99g==}
 
+  vscode-languageserver-types@3.18.4:
+    resolution: {integrity: sha512-nQsacoiijvl0fRf2q28uFDrAVwRhdCa3QveiF7/CX0r18mLR5FU/1WskSsCKOjmEbtteKUnY8x8Yzxop+k0zwg==}
+
   w3c-keyname@2.2.8:
     resolution: {integrity: sha512-dpojBhNsCNN7T82Tm7k26A6G9ML3NkhDsnw9n/eoxSRlVBB4CEtIQ/KTCLI2Fwf3ataSXRhYFkQi3SlnFwPvPQ==}
 
@@ -1899,8 +1919,8 @@ packages:
       vscode-json-languageservice:
         optional: true
 
-  wikiparser-node@1.46.3:
-    resolution: {integrity: sha512-T9qHjUGc4gpb7aNwddt/PWSF8/zqczLn/kXf+TROVF41RZQtBVQXYZK1bmgCKMk+8U1lvGiz/ENLMCFH3CooDQ==}
+  wikiparser-node@1.47.0:
+    resolution: {integrity: sha512-GZSkixX6CHF6eR6ExWC09HkSCmKKoNX/zY/xuZqF9pE29fgGts72XXFcvap6AJm3oJi6ET39cskHo3+ECVgpAw==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24.11.0}
     hasBin: true
     peerDependencies:
@@ -2106,41 +2126,48 @@ snapshots:
 
   '@bhsd/cm-util@2.2.0': {}
 
-  '@bhsd/cm-util@2.4.0(@codemirror/state@6.7.1)(@codemirror/view@6.43.9)':
+  '@bhsd/cm-util@2.4.0(@codemirror/state@6.7.6)(@codemirror/view@6.43.13)':
     optionalDependencies:
-      '@codemirror/state': 6.7.1
-      '@codemirror/view': 6.43.9
+      '@codemirror/state': 6.7.6
+      '@codemirror/view': 6.43.13
 
-  '@bhsd/cm-util@2.4.1(@codemirror/state@6.7.1)(@codemirror/view@6.43.9)':
+  '@bhsd/cm-util@2.4.1(@codemirror/state@6.7.6)(@codemirror/view@6.43.13)':
     optionalDependencies:
-      '@codemirror/state': 6.7.1
-      '@codemirror/view': 6.43.9
+      '@codemirror/state': 6.7.6
+      '@codemirror/view': 6.43.13
 
-  '@bhsd/codemirror-css-color-picker@9.0.0(@codemirror/language@6.12.4)(@codemirror/view@6.43.9)(culori@4.0.2)':
+  '@bhsd/codemirror-css-color-picker@9.0.1(@codemirror/language@6.12.4)(@codemirror/view@6.43.13)(culori@4.0.2)':
     dependencies:
       '@bhsd/browser': 2.1.1(culori@4.0.2)
       '@bhsd/common': 4.1.0(culori@4.0.2)
       '@codemirror/language': 6.12.4
-      '@codemirror/view': 6.43.9
+      '@codemirror/view': 6.43.13
     transitivePeerDependencies:
       - culori
 
-  '@bhsd/codemirror-wikitext@0.11.0(@codemirror/autocomplete@6.20.3)(@codemirror/commands@6.11.0)(@codemirror/language@6.12.4)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/state@6.7.1)(@codemirror/view@6.43.9)(ajv@8.20.0)(culori@4.0.2)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))':
+  '@bhsd/codemirror-stickyscroll@0.1.1(@codemirror/language@6.12.4)(@codemirror/state@6.7.6)(@codemirror/view@6.43.13)':
+    dependencies:
+      '@codemirror/language': 6.12.4
+      '@codemirror/state': 6.7.6
+      '@codemirror/view': 6.43.13
+
+  '@bhsd/codemirror-wikitext@0.12.0(@codemirror/autocomplete@6.20.3)(@codemirror/commands@6.11.1)(@codemirror/language@6.12.4)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.2)(@codemirror/state@6.7.6)(@codemirror/view@6.43.13)(ajv@8.20.0)(culori@4.0.2)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))':
     dependencies:
       '@bhsd/browser': 2.1.1(culori@4.0.2)
-      '@bhsd/cm-util': 2.4.1(@codemirror/state@6.7.1)(@codemirror/view@6.43.9)
-      '@bhsd/codemirror-css-color-picker': 9.0.0(@codemirror/language@6.12.4)(@codemirror/view@6.43.9)(culori@4.0.2)
+      '@bhsd/cm-util': 2.4.1(@codemirror/state@6.7.6)(@codemirror/view@6.43.13)
+      '@bhsd/codemirror-css-color-picker': 9.0.1(@codemirror/language@6.12.4)(@codemirror/view@6.43.13)(culori@4.0.2)
+      '@bhsd/codemirror-stickyscroll': 0.1.1(@codemirror/language@6.12.4)(@codemirror/state@6.7.6)(@codemirror/view@6.43.13)
       '@bhsd/common': 4.1.0(culori@4.0.2)
       '@bhsd/stylelint-util': 1.1.0(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))
       '@codemirror/autocomplete': 6.20.3
-      '@codemirror/commands': 6.11.0
+      '@codemirror/commands': 6.11.1
       '@codemirror/language': 6.12.4
       '@codemirror/lint': 6.9.7
-      '@codemirror/search': 6.7.1
-      '@codemirror/state': 6.7.1
-      '@codemirror/view': 6.43.9
-      marked: 18.0.10
-      wikiparser-node: 1.46.3(@codemirror/state@6.7.1)(@codemirror/view@6.43.9)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
+      '@codemirror/search': 6.7.2
+      '@codemirror/state': 6.7.6
+      '@codemirror/view': 6.43.13
+      marked: 18.0.14
+      wikiparser-node: 1.47.0(@codemirror/state@6.7.6)(@codemirror/view@6.43.13)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
     transitivePeerDependencies:
       - ajv
       - ajv-errors
@@ -2189,21 +2216,21 @@ snapshots:
   '@codemirror/autocomplete@6.20.3':
     dependencies:
       '@codemirror/language': 6.12.4
-      '@codemirror/state': 6.7.1
-      '@codemirror/view': 6.43.9
+      '@codemirror/state': 6.7.6
+      '@codemirror/view': 6.43.13
       '@lezer/common': 1.5.2
 
-  '@codemirror/commands@6.11.0':
+  '@codemirror/commands@6.11.1':
     dependencies:
       '@codemirror/language': 6.12.4
-      '@codemirror/state': 6.7.1
-      '@codemirror/view': 6.43.9
-      '@lezer/common': 1.5.2
+      '@codemirror/state': 6.7.6
+      '@codemirror/view': 6.43.13
+      '@lezer/common': 1.5.3
 
   '@codemirror/language@6.12.4':
     dependencies:
-      '@codemirror/state': 6.7.1
-      '@codemirror/view': 6.43.9
+      '@codemirror/state': 6.7.6
+      '@codemirror/view': 6.43.13
       '@lezer/common': 1.5.2
       '@lezer/highlight': 1.2.3
       '@lezer/lr': 1.4.10
@@ -2211,33 +2238,33 @@ snapshots:
 
   '@codemirror/lint@6.9.7':
     dependencies:
-      '@codemirror/state': 6.7.1
-      '@codemirror/view': 6.43.9
+      '@codemirror/state': 6.7.6
+      '@codemirror/view': 6.43.13
       crelt: 1.0.7
 
   '@codemirror/merge@6.12.2':
     dependencies:
       '@codemirror/language': 6.12.4
-      '@codemirror/state': 6.7.1
-      '@codemirror/view': 6.43.9
+      '@codemirror/state': 6.7.6
+      '@codemirror/view': 6.43.13
       '@lezer/highlight': 1.2.3
       style-mod: 4.1.3
 
-  '@codemirror/search@6.7.1':
+  '@codemirror/search@6.7.2':
     dependencies:
-      '@codemirror/state': 6.7.1
-      '@codemirror/view': 6.43.9
+      '@codemirror/state': 6.7.6
+      '@codemirror/view': 6.43.13
       crelt: 1.0.7
 
-  '@codemirror/state@6.7.1':
+  '@codemirror/state@6.7.6':
     dependencies:
-      '@marijn/find-cluster-break': 1.0.3
+      '@marijn/find-cluster-break': 1.0.4
 
-  '@codemirror/view@6.43.9':
+  '@codemirror/view@6.43.13':
     dependencies:
-      '@codemirror/state': 6.7.1
+      '@codemirror/state': 6.7.6
       crelt: 1.0.7
-      style-mod: 4.1.3
+      style-mod: 4.1.4
       w3c-keyname: 2.2.8
 
   '@csstools/color-helpers@6.1.0': {}
@@ -2376,6 +2403,8 @@ snapshots:
 
   '@lezer/common@1.5.2': {}
 
+  '@lezer/common@1.5.3': {}
+
   '@lezer/highlight@1.2.3':
     dependencies:
       '@lezer/common': 1.5.2
@@ -2384,7 +2413,7 @@ snapshots:
     dependencies:
       '@lezer/common': 1.5.2
 
-  '@marijn/find-cluster-break@1.0.3': {}
+  '@marijn/find-cluster-break@1.0.4': {}
 
   '@napi-rs/wasm-runtime@1.2.1(@emnapi/core@2.0.0-alpha.3)(@emnapi/runtime@2.0.0-alpha.3)':
     dependencies:
@@ -2725,12 +2754,12 @@ snapshots:
   codemirror@6.0.2:
     dependencies:
       '@codemirror/autocomplete': 6.20.3
-      '@codemirror/commands': 6.11.0
+      '@codemirror/commands': 6.11.1
       '@codemirror/language': 6.12.4
       '@codemirror/lint': 6.9.7
-      '@codemirror/search': 6.7.1
-      '@codemirror/state': 6.7.1
-      '@codemirror/view': 6.43.9
+      '@codemirror/search': 6.7.2
+      '@codemirror/state': 6.7.6
+      '@codemirror/view': 6.43.13
 
   color-convert@2.0.1:
     dependencies:
@@ -2804,6 +2833,8 @@ snapshots:
   emoji-regex@8.0.0: {}
 
   entities@8.0.0: {}
+
+  entities@8.1.0: {}
 
   env-paths@2.2.1: {}
 
@@ -3189,7 +3220,7 @@ snapshots:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.6.0
 
-  marked@18.0.10: {}
+  marked@18.0.14: {}
 
   mathml-tag-names@4.0.0: {}
 
@@ -3405,6 +3436,8 @@ snapshots:
 
   style-mod@4.1.3: {}
 
+  style-mod@4.1.4: {}
+
   stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)):
     dependencies:
       stylelint: 17.14.1(supports-color@10.2.2)(typescript@6.0.3)
@@ -3573,6 +3606,8 @@ snapshots:
 
   vscode-languageserver-types@3.18.0: {}
 
+  vscode-languageserver-types@3.18.4: {}
+
   w3c-keyname@2.2.8: {}
 
   w3c-xmlserializer@5.0.0:
@@ -3609,9 +3644,9 @@ snapshots:
 
   why-is-node-running@3.2.2: {}
 
-  wikiparser-node@1.46.2(@codemirror/state@6.7.1)(@codemirror/view@6.43.9)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)):
+  wikiparser-node@1.46.2(@codemirror/state@6.7.6)(@codemirror/view@6.43.13)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)):
     dependencies:
-      '@bhsd/cm-util': 2.4.0(@codemirror/state@6.7.1)(@codemirror/view@6.43.9)
+      '@bhsd/cm-util': 2.4.0(@codemirror/state@6.7.6)(@codemirror/view@6.43.13)
       '@bhsd/common': 4.0.1(culori@4.0.2)
       '@bhsd/nodejs': 1.2.1
       '@bhsd/stylelint-util': 1.1.0(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))
@@ -3627,15 +3662,15 @@ snapshots:
       - monaco-editor
       - stylelint-config-recommended
 
-  wikiparser-node@1.46.3(@codemirror/state@6.7.1)(@codemirror/view@6.43.9)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)):
+  wikiparser-node@1.47.0(@codemirror/state@6.7.6)(@codemirror/view@6.43.13)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)):
     dependencies:
-      '@bhsd/cm-util': 2.4.1(@codemirror/state@6.7.1)(@codemirror/view@6.43.9)
+      '@bhsd/cm-util': 2.4.1(@codemirror/state@6.7.6)(@codemirror/view@6.43.13)
       '@bhsd/common': 4.1.0(culori@4.0.2)
       '@bhsd/nodejs': 1.2.1
       '@bhsd/stylelint-util': 1.1.0(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))
       culori: 4.0.2
-      entities: 8.0.0
-      vscode-languageserver-types: 3.18.0
+      entities: 8.1.0
+      vscode-languageserver-types: 3.18.4
     optionalDependencies:
       ajv: 8.20.0
       stylelint: 17.14.1(supports-color@10.2.2)(typescript@6.0.3)
@@ -3645,11 +3680,11 @@ snapshots:
       - monaco-editor
       - stylelint-config-recommended
 
-  wikitext-fmt@0.9.1(@codemirror/state@6.7.1)(@codemirror/view@6.43.9)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)):
+  wikitext-fmt@0.9.1(@codemirror/state@6.7.6)(@codemirror/view@6.43.13)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)):
     dependencies:
       '@bhsd/cm-util': 2.2.0
       fast-glob: 3.3.3
-      wikiparser-node: 1.46.2(@codemirror/state@6.7.1)(@codemirror/view@6.43.9)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
+      wikiparser-node: 1.46.2(@codemirror/state@6.7.6)(@codemirror/view@6.43.13)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
     transitivePeerDependencies:
       - '@codemirror/state'
       - '@codemirror/view'
