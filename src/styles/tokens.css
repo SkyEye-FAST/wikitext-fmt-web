@@ -31,7 +31,7 @@
     "Segoe UI", sans-serif;
   --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
   --radius: 4px;
-  --header-height: 60px;
+  --header-height: 48px;
 }
 
 :root[data-theme="dark"] {

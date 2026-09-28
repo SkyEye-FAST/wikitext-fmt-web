@@ -55,7 +55,7 @@ export function EditorToolbar(props: EditorToolbarProps) {
       {props.busy ? (
         <ToolbarButton
           className="button-stop"
-          icon={<Square size={17} />}
+          icon={<Square size={15} />}
           onClick={props.onStop}
         >
           {t("toolbar.stop")}
@@ -63,28 +63,28 @@ export function EditorToolbar(props: EditorToolbarProps) {
       ) : (
         <ToolbarButton
           className="button-primary"
-          icon={<Play size={17} />}
+          icon={<Play size={15} />}
           onClick={props.onFormat}
         >
           {t("toolbar.format")}
         </ToolbarButton>
       )}
       <ToolbarButton
-        icon={<Clipboard size={17} />}
+        icon={<Clipboard size={15} />}
         onClick={props.onCopy}
         disabled={!props.hasOutput}
       >
         {t("toolbar.copy-output")}
       </ToolbarButton>
       <ToolbarButton
-        icon={<Download size={17} />}
+        icon={<Download size={15} />}
         onClick={props.onDownload}
         disabled={!props.hasOutput}
       >
         {t("toolbar.download")}
       </ToolbarButton>
       <ToolbarButton
-        icon={<Replace size={17} />}
+        icon={<Replace size={15} />}
         onClick={props.onApplyOutput}
         disabled={!props.canApplyOutput}
         title={
@@ -95,26 +95,26 @@ export function EditorToolbar(props: EditorToolbarProps) {
       >
         {t("toolbar.apply-output")}
       </ToolbarButton>
-      <ToolbarButton icon={<FileInput size={17} />} onClick={props.onOpenFile}>
+      <ToolbarButton icon={<FileInput size={15} />} onClick={props.onOpenFile}>
         {t("toolbar.open-file")}
       </ToolbarButton>
-      <ToolbarButton icon={<Trash2 size={17} />} onClick={props.onClear}>
+      <ToolbarButton icon={<Trash2 size={15} />} onClick={props.onClear}>
         {t("toolbar.clear")}
       </ToolbarButton>
       <ToolbarButton
-        icon={<RotateCcw size={17} />}
+        icon={<RotateCcw size={15} />}
         onClick={props.onLoadExample}
       >
         {t("toolbar.load-example")}
       </ToolbarButton>
       <ToolbarButton
-        icon={<Settings size={17} />}
+        icon={<Settings size={15} />}
         onClick={props.onOpenSettings}
       >
         {t("toolbar.settings")}
       </ToolbarButton>
       <ToolbarButton
-        icon={<GitCompareArrows size={17} />}
+        icon={<GitCompareArrows size={15} />}
         onClick={props.onToggleDiff}
         disabled={!props.hasOutput}
         aria-pressed={props.diffVisible}

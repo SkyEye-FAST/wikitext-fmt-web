@@ -34,7 +34,7 @@ export function AppHeader({
     <header className="app-header">
       <div className="brand-lockup">
         <span className="brand-mark" aria-hidden="true">
-          <Braces size={24} />
+          <Braces size={18} />
         </span>
         <div>
           <h1>{t("brand.name")}</h1>
@@ -74,11 +74,23 @@ export function AppHeader({
             <option value="dark">{t("theme.dark")}</option>
           </select>
         </label>
-        <a href={CORE_REPOSITORY_URL} target="_blank" rel="noreferrer">
-          <ExternalLink size={15} aria-hidden="true" /> {t("header.core")}
+        <a
+          href={CORE_REPOSITORY_URL}
+          target="_blank"
+          rel="noreferrer"
+          title={t("header.core")}
+        >
+          <ExternalLink size={14} aria-hidden="true" />
+          <span>{t("header.core")}</span>
         </a>
-        <a href={FRONTEND_REPOSITORY_URL} target="_blank" rel="noreferrer">
-          <ExternalLink size={15} aria-hidden="true" /> {t("header.frontend")}
+        <a
+          href={FRONTEND_REPOSITORY_URL}
+          target="_blank"
+          rel="noreferrer"
+          title={t("header.frontend")}
+        >
+          <ExternalLink size={14} aria-hidden="true" />
+          <span>{t("header.frontend")}</span>
         </a>
       </div>
     </header>
