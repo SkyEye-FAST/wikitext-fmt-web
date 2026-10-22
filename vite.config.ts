@@ -73,7 +73,14 @@ function buildMetadataPlugin(): Plugin {
 
 export default defineConfig({
   resolve: {
-    dedupe: ["@codemirror/state", "@codemirror/view", "@codemirror/language"],
+    // Duplicate copies break NodeProp identity and crash syntax highlighting.
+    dedupe: [
+      "@codemirror/state",
+      "@codemirror/view",
+      "@codemirror/language",
+      "@lezer/common",
+      "@lezer/highlight",
+    ],
   },
   base: process.env.VITE_BASE_PATH ?? "/",
   define: {
