@@ -2,6 +2,35 @@
 
 ## Unreleased
 
+### Changed
+
+- Replace the full-width report panel with a status bar: a status label,
+  short facts, and per-rule change counts that jump to the affected line. The
+  core's failure stage and message are the failure code's tooltip.
+- Rewrite the interface copy in all three languages as short, formal labels
+  using MediaWiki terminology; full sentences remain only in Settings hints and
+  actionable errors.
+- Remove the header tagline, the empty-source description, and the Settings
+  description.
+- Merge the active preset and Adjust into one button that opens Settings.
+- Move the formatter and web app versions into Settings → Advanced, replacing
+  the read-only Parser row.
+- Remove repeated copy: the "Runs locally" header badge, the privacy line in
+  the report, the shortcut hint and privacy note on the empty source, the
+  explanation on the empty result, the Ready status sentence, the line-wrapping
+  hint, and most of the Settings description.
+- Replace the language select with a dropdown menu.
+- Add motion: a load sequence, a one-time flash on changed lines, a ripple on
+  the Format button while formatting, menu and sheet enter and exit
+  animations, and a crossfade on theme and language changes. Reduced-motion
+  preferences turn all of it off.
+
+### Fixed
+
+- Stop text wrapping and controls overlapping at narrow widths: the empty-source
+  heading, the wordmark at 360px and below, pane headers at 1280–1366px, the
+  report bar on phones, and settings choices with previews at 360px and below.
+
 ## 0.5.0 — 2026-10-22
 
 ### Changed

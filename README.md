@@ -8,11 +8,10 @@ Formatting runs locally in your browser. Source text is not uploaded, logged, pl
 
 - Two CodeMirror 6 editors, Source and Result, joined by a Format button with its Ctrl/Cmd+Enter shortcut. Both have line numbers, search, bracket matching, optional line wrapping, and MediaWiki Wikitext highlighting.
 - Explicit formatting through `wikitext-fmt/browser`; formatting never runs on each keystroke or on the main UI thread.
-- A one-sentence status for every outcome: formatted, no changes needed, left unchanged (fail-closed), formatter error, and out of date.
-- A report bar whose Details panel lists what changed, skipped rules, why a result was rejected, and the core's exact failure code, stage and message.
+- A status bar for every outcome (formatted, no changes, not formatted when the result fails verification, error, out of date) with per-rule change counts that jump to the affected line, and the core's failure code with its stage and message as a tooltip.
 - A Changes tab with a side-by-side merge view on wide screens and a unified view on narrow ones.
-- Paste, open or drop a file, try an example, copy, download, replace the source with the result (undoable), and clear with Undo.
-- A settings sheet with Default and Complete presets, per-rule controls, and the theme and line-wrapping choices.
+- Paste, open or drop a file, load an example, copy, download, replace the source with the result (undoable), and clear with Undo.
+- A settings sheet with Default and Complete presets, per-rule controls, the theme and line-wrapping choices, and the formatter and web app versions.
 - System, light and dark themes; responsive layouts down to 320px and 200% zoom.
 - No backend, analytics, advertising, external parser CDN, service worker, or Wikitext preview rendering.
 
@@ -100,7 +99,7 @@ The UI is available in **English**, **简体中文** (Simplified Chinese), and *
 
 The language preference is stored in `localStorage` (settings schema v3) so it is available before the formatter Worker finishes loading. Changing the language updates all React UI text, CodeMirror and diff accessible names, `document.documentElement.lang`, the page title, and meta tags immediately without rebuilding the Worker or clearing source text.
 
-**The formatter core returns diagnostics, failure codes, failure messages, and rule IDs in English.** The UI explains each failure code in plain language and translates the surrounding labels, but preserves the core's exact original message text under **Technical details** so it remains searchable.
+**The formatter core returns diagnostics, failure codes, failure messages, and rule IDs in English.** The UI names each failure code with a short translated phrase and keeps the core's exact original message as the code's tooltip so it remains searchable.
 
 The Chinese catalogs contain no manual spaces between Han characters and Latin letters or digits. The page sets CSS `text-autospace: normal`, so browsers that support it add that spacing; code, shortcuts and the editors opt out. Browsers without `text-autospace` show the text unspaced, and no spacing is added next to symbols such as `||` or `<br>`.
 
