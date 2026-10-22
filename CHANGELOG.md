@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.5.0 — 2026-10-22
+
 ### Changed
 
 - Redesign the workspace: Source and Result editors joined by a Format

@@ -10,7 +10,7 @@ test("runs the critical formatter workflow", async ({ page }) => {
   await expect(page.getByRole("status")).toContainText("Formatted");
   await expect(page.locator('[data-testid="output-editor"] .cm-content')).toContainText("Example article");
   await page.getByRole("button", { name: "Details" }).click();
-  await expect(page.getByText("wikitext-fmt 0.10.0 · web app 0.4.0")).toBeVisible();
+  await expect(page.getByText("wikitext-fmt 0.10.0 · web app 0.5.0")).toBeVisible();
 
   await page.locator('[data-testid="source-editor"] .cm-content').click();
   await page.keyboard.insertText("stale edit");

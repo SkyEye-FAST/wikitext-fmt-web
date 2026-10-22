@@ -22,7 +22,7 @@ function renderBar(status: FormatStatus, extra = {}) {
     changedLineCount: 0,
     presetLabel: "Default",
     formatterVersion: "0.10.0",
-    webVersion: "0.4.0",
+    webVersion: "0.5.0",
     shortcuts,
     onAdjust: vi.fn(),
     onGoToLine: vi.fn(),

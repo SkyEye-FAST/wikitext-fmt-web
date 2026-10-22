@@ -111,8 +111,8 @@ describe("i18n catalog consistency", () => {
 describe("interpolation and plurals", () => {
   it("interpolates named parameters", () => {
     const t = createT(enMessages);
-    expect(t("report.versions", { web: "0.4.0", fmt: "0.10.0" })).toBe(
-      "wikitext-fmt 0.10.0 · web app 0.4.0",
+    expect(t("report.versions", { web: "0.5.0", fmt: "0.10.0" })).toBe(
+      "wikitext-fmt 0.10.0 · web app 0.5.0",
     );
     expect(t("editor.stats.aria", { lines: 10, characters: 200 })).toBe(
       "10 lines, 200 characters",
