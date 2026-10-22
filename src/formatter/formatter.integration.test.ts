@@ -6,7 +6,7 @@ import {
   ruleLevels,
 } from "wikitext-fmt/browser";
 
-describe("wikitext-fmt 0.9.1 browser integration", () => {
+describe("wikitext-fmt 0.10.0 browser integration", () => {
   it("exposes the canonical diagnostics and rule metadata", () => {
     const result = formatWikitextSafeDetailed("{{foo|a=1}}\n");
     expect(result).toHaveProperty("templateDiagnostics");
@@ -62,10 +62,10 @@ describe("wikitext-fmt 0.9.1 browser integration", () => {
       "#ReDiReCt [[Target]]",
       "{{News List",
       "| 1 = {{新闻单元",
-      "| 内容 = 说明：",
+      "  | 内容 = 说明：",
       "* item",
       "# 正文[[Page]]",
-      "}}",
+      "  }}",
       "}}",
       '<ref name="used" />',
       "* outside",
@@ -94,7 +94,7 @@ describe("wikitext-fmt 0.9.1 browser integration", () => {
     [
       "table",
       "{| class=wikitable\n|a||b\n|}\n",
-      "{| class=wikitable\n| a\n| b\n|}\n",
+      "{| class=wikitable\n| a || b\n|}\n",
     ],
     ["list", "*one\n**two\n", "* one\n** two\n"],
   ])("formats %s syntax", (_name, source, expected) => {
@@ -109,7 +109,7 @@ describe("wikitext-fmt 0.9.1 browser integration", () => {
     [
       "caption, table, and row attributes",
       '{|class="wikitable"\n|-class="row"\n|+style="text-align:center"|Caption\n|A||B\n|}\n',
-      '{| class="wikitable"\n|- class="row"\n|+ style="text-align:center" | Caption\n| A\n| B\n|}\n',
+      '{| class="wikitable"\n|- class="row"\n|+ style="text-align:center" | Caption\n| A || B\n|}\n',
     ],
   ])("normalizes %s layout", (_name, source, expected) => {
     const result = formatWikitextSafeDetailed(source);
@@ -129,7 +129,7 @@ describe("wikitext-fmt 0.9.1 browser integration", () => {
     });
     expect(result.failure).toBeUndefined();
     expect(result.formatted).toBe(
-      '{| class="wikitable"\n|- class="row"\n|+ Caption\n! A!!B\n| A||B\n|}\n',
+      '{| class="wikitable"\n|- class="row"\n|+ Caption\n! A !! B\n| A || B\n|}\n',
     );
     expect(result.formatted).not.toMatch(/[ \t]+$/mu);
   });

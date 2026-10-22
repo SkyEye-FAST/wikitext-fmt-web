@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.4.0 — 2026-10-22
+
 ### Added
 
 - Highlight output lines changed by the current format run in the read-only
@@ -13,6 +15,10 @@
 
 ### Changed
 
+- Upgrade the exact browser dependency from `wikitext-fmt@0.9.1` to
+  `wikitext-fmt@0.10.0`, inheriting editor-style multiline template layout,
+  page-aware heading spacing, inline table layout preservation by default, and
+  faster formatting of large pages.
 - Show template, list, and table layouts in the built-in example.
 - Raise the smallest interface text to 12px and give the diagnostics columns
   stable widths.
@@ -21,6 +27,9 @@
 
 - Ctrl/Cmd+Enter in the source editor now formats without first inserting a
   blank line at the cursor.
+- Inherit the core fix that stops deeply nested templates from stalling the
+  formatter Worker; markup nested more than 500 levels deep is left unchanged
+  with an `input-parse` failure.
 
 ## 0.3.1 — 2026-08-24
 
