@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 
+import { isolateHistory } from "@codemirror/commands";
 import { StateEffect } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 
@@ -106,6 +107,8 @@ const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(
               anchor: Math.min(selection.anchor, value.length),
               head: Math.min(selection.head, value.length),
             },
+            // One undo step of its own, even right after typing.
+            annotations: isolateHistory.of("full"),
           });
         },
         focus: () => viewRef.current?.focus(),

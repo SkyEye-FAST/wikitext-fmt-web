@@ -74,4 +74,25 @@ describe("EditorPane", () => {
     expect(onFormat).toHaveBeenCalledTimes(1);
     expect(ref.current?.getValue()).toBe("==Title==");
   });
+
+  it("undoes a document replacement on its own, however soon it follows an edit", async () => {
+    const ref = createRef<EditorPaneHandle>();
+    const user = userEvent.setup();
+    render(
+      <EditorPane
+        ref={ref}
+        id="source"
+        label="Source"
+        lineWrapping
+        theme="light"
+      />,
+    );
+
+    act(() => ref.current?.setValue("edited"));
+    act(() => ref.current?.setValue("replaced"));
+    act(() => ref.current?.focus());
+    await user.keyboard("{Control>}z{/Control}");
+
+    expect(ref.current?.getValue()).toBe("edited");
+  });
 });

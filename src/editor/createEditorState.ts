@@ -77,6 +77,9 @@ export function createEditorExtensions(
     createSyntaxTheme(),
     EditorState.readOnly.of(options.readOnly),
     EditorView.editable.of(!options.readOnly),
+    // Read-only content is not contenteditable, so without a tab stop a
+    // keyboard user could neither select nor scroll it.
+    EditorView.contentAttributes.of({ tabindex: "0" }),
     createEditorTheme(options.theme),
   ];
 
