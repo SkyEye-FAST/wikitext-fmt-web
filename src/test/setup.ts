@@ -16,6 +16,16 @@ class ResizeObserverStub implements ResizeObserver {
 
 globalThis.ResizeObserver = ResizeObserverStub;
 
+// Sonner captures the pointer when a toast is pressed; jsdom lacks the API.
+if (
+  typeof Element !== "undefined" &&
+  !Element.prototype.setPointerCapture
+) {
+  Element.prototype.setPointerCapture = () => undefined;
+  Element.prototype.releasePointerCapture = () => undefined;
+  Element.prototype.hasPointerCapture = () => false;
+}
+
 Object.defineProperty(globalThis, "matchMedia", {
   writable: true,
   value: (query: string): MediaQueryList => ({

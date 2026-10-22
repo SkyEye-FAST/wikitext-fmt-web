@@ -3,7 +3,7 @@ import { StrictMode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { defaultOptions } from "wikitext-fmt/browser";
 
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { createDetailedResult, createMetadata } from "../test/fixtures.js";
@@ -27,6 +27,13 @@ afterEach(() => {
     value: originalNavigatorLanguage,
   });
 });
+
+/** The status line at the bottom of the page. */
+function reportStatus() {
+  const status = document.querySelector<HTMLElement>(".report-status");
+  if (!status) throw new Error("Report status was not rendered.");
+  return status;
+}
 
 describe("App formatting snapshots", () => {
   it("discards a result when the source document changes while formatting", async () => {
@@ -60,7 +67,7 @@ describe("App formatting snapshots", () => {
       await pendingFormat;
     });
 
-    expect(screen.getByText(/result was discarded/i)).toBeVisible();
+    expect(reportStatus()).toHaveTextContent(/result was set aside/i);
     expect(screen.getByTestId("output-editor")).not.toHaveTextContent(
       "stale output",
     );
@@ -83,19 +90,19 @@ describe("App formatting snapshots", () => {
     render(<App createFormatterClient={() => client} />);
 
     await user.click(
-      await screen.findByRole("button", { name: "Load example" }),
+      await screen.findByRole("button", { name: "Try an example" }),
     );
     await user.click(screen.getByRole("button", { name: "Format" }));
-    await screen.findByText("Formatted with changes");
+    await within(reportStatus()).findByText("Formatted");
     await user.click(screen.getByRole("textbox", { name: "Source" }));
     await user.keyboard("x");
 
-    expect(screen.getByText("Output is outdated")).toBeVisible();
-    expect(
-      screen.getByText(/source or formatter settings changed/i),
-    ).toBeVisible();
+    expect(within(reportStatus()).getByText("Out of date")).toBeVisible();
+    expect(reportStatus()).toHaveTextContent(/you edited the source/i);
     expect(screen.getByTestId("output-editor")).toHaveTextContent("Formatted");
-    expect(screen.getByRole("button", { name: "Apply output" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Replace source" }),
+    ).toBeDisabled();
   });
 
   it("keeps the application title after loading the example", async () => {
@@ -110,7 +117,7 @@ describe("App formatting snapshots", () => {
     render(<App createFormatterClient={() => client} />);
 
     await user.click(
-      await screen.findByRole("button", { name: "Load example" }),
+      await screen.findByRole("button", { name: "Try an example" }),
     );
 
     expect(document.title).toBe("Wikitext Formatter");
@@ -133,24 +140,28 @@ describe("App formatting snapshots", () => {
     render(<App createFormatterClient={() => client} />);
 
     await user.click(
-      await screen.findByRole("button", { name: "Load example" }),
+      await screen.findByRole("button", { name: "Try an example" }),
     );
     await user.click(screen.getByRole("button", { name: "Format" }));
-    await screen.findByText("Formatted with changes");
-    await user.selectOptions(screen.getByLabelText("Theme"), "dark");
-    expect(screen.queryByText("Output is outdated")).not.toBeInTheDocument();
+    await within(reportStatus()).findByText("Formatted");
+    await user.click(screen.getByRole("radio", { name: "Dark" }));
+    expect(reportStatus()).not.toHaveTextContent("Out of date");
     await user.selectOptions(screen.getByLabelText("Language"), "zh-Hans");
-    expect(screen.queryByText("输出已过期")).not.toBeInTheDocument();
+    expect(reportStatus()).not.toHaveTextContent("已过期");
 
     await user.click(screen.getByRole("button", { name: "设置" }));
     await user.click(await screen.findByLabelText("自动换行"));
-    expect(screen.queryByText("输出已过期")).not.toBeInTheDocument();
+    expect(reportStatus()).not.toHaveTextContent("已过期");
     const lineWidth = await screen.findByLabelText("行宽");
     await user.clear(lineWidth);
     await user.type(lineWidth, "88");
 
-    expect(screen.getByText("输出已过期")).toBeVisible();
-    expect(screen.getByRole("button", { name: "应用输出" })).toBeDisabled();
+    expect(reportStatus()).toHaveTextContent("已过期");
+    expect(reportStatus()).toHaveTextContent("生成此结果后设置有变化");
+    await user.keyboard("{Escape}");
+    expect(
+      screen.getByRole("button", { name: "替换源文本" }),
+    ).toBeDisabled();
   });
 
   it("discards an in-flight result when formatter options change", async () => {
@@ -173,7 +184,7 @@ describe("App formatting snapshots", () => {
     render(<App createFormatterClient={() => client} />);
 
     await user.click(
-      await screen.findByRole("button", { name: "Load example" }),
+      await screen.findByRole("button", { name: "Try an example" }),
     );
     await user.click(screen.getByRole("button", { name: "Format" }));
     await user.click(screen.getByRole("button", { name: "Settings" }));
@@ -188,7 +199,7 @@ describe("App formatting snapshots", () => {
       await pendingFormat;
     });
 
-    expect(screen.getByText(/result was discarded/i)).toBeVisible();
+    expect(reportStatus()).toHaveTextContent(/result was set aside/i);
     expect(screen.getByTestId("output-editor")).not.toHaveTextContent(
       "discarded output",
     );
@@ -211,21 +222,23 @@ describe("App formatting snapshots", () => {
     render(<App createFormatterClient={() => client} />);
 
     await user.click(
-      await screen.findByRole("button", { name: "Load example" }),
+      await screen.findByRole("button", { name: "Try an example" }),
     );
     await user.click(screen.getByRole("button", { name: "Format" }));
-    await screen.findByText("Formatted with changes");
-    await user.click(screen.getByRole("button", { name: "Apply output" }));
+    await within(reportStatus()).findByText("Formatted");
+    await user.click(screen.getByRole("button", { name: "Replace source" }));
 
-    expect(screen.getByText("Formatted output applied")).toBeVisible();
+    expect(within(reportStatus()).getByText("Source replaced")).toBeVisible();
     expect(screen.getByRole("textbox", { name: "Source" })).toHaveTextContent(
       "Formatted title",
     );
     expect(screen.getByRole("textbox", { name: "Source" })).toHaveFocus();
-    expect(screen.getByRole("button", { name: "Apply output" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Replace source" }),
+    ).toBeDisabled();
   });
 
-  it("resets the completed run when the source is cleared or replaced with the example", async () => {
+  it("resets the completed run when the source is cleared, and undoes the clear", async () => {
     const metadata = createMetadata({ ...defaultOptions });
     const client: FormatterClientPort = {
       ready: vi.fn().mockResolvedValue(metadata),
@@ -242,24 +255,52 @@ describe("App formatting snapshots", () => {
     render(<App createFormatterClient={() => client} />);
 
     await user.click(
-      await screen.findByRole("button", { name: "Load example" }),
+      await screen.findByRole("button", { name: "Try an example" }),
     );
     await user.click(screen.getByRole("button", { name: "Format" }));
-    await screen.findByText("Formatted with changes");
+    await within(reportStatus()).findByText("Formatted");
     await user.click(screen.getByRole("button", { name: "Clear" }));
     expect(screen.getByTestId("output-editor")).not.toHaveTextContent(
       "formatted output",
     );
-    expect(screen.getByText("Ready")).toBeVisible();
-
-    await user.click(screen.getByRole("button", { name: "Load example" }));
-    await user.click(screen.getByRole("button", { name: "Format" }));
-    await screen.findByText("Formatted with changes");
-    await user.click(screen.getByRole("button", { name: "Load example" }));
-    expect(screen.getByTestId("output-editor")).not.toHaveTextContent(
-      "formatted output",
+    expect(within(reportStatus()).getByText("Ready")).toBeVisible();
+    expect(screen.getByRole("textbox", { name: "Source" })).toHaveTextContent(
+      "",
     );
-    expect(screen.getByText("Ready")).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Try an example" }),
+    ).toBeVisible();
+
+    await user.click(await screen.findByRole("button", { name: "Undo" }));
+    expect(screen.getByRole("textbox", { name: "Source" })).toHaveTextContent(
+      "Example article",
+    );
+    expect(within(reportStatus()).getByText("Ready")).toBeVisible();
+  });
+
+  it("pastes the clipboard into an empty source", async () => {
+    const metadata = createMetadata({ ...defaultOptions });
+    const client: FormatterClientPort = {
+      ready: vi.fn().mockResolvedValue(metadata),
+      format: vi.fn(),
+      restart: vi.fn().mockResolvedValue(metadata),
+      dispose: vi.fn(),
+    };
+    const user = userEvent.setup();
+    render(<App createFormatterClient={() => client} />);
+
+    await navigator.clipboard.writeText("==Pasted heading==");
+    await user.click(await screen.findByRole("button", { name: "Paste" }));
+
+    expect(
+      await screen.findByRole("textbox", { name: "Source" }),
+    ).toHaveTextContent("==Pasted heading==");
+    expect(
+      screen.getByRole("textbox", { name: "Source" }),
+    ).toHaveAccessibleDescription("1 line, 18 characters");
+    expect(
+      screen.queryByRole("button", { name: "Try an example" }),
+    ).not.toBeInTheDocument();
   });
 });
 
@@ -325,7 +366,7 @@ describe("App formatter client lifecycle", () => {
     const { unmount } = render(<App createFormatterClient={factory} />);
 
     await screen.findByRole("button", { name: "Format" });
-    await user.click(screen.getByRole("button", { name: "Load example" }));
+    await user.click(screen.getByRole("button", { name: "Try an example" }));
     await user.click(screen.getByRole("button", { name: "Format" }));
     await user.selectOptions(screen.getByLabelText("Language"), "zh-Hant");
 
@@ -338,7 +379,7 @@ describe("App formatter client lifecycle", () => {
     });
 
     expect(screen.getByTestId("output-editor")).toHaveTextContent("保留的输出");
-    expect(screen.getByText("已格式化，有變更")).toBeVisible();
+    expect(within(reportStatus()).getByText("已格式化")).toBeVisible();
     expect(factory).toHaveBeenCalledTimes(1);
     expect(clients[0]?.dispose).not.toHaveBeenCalled();
     expect(clients[0]?.restart).not.toHaveBeenCalled();
@@ -365,8 +406,8 @@ describe("App formatter client lifecycle", () => {
   });
 
   it.each([
-    ["zh-CN", "zh-Hans", "正在初始化本地格式化器 Worker……"],
-    ["zh-TW", "zh-Hant", "正在初始化本機格式化器 Worker……"],
+    ["zh-CN", "zh-Hans", "正在启动格式化器……"],
+    ["zh-TW", "zh-Hant", "正在啟動格式化器……"],
   ])(
     "uses the browser locale during initialization for %s",
     (browserLanguage, expectedLocale, expectedMessage) => {
@@ -421,7 +462,7 @@ describe("App formatter client lifecycle", () => {
     expect(client.format).toHaveBeenCalledTimes(2);
   });
 
-  it("displays format shortcut tooltip and localized empty output placeholder", async () => {
+  it("shows the format shortcut and guides an empty workspace", async () => {
     const metadata = createMetadata({ ...defaultOptions });
     const client: FormatterClientPort = {
       ready: vi.fn().mockResolvedValue(metadata),
@@ -435,9 +476,14 @@ describe("App formatter client lifecycle", () => {
     expect(formatButton).toHaveAttribute("title", "Format (Ctrl+Enter)");
 
     expect(
-      screen.getByText(
-        "Formatted output appears here. Press Ctrl+Enter to format.",
-      ),
-    ).toBeInTheDocument();
+      screen.getByRole("heading", { name: "Paste wikitext to get started" }),
+    ).toBeVisible();
+    expect(screen.getByText("Press Ctrl+Enter to format")).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: "The formatted text appears here" }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Replace source" }),
+    ).toBeDisabled();
   });
 });

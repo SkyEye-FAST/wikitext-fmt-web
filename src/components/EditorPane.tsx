@@ -1,29 +1,17 @@
-import {
-  forwardRef,
-  memo,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
+import { forwardRef, memo, useEffect, useImperativeHandle, useRef } from "react";
 
 import { isolateHistory } from "@codemirror/commands";
 import { StateEffect } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 
+import { setChangedLines } from "../editor/changedLineDecorations.js";
 import {
   createEditorExtensions,
   createEditorState,
+  type EditorExtensionOptions,
 } from "../editor/createEditorState.js";
-import {
-  setChangedLines,
-} from "../editor/changedLineDecorations.js";
 import type { ResolvedTheme } from "../editor/themes.js";
-import { useI18n } from "../i18n/useI18n.js";
-import {
-  type DocumentStatistics,
-  getDocumentStatistics,
-} from "../utils/document.js";
+import type { DocumentStatistics } from "../utils/document.js";
 
 export interface EditorPaneHandle {
   getValue(): string;
@@ -40,12 +28,16 @@ interface EditorPaneProps {
   readOnly?: boolean;
   lineWrapping: boolean;
   theme: ResolvedTheme;
-  mutedLabel?: string;
   placeholder?: string;
   changedLines?: Set<number>;
   onFormat?: () => void;
+  describedBy?: string;
 }
 
+/**
+ * A bare CodeMirror host. Pane chrome (titles, counts, actions) belongs to the
+ * caller so the same editor can sit in different layouts.
+ */
 const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(
   function EditorPane(
     {
@@ -56,10 +48,10 @@ const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(
       readOnly = false,
       lineWrapping,
       theme,
-      mutedLabel,
       placeholder,
       changedLines,
       onFormat,
+      describedBy,
     }: EditorPaneProps,
     forwardedRef,
   ) {
@@ -68,14 +60,10 @@ const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(
     const initialValueRef = useRef(initialValue);
     const onDocumentChangeRef = useRef(onDocumentChange);
     const onFormatRef = useRef(onFormat);
+
     useEffect(() => {
       onFormatRef.current = onFormat;
     }, [onFormat]);
-    const [stats, setStats] = useState(() =>
-      getDocumentStatistics(initialValue),
-    );
-    const { locale, t } = useI18n();
-
     useEffect(() => {
       onDocumentChangeRef.current = onDocumentChange;
     }, [onDocumentChange]);
@@ -88,10 +76,7 @@ const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(
         setValue: (value) => {
           initialValueRef.current = value;
           const view = viewRef.current;
-          if (!view) {
-            setStats(getDocumentStatistics(value));
-            return;
-          }
+          if (!view) return;
           // Full-string comparison happens only for explicit document replacement,
           // never for ordinary editor updates.
           if (
@@ -120,7 +105,6 @@ const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(
           const lineObj = doc.line(clampedLine);
           view.dispatch({
             selection: { anchor: lineObj.from, head: lineObj.to },
-            scrollIntoView: true,
             effects: EditorView.scrollIntoView(lineObj.from, { y: "center" }),
           });
           view.focus();
@@ -129,29 +113,29 @@ const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(
       [],
     );
 
-    useEffect(() => {
-      const host = hostRef.current;
-      if (!host) {
-        return;
-      }
-      const state = createEditorState({
-        doc: initialValueRef.current,
+    function extensionOptions(): EditorExtensionOptions {
+      return {
         readOnly,
         lineWrapping,
         theme,
         enableChangedLines: readOnly,
         placeholder,
         onFormat: onFormat ? () => onFormatRef.current?.() : undefined,
-        onDocumentChange: (nextStatistics) => {
-          setStats(nextStatistics);
-          onDocumentChangeRef.current?.(nextStatistics);
-        },
+        onDocumentChange: (statistics) =>
+          onDocumentChangeRef.current?.(statistics),
+      };
+    }
+
+    useEffect(() => {
+      const host = hostRef.current;
+      if (!host) return;
+      const view = new EditorView({
+        state: createEditorState({
+          doc: initialValueRef.current,
+          ...extensionOptions(),
+        }),
+        parent: host,
       });
-      const view = new EditorView({ state, parent: host });
-      view.contentDOM.setAttribute("aria-label", label);
-      if (readOnly) {
-        view.contentDOM.setAttribute("aria-readonly", "true");
-      }
       viewRef.current = view;
       return () => {
         view.destroy();
@@ -163,30 +147,22 @@ const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(
 
     useEffect(() => {
       const view = viewRef.current;
-      if (!view) {
-        return;
-      }
+      if (!view) return;
       view.dispatch({
         effects: StateEffect.reconfigure.of(
-          createEditorExtensions({
-            readOnly,
-            lineWrapping,
-            theme,
-            enableChangedLines: readOnly,
-            placeholder,
-            onFormat: onFormat ? () => onFormatRef.current?.() : undefined,
-            onDocumentChange: (nextStatistics) => {
-              setStats(nextStatistics);
-              onDocumentChangeRef.current?.(nextStatistics);
-            },
-          }),
+          createEditorExtensions(extensionOptions()),
         ),
       });
-      view.contentDOM.setAttribute("aria-label", label);
-      view.contentDOM.toggleAttribute("aria-readonly", readOnly);
-    }, [label, lineWrapping, onFormat, placeholder, readOnly, theme]);
+      const content = view.contentDOM;
+      content.setAttribute("aria-label", label);
+      if (readOnly) content.setAttribute("aria-readonly", "true");
+      else content.removeAttribute("aria-readonly");
+      if (describedBy) content.setAttribute("aria-describedby", describedBy);
+      else content.removeAttribute("aria-describedby");
+      // extensionOptions() reads exactly these props.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [describedBy, label, lineWrapping, onFormat, placeholder, readOnly, theme]);
 
-    // Dispatch changed lines to the editor view when prop changes
     useEffect(() => {
       const view = viewRef.current;
       if (!view || !readOnly) return;
@@ -195,39 +171,8 @@ const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(
       });
     }, [changedLines, readOnly]);
 
-    const numberFormatter = new Intl.NumberFormat(locale);
-    const formattedLines = numberFormatter.format(stats.lines);
-    const formattedCharacters = numberFormatter.format(stats.characters);
-    const statsAriaLabel = t("editor.stats.aria", {
-      lines: formattedLines,
-      characters: formattedCharacters,
-    });
-
     return (
-      <section
-        className="editor-pane syntax-spine"
-        aria-labelledby={`${id}-label`}
-      >
-        <header className="pane-header">
-          <div>
-            <h2 id={`${id}-label`}>{label}</h2>
-            {mutedLabel ? (
-              <span className="pane-muted">{mutedLabel}</span>
-            ) : null}
-          </div>
-          <span className="pane-stats" aria-label={statsAriaLabel}>
-            {t("editor.stats.visible", {
-              lines: formattedLines,
-              characters: formattedCharacters,
-            })}
-          </span>
-        </header>
-        <div
-          ref={hostRef}
-          className="editor-host"
-          data-testid={`${id}-editor`}
-        />
-      </section>
+      <div ref={hostRef} className="editor-host" data-testid={`${id}-editor`} />
     );
   },
 );

@@ -1,6 +1,7 @@
 import type { FormatDetailedResult, FormatFailure } from "wikitext-fmt/browser";
 
 import type { ResultFreshness } from "../app/formatRun.js";
+import enMessages from "../i18n/messages.en.json";
 import type { MessageCatalog } from "../i18n/types.js";
 import type { ClientErrorCode, FormatterClientError } from "./client.js";
 
@@ -75,6 +76,16 @@ export function clientErrorMessageKey(
   code: ClientErrorCode,
 ): keyof MessageCatalog {
   return CLIENT_ERROR_MESSAGE_KEYS[code];
+}
+
+/** Plain-language explanation for a fail-closed result. */
+export function failureMessageKey(
+  code: FormatFailure["code"] | string,
+): keyof MessageCatalog {
+  const key = `failure.${code}`;
+  return Object.hasOwn(enMessages, key)
+    ? (key as keyof MessageCatalog)
+    : "failure.unknown";
 }
 
 type TFunction = (

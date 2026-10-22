@@ -9,12 +9,16 @@ import {
   useState,
 } from "react";
 
+import { FileUp } from "lucide-react";
+import { Toaster, toast } from "sonner";
+
 import { AppHeader } from "../components/AppHeader.js";
-import { DiagnosticsPanel } from "../components/DiagnosticsPanel.js";
-import { EditorPane, type EditorPaneHandle } from "../components/EditorPane.js";
-import { EditorToolbar } from "../components/EditorToolbar.js";
-import { FormatStatus } from "../components/FormatStatus.js";
-import { PrivacyNotice } from "../components/PrivacyNotice.js";
+import type { EditorPaneHandle } from "../components/EditorPane.js";
+import { FormatSeam } from "../components/FormatSeam.js";
+import { type OutputTab, OutputPane } from "../components/OutputPane.js";
+import { ReportBar } from "../components/ReportBar.js";
+import { SourcePane } from "../components/SourcePane.js";
+import { computeChangedLines } from "../editor/changedLineDecorations.js";
 import type { ResolvedTheme } from "../editor/themes.js";
 import {
   FormatterClient,
@@ -31,7 +35,6 @@ import {
   clientErrorMessageKey,
   type FormatStatus as Status,
 } from "../formatter/resultSummary.js";
-import { computeChangedLines } from "../editor/changedLineDecorations.js";
 import { I18nProvider } from "../i18n/I18nProvider.js";
 import {
   type LanguagePreference,
@@ -53,7 +56,13 @@ import {
   loadStoredLanguagePreference,
   saveSettings,
 } from "../settings/storage.js";
-import { copyText, triggerTextDownload } from "../utils/document.js";
+import {
+  copyText,
+  type DocumentStatistics,
+  getDocumentStatistics,
+  triggerTextDownload,
+} from "../utils/document.js";
+import { getShortcutLabels } from "../utils/platform.js";
 import {
   type FormatRun,
   isApplicableFormatRun,
@@ -61,7 +70,6 @@ import {
   type ResultFreshness,
 } from "./formatRun.js";
 
-const DiffView = lazy(() => import("../components/DiffView.js"));
 const SettingsPanel = lazy(() => import("../components/SettingsPanel.js"));
 
 export type FormatterClientPort = Pick<
@@ -69,8 +77,12 @@ export type FormatterClientPort = Pick<
   "ready" | "format" | "restart" | "dispose"
 >;
 
+type MobileView = "source" | "output";
+
 const defaultFormatterClientFactory = (): FormatterClientPort =>
   new FormatterClient();
+
+const EMPTY_STATISTICS = getDocumentStatistics("");
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -108,6 +120,10 @@ function areFormatterOptionsEqual(
   right: ResolvedBrowserOptions,
 ): boolean {
   return areOptionValuesEqual(left, right);
+}
+
+function hasDraggedFiles(event: DragEvent): boolean {
+  return Array.from(event.dataTransfer?.types ?? []).includes("Files");
 }
 
 interface AppProps {
@@ -157,10 +173,15 @@ function InitializationScreen({ status }: { status: Status }) {
   const { t } = useI18n();
   return (
     <main className="initialization-screen">
-      <span className="brand-mark" aria-hidden="true">
-        {"{ }"}
-      </span>
-      <h1>{t("brand.name")}</h1>
+      <p className="wordmark">
+        <span className="wordmark-brace" aria-hidden="true">
+          {"{{"}
+        </span>
+        {t("brand.name")}
+        <span className="wordmark-brace" aria-hidden="true">
+          {"}}"}
+        </span>
+      </p>
       {status.kind === "error" ? (
         <>
           <p role="alert">
@@ -168,14 +189,16 @@ function InitializationScreen({ status }: { status: Status }) {
           </p>
           <button
             type="button"
-            className="secondary-button"
+            className="button"
             onClick={() => location.reload()}
           >
-            {t("init.retry-worker")}
+            {t("init.reload")}
           </button>
         </>
       ) : (
-        <p>{t("init.initializing")}</p>
+        <p className="initialization-progress" role="status">
+          {t("init.starting")}
+        </p>
       )}
     </main>
   );
@@ -199,7 +222,6 @@ export default function App({
   const [defaults, setDefaults] = useState<ResolvedBrowserOptions | null>(null);
   const [formatterMetadata, setFormatterMetadata] =
     useState<FormatterMetadata | null>(null);
-  const [sourceFilename, setSourceFilename] = useState<string>();
 
   const locale = useResolvedLocale(languagePref);
 
@@ -263,8 +285,6 @@ export default function App({
         languagePref={languagePref}
         setLanguagePref={setLanguagePref}
         client={client}
-        sourceFilename={sourceFilename}
-        setSourceFilename={setSourceFilename}
       />
     </I18nProvider>
   );
@@ -279,8 +299,6 @@ interface AppMainProps {
   languagePref: LanguagePreference;
   setLanguagePref: (pref: LanguagePreference) => void;
   client: FormatterClientPort;
-  sourceFilename?: string;
-  setSourceFilename: (filename: string | undefined) => void;
 }
 
 function AppMain({
@@ -292,11 +310,11 @@ function AppMain({
   languagePref,
   setLanguagePref,
   client,
-  sourceFilename,
-  setSourceFilename,
 }: AppMainProps) {
   const { t } = useI18n();
+  const [shortcuts] = useState(getShortcutLabels);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const workspaceRef = useRef<HTMLElement>(null);
   const sourceEditorRef = useRef<EditorPaneHandle>(null);
   const outputEditorRef = useRef<EditorPaneHandle>(null);
   const sourceRevisionRef = useRef(0);
@@ -316,15 +334,28 @@ function AppMain({
   });
   const activityStatusRef = useRef<Status>({ kind: "idle" });
   const [notice, setNotice] = useState<keyof MessageCatalog>();
-  const [diffVisible, setDiffVisible] = useState(false);
+  const [outputTab, setOutputTab] = useState<OutputTab>("result");
+  const [mobileView, setMobileView] = useState<MobileView>("source");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const [sourceFilename, setSourceFilename] = useState<string>();
+  const [sourceStatistics, setSourceStatistics] =
+    useState<DocumentStatistics>(EMPTY_STATISTICS);
 
   const resolvedTheme = useResolvedTheme(settings.theme);
 
   useEffect(() => {
-    document.documentElement.dataset.theme = resolvedTheme;
-    document.documentElement.style.colorScheme = resolvedTheme;
+    const root = document.documentElement;
+    // Switch every colour at once: the editors repaint instantly, so hover
+    // transitions on the chrome would otherwise trail behind them.
+    root.dataset.themeSwitching = "";
+    root.dataset.theme = resolvedTheme;
+    root.style.colorScheme = resolvedTheme;
+    const frame = requestAnimationFrame(() =>
+      requestAnimationFrame(() => delete root.dataset.themeSwitching),
+    );
+    return () => cancelAnimationFrame(frame);
   }, [resolvedTheme]);
 
   useEffect(() => {
@@ -361,16 +392,20 @@ function AppMain({
     setFreshness("none");
   }, []);
 
-  const handleSourceDocumentChange = useCallback(() => {
-    if (sourceReplacementRef.current) {
-      return;
-    }
-    sourceRevisionRef.current += 1;
-    updateResultFreshness();
-    if (activityStatusRef.current.kind === "applied") {
-      setActivityStatus({ kind: "idle" });
-    }
-  }, [setActivityStatus, updateResultFreshness]);
+  const handleSourceDocumentChange = useCallback(
+    (statistics: DocumentStatistics) => {
+      setSourceStatistics(statistics);
+      if (sourceReplacementRef.current) {
+        return;
+      }
+      sourceRevisionRef.current += 1;
+      updateResultFreshness();
+      if (activityStatusRef.current.kind === "applied") {
+        setActivityStatus({ kind: "idle" });
+      }
+    },
+    [setActivityStatus, updateResultFreshness],
+  );
 
   const replaceSourceDocument = useCallback(
     (source: string) => {
@@ -455,6 +490,8 @@ function AppMain({
       setFormatRun(completedRun);
       setFreshness("current");
       setActivityStatus({ kind: "idle" });
+      // On a phone only one pane fits, so follow the work to the result.
+      setMobileView("output");
     } catch (error) {
       if (
         operationToken === activeFormatRef.current &&
@@ -479,6 +516,7 @@ function AppMain({
   }, [format]);
 
   const handleGoToLine = useCallback((line: number) => {
+    setMobileView("source");
     sourceEditorRef.current?.goToLine(line);
   }, []);
 
@@ -503,8 +541,18 @@ function AppMain({
     return () => document.removeEventListener("keydown", handleShortcut);
   }, []);
 
+  /** Swap in a new source and forget everything derived from the old one. */
+  function resetSource(text: string, filename: string | undefined): void {
+    replaceSourceDocument(text);
+    clearFormatRun();
+    setActivityStatus({ kind: "idle" });
+    setNotice(undefined);
+    setOutputTab("result");
+    setMobileView("source");
+    setSourceFilename(filename);
+  }
+
   async function stopFormatting(): Promise<void> {
-    if (!client) return;
     activeFormatRef.current += 1;
     busyRef.current = false;
     setBusy(false);
@@ -523,9 +571,9 @@ function AppMain({
   async function copyOutput(): Promise<void> {
     try {
       await copyText(formatRunRef.current?.result.formatted ?? "");
-      setNotice("copy.success");
+      toast.success(t("copy.success"));
     } catch {
-      setNotice("copy.denied");
+      toast.error(t("copy.denied"));
     }
   }
 
@@ -541,52 +589,74 @@ function AppMain({
     }
     replaceSourceDocument(run.result.formatted);
     clearFormatRun();
-    setDiffVisible(false);
+    setOutputTab("result");
     setNotice(undefined);
     setActivityStatus({ kind: "applied" });
+    setMobileView("source");
     queueMicrotask(() => sourceEditorRef.current?.focus());
   }
 
   async function openFile(file: File): Promise<void> {
+    let text: string;
     try {
-      const text = await file.text();
-      replaceSourceDocument(text);
-      clearFormatRun();
-      setActivityStatus({ kind: "idle" });
-      setSourceFilename(file.name);
-      setDiffVisible(false);
-      setNotice(
-        file.size > LARGE_DOCUMENT_WARNING_BYTES
-          ? "editor.large-file-warning"
-          : undefined,
-      );
+      text = await file.text();
     } catch {
-      setNotice("editor.file-not-readable");
+      toast.error(t("file.not-readable", { name: file.name }));
+      return;
     }
+    resetSource(text, file.name);
+    if (file.size > LARGE_DOCUMENT_WARNING_BYTES) {
+      toast.warning(t("file.large"));
+    } else {
+      toast(t("file.opened", { name: file.name }));
+    }
+    sourceEditorRef.current?.focus();
+  }
+
+  const openFileRef = useRef(openFile);
+  useEffect(() => {
+    openFileRef.current = openFile;
+  });
+
+  async function pasteFromClipboard(): Promise<void> {
+    let text: string;
+    try {
+      text = await navigator.clipboard.readText();
+    } catch {
+      toast.error(t("paste.denied", { shortcut: shortcuts.paste }));
+      sourceEditorRef.current?.focus();
+      return;
+    }
+    if (!text) {
+      toast(t("paste.empty"));
+      sourceEditorRef.current?.focus();
+      return;
+    }
+    resetSource(text, undefined);
+    sourceEditorRef.current?.focus();
   }
 
   function clearDocument(): void {
-    replaceSourceDocument("");
-    clearFormatRun();
-    setActivityStatus({ kind: "idle" });
-    setNotice(undefined);
-    setDiffVisible(false);
-    setSourceFilename(undefined);
+    const previousText = sourceEditorRef.current?.getValue() ?? "";
+    const previousFilename = sourceFilename;
+    resetSource("", undefined);
     sourceEditorRef.current?.focus();
+    if (previousText) {
+      toast(t("clear.done"), {
+        action: {
+          label: t("clear.undo"),
+          onClick: () => {
+            resetSource(previousText, previousFilename);
+            sourceEditorRef.current?.focus();
+          },
+        },
+      });
+    }
   }
 
   function loadExample(): void {
-    replaceSourceDocument(EXAMPLE_WIKITEXT);
-    clearFormatRun();
-    setActivityStatus({ kind: "idle" });
-    setNotice(undefined);
-    setDiffVisible(false);
-    setSourceFilename("Example.wikitext");
+    resetSource(EXAMPLE_WIKITEXT, "Example.wikitext");
     sourceEditorRef.current?.focus();
-  }
-
-  function toggleDiff(): void {
-    setDiffVisible((visible) => !visible);
   }
 
   function resetAllSettings(): void {
@@ -600,9 +670,52 @@ function AppMain({
     setSettings((s) => ({ ...s, language: lang }));
   }
 
+  // Files dropped anywhere on the workspace open as the source. Listening in
+  // the capture phase keeps CodeMirror from inserting the file as text.
+  useEffect(() => {
+    const workspace = workspaceRef.current;
+    if (!workspace) return;
+    let depth = 0;
+    function onDragEnter(event: DragEvent): void {
+      if (!hasDraggedFiles(event)) return;
+      event.preventDefault();
+      depth += 1;
+      setDragging(true);
+    }
+    function onDragOver(event: DragEvent): void {
+      if (!hasDraggedFiles(event)) return;
+      event.preventDefault();
+      if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+    }
+    function onDragLeave(event: DragEvent): void {
+      if (!hasDraggedFiles(event)) return;
+      depth = Math.max(0, depth - 1);
+      if (depth === 0) setDragging(false);
+    }
+    function onDrop(event: DragEvent): void {
+      if (!hasDraggedFiles(event)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      depth = 0;
+      setDragging(false);
+      const file = event.dataTransfer?.files[0];
+      if (file) void openFileRef.current(file);
+    }
+    workspace.addEventListener("dragenter", onDragEnter, true);
+    workspace.addEventListener("dragover", onDragOver, true);
+    workspace.addEventListener("dragleave", onDragLeave, true);
+    workspace.addEventListener("drop", onDrop, true);
+    return () => {
+      workspace.removeEventListener("dragenter", onDragEnter, true);
+      workspace.removeEventListener("dragover", onDragOver, true);
+      workspace.removeEventListener("dragleave", onDragLeave, true);
+      workspace.removeEventListener("drop", onDrop, true);
+    };
+  }, []);
+
   const output = formatRun?.result.formatted ?? "";
-  const hasOutput = Boolean(formatRun);
   const canApplyOutput = isApplicableFormatRun(formatRun, freshness);
+  const stale = Boolean(formatRun) && freshness !== "current";
   let status: Status;
   if (activityStatus.kind !== "idle") {
     status = activityStatus;
@@ -622,29 +735,20 @@ function AppMain({
     status = activityStatus;
   }
 
+  const presetLabel = t(
+    settings.formatter.profile === "production"
+      ? "settings.preset.production"
+      : "settings.preset.default",
+  );
+
   return (
-    <div className="app-shell">
+    <div className="app-shell" data-view={mobileView}>
       <AppHeader
         theme={settings.theme}
         language={languagePref}
         onThemeChange={(theme) => setSettings((s) => ({ ...s, theme }))}
         onLanguageChange={handleLanguageChange}
-      />
-      <EditorToolbar
-        busy={busy}
-        hasOutput={hasOutput}
-        canApplyOutput={canApplyOutput}
-        diffVisible={diffVisible}
-        onFormat={() => void format()}
-        onStop={() => void stopFormatting()}
-        onCopy={() => void copyOutput()}
-        onDownload={() => triggerTextDownload(output, sourceFilename)}
-        onApplyOutput={applyOutput}
-        onOpenFile={() => fileInputRef.current?.click()}
-        onClear={clearDocument}
-        onLoadExample={loadExample}
         onOpenSettings={() => setSettingsOpen(true)}
-        onToggleDiff={toggleDiff}
       />
       <input
         ref={fileInputRef}
@@ -660,66 +764,95 @@ function AppMain({
         }}
       />
 
-      <main className="workspace">
-        <div
-          className={`editor-grid ${diffVisible ? "is-visually-hidden" : ""}`}
-          aria-hidden={diffVisible}
-          inert={diffVisible}
+      <div className="view-switch" role="group" aria-label={t("view.label")}>
+        <button
+          type="button"
+          aria-pressed={mobileView === "source"}
+          onClick={() => setMobileView("source")}
         >
-          <EditorPane
-            ref={sourceEditorRef}
-            id="source"
-            label={t("editor.source.label")}
-            mutedLabel={t("editor.source.muted")}
-            onDocumentChange={handleSourceDocumentChange}
-            lineWrapping={settings.lineWrapping}
-            theme={resolvedTheme}
-            onFormat={format}
-          />
-          <EditorPane
-            ref={outputEditorRef}
-            id="output"
-            label={t("editor.output.label")}
-            mutedLabel={t("editor.output.muted")}
-            readOnly
-            lineWrapping={settings.lineWrapping}
-            theme={resolvedTheme}
-            placeholder={t("editor.output.placeholder")}
-            changedLines={changedLines}
-          />
-        </div>
-        {diffVisible ? (
-          <Suspense
-            fallback={<div className="lazy-loading">{t("diff.loading")}</div>}
-          >
-            <DiffView
-              original={formatRun?.sourceSnapshot ?? ""}
-              formatted={output}
-              outdated={freshness !== "current"}
-              lineWrapping={settings.lineWrapping}
-              theme={resolvedTheme}
-            />
-          </Suspense>
+          {t("view.source")}
+        </button>
+        <button
+          type="button"
+          aria-pressed={mobileView === "output"}
+          onClick={() => setMobileView("output")}
+        >
+          {t("view.output")}
+          {stale ? <span className="view-dot" aria-hidden="true" /> : null}
+        </button>
+      </div>
+
+      <main className="workspace" ref={workspaceRef}>
+        <SourcePane
+          editorRef={sourceEditorRef}
+          statistics={sourceStatistics}
+          filename={sourceFilename}
+          lineWrapping={settings.lineWrapping}
+          theme={resolvedTheme}
+          shortcuts={shortcuts}
+          hidden={mobileView !== "source"}
+          onDocumentChange={handleSourceDocumentChange}
+          onFormat={format}
+          onOpenFile={() => fileInputRef.current?.click()}
+          onClear={clearDocument}
+          onPaste={() => void pasteFromClipboard()}
+          onExample={loadExample}
+        />
+        <FormatSeam
+          busy={busy}
+          stale={stale}
+          shortcuts={shortcuts}
+          onFormat={() => void format()}
+          onStop={() => void stopFormatting()}
+        />
+        <OutputPane
+          editorRef={outputEditorRef}
+          run={formatRun}
+          freshness={freshness}
+          changedLines={changedLines}
+          canApply={canApplyOutput}
+          tab={outputTab}
+          sourceFilename={sourceFilename}
+          lineWrapping={settings.lineWrapping}
+          theme={resolvedTheme}
+          shortcuts={shortcuts}
+          hidden={mobileView !== "output"}
+          onTabChange={setOutputTab}
+          onCopy={() => void copyOutput()}
+          onDownload={() => triggerTextDownload(output, sourceFilename)}
+          onApply={applyOutput}
+        />
+        {dragging ? (
+          <div className="drop-overlay" aria-hidden="true">
+            <div className="drop-card">
+              <FileUp size={28} />
+              <p className="drop-title">{t("drop.title")}</p>
+              <p>{t("drop.body")}</p>
+            </div>
+          </div>
         ) : null}
       </main>
 
-      <aside className="lower-rail" aria-label={t("layout.status-diagnostics")}>
-        <div className="status-privacy-row">
-          <FormatStatus
-            status={status}
-            profile={settings.formatter.profile}
-            webVersion={__WIKITEXT_FMT_WEB_VERSION__}
-            formatterVersion={formatterVersion}
-          />
-          <PrivacyNotice />
-        </div>
-        <DiagnosticsPanel
-          result={formatRun?.result}
-          status={status}
-          notice={notice}
-          onGoToLine={handleGoToLine}
-        />
-      </aside>
+      <ReportBar
+        status={status}
+        result={formatRun?.result}
+        changedLineCount={changedLines.size}
+        notice={notice}
+        presetLabel={presetLabel}
+        formatterVersion={formatterVersion}
+        webVersion={__WIKITEXT_FMT_WEB_VERSION__}
+        shortcuts={shortcuts}
+        onAdjust={() => setSettingsOpen(true)}
+        onGoToLine={handleGoToLine}
+      />
+
+      <Toaster
+        position="bottom-center"
+        theme={resolvedTheme}
+        offset={{ bottom: 64 }}
+        mobileOffset={{ bottom: 132 }}
+        toastOptions={{ className: "toast" }}
+      />
 
       {settingsOpen ? (
         <Suspense fallback={null}>

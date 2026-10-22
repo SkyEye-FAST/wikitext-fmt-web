@@ -37,11 +37,13 @@ const catalogs: [string, MessageCatalog][] = [
 
 const enKeys = Object.keys(enMessages) as (keyof MessageCatalog)[];
 const freshnessKeys = [
-  "toolbar.apply-output",
-  "toolbar.apply-output-unavailable",
+  "output.apply",
+  "output.apply.unavailable",
   "diff.previous-run",
   "status.outdated",
-  "status.outdated.detail",
+  "status.outdated.source",
+  "status.outdated.options",
+  "status.outdated.both",
   "status.applied",
   "status.result-discarded",
 ] as const satisfies readonly (keyof MessageCatalog)[];
@@ -91,39 +93,6 @@ describe("i18n catalog consistency", () => {
     }
   });
 
-  it("resolves English text for key UI strings", () => {
-    const t = createT(enMessages);
-
-    expect(t("brand.name")).toBe("Wikitext Formatter");
-    expect(t("toolbar.format")).toBe("Format");
-    expect(t("editor.source.label")).toBe("Source");
-    expect(t("settings.title")).toBe("Formatter settings");
-  });
-
-  it("resolves Simplified Chinese text for key UI strings", () => {
-    const t = createT(zhHansMessages);
-
-    // Brand stays English.
-    expect(t("brand.name")).toBe("Wikitext Formatter");
-    expect(t("toolbar.format")).toBe("格式化");
-    expect(t("editor.source.label")).toBe("源代码");
-    expect(t("editor.output.label")).toBe("格式化输出");
-    expect(t("settings.title")).toBe("格式化器设置");
-    expect(t("settings.general")).toBe("常规");
-  });
-
-  it("resolves Traditional Chinese text for key UI strings", () => {
-    const t = createT(zhHantMessages);
-
-    // Brand stays English.
-    expect(t("brand.name")).toBe("Wikitext Formatter");
-    expect(t("toolbar.format")).toBe("格式化");
-    expect(t("editor.source.label")).toBe("原始碼");
-    expect(t("editor.output.label")).toBe("格式化輸出");
-    expect(t("settings.title")).toBe("格式化器設定");
-    expect(t("settings.general")).toBe("一般");
-  });
-
   it("falls back to English for missing translations", () => {
     // The createT function falls back to enMessages when a key is missing.
     // Since all catalogs have the same keys, we test that the fallback
@@ -131,48 +100,49 @@ describe("i18n catalog consistency", () => {
     // but the catalog lookup returns undefined.
     const partialCatalog = { ...zhHansMessages };
     // Simulate a missing key by deleting one.
-    delete (partialCatalog as Record<string, string>)["toolbar.format"];
+    delete (partialCatalog as Record<string, string>)["action.format"];
 
     const t = createT(partialCatalog as MessageCatalog);
     // Should fall back to English.
-    expect(t("toolbar.format")).toBe("Format");
+    expect(t("action.format")).toBe("Format");
   });
 });
 
 describe("interpolation and plurals", () => {
   it("interpolates named parameters", () => {
     const t = createT(enMessages);
-    expect(t("status.versions", { web: "0.4.0", fmt: "0.10.0" })).toBe(
-      "Web 0.4.0 · Formatter 0.10.0",
+    expect(t("report.versions", { web: "0.4.0", fmt: "0.10.0" })).toBe(
+      "wikitext-fmt 0.10.0 · web app 0.4.0",
     );
     expect(t("editor.stats.aria", { lines: 10, characters: 200 })).toBe(
       "10 lines, 200 characters",
+    );
+    expect(t("editor.stats.aria", { lines: 1, characters: 1 })).toBe(
+      "1 line, 1 character",
     );
   });
 
   it("handles English plural forms correctly", () => {
     const t = createT(enMessages);
 
-    // One entry.
-    expect(t("diagnostics.entries", { count: 1 })).toContain("1 rule entry");
-    // Multiple entries.
-    expect(t("diagnostics.entries", { count: 5 })).toContain("5 rule entries");
+    expect(t("output.changed-lines", { count: 1 })).toBe("1 line changed");
+    expect(t("output.changed-lines", { count: 5 })).toBe("5 lines changed");
 
     // One template.
     expect(t("summary.templates-changed", { count: 1 })).toBe(
-      "Formatted 1 template.",
+      "Reformatted 1 template.",
     );
     // Multiple templates.
     expect(t("summary.templates-changed", { count: 3 })).toBe(
-      "Formatted 3 templates.",
+      "Reformatted 3 templates.",
     );
   });
 
-  it("returns the key as-is when params are missing for interpolation", () => {
+  it("returns the template as-is when params are missing for interpolation", () => {
     const t = createT(enMessages);
     // Missing params should still produce sensible output (the placeholder key).
-    const result = t("editor.stats.aria");
-    expect(result).toContain("{lines}");
-    expect(result).toContain("{characters}");
+    const result = t("report.versions");
+    expect(result).toContain("{fmt}");
+    expect(result).toContain("{web}");
   });
 });

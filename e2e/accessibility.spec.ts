@@ -14,44 +14,48 @@ test.beforeEach(async ({ page }) => {
 test("has no automated accessibility violations in primary states", async ({ page }) => {
   await expectNoAxeViolations(page);
 
-  await page.getByRole("button", { name: "Load example" }).click();
+  await page.getByRole("button", { name: "Try an example" }).click();
   await page.getByRole("button", { name: "Format" }).click();
-  await expect(page.getByText("Formatted with changes")).toBeVisible();
+  await expect(page.getByRole("status")).toContainText("Formatted");
   await expectNoAxeViolations(page);
+
+  await page.getByRole("button", { name: "Details" }).click();
+  await expect(page.getByRole("button", { name: "Hide details" })).toHaveAttribute("aria-expanded", "true");
+  await expectNoAxeViolations(page);
+  await page.getByRole("button", { name: "Hide details" }).click();
 
   await page.locator('[data-testid="source-editor"] .cm-content').click();
   await page.keyboard.insertText("stale edit");
-  await expect(page.getByText("Output is outdated")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Apply output" })).toBeDisabled();
+  await expect(page.getByRole("status")).toContainText("Out of date");
+  await expect(page.getByRole("button", { name: "Replace source" })).toBeDisabled();
   await expectNoAxeViolations(page);
 
-  await page.getByRole("button", { name: "Diff" }).click();
+  await page.getByRole("tab", { name: /^Changes/ }).click();
   await expect(page.getByTestId("diff-view")).toBeVisible();
   await expectNoAxeViolations(page);
-  await page.getByRole("button", { name: "Diff" }).click();
+  await page.getByRole("tab", { name: "Result" }).click();
 
   await page.getByRole("button", { name: "Settings" }).click();
-  await expect(page.getByRole("dialog", { name: "Formatter settings" })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Settings" })).toBeVisible();
   await expectNoAxeViolations(page);
   await page.keyboard.press("Escape");
 
-  await page.getByLabel("Theme").selectOption("dark");
+  await page.getByRole("radio", { name: "Dark" }).check();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expectNoAxeViolations(page);
 });
 
-test("supports keyboard toolbar use and announces status", async ({ page }) => {
-  await page.getByRole("button", { name: "Load example" }).click();
+test("supports keyboard use and announces status", async ({ page }) => {
+  await page.getByRole("button", { name: "Try an example" }).click();
   await page.getByRole("button", { name: "Format" }).focus();
   await page.keyboard.press("Enter");
-  await expect(page.getByText("Formatted with changes")).toBeVisible();
-  await expect(page.getByRole("status")).toContainText("Formatted with changes");
+  await expect(page.getByRole("status")).toContainText("Formatted");
 
   await page.getByRole("button", { name: "Format" }).focus();
   await page.keyboard.press("Tab");
-  await expect(page.getByRole("button", { name: "Copy output" })).toBeFocused();
+  await expect(page.getByRole("tab", { name: "Result" })).toBeFocused();
   await page.keyboard.press("Tab");
-  await expect(page.getByRole("button", { name: "Download" })).toBeFocused();
+  await expect(page.getByRole("button", { name: "Copy" })).toBeFocused();
 });
 
 test("keeps controls available at mobile sizes and 200 percent zoom", async ({ page }) => {
@@ -64,7 +68,7 @@ test("keeps controls available at mobile sizes and 200 percent zoom", async ({ p
     await page.reload();
     await expect(page.getByRole("button", { name: "Format" })).toBeVisible();
     await expect(page.getByLabel("Language")).toBeVisible();
-    await expect(page.getByLabel("Theme")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Settings" })).toBeVisible();
     const formatBox = await page.getByRole("button", { name: "Format" }).boundingBox();
     expect(formatBox?.height).toBeGreaterThanOrEqual(36);
     const horizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -79,6 +83,8 @@ test("keeps controls available at mobile sizes and 200 percent zoom", async ({ p
   await expect(page.getByRole("button", { name: "Settings" })).toBeVisible();
   await page.getByRole("button", { name: "Settings" }).click();
   await expect(page.getByRole("button", { name: "Close settings" })).toBeVisible();
+  // The header theme switch is hidden on phones; the same choice lives in Settings.
+  await expect(page.getByRole("dialog").getByRole("radio", { name: "Dark" })).toBeAttached();
   const horizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(horizontalOverflow).toBeLessThanOrEqual(1);
 });

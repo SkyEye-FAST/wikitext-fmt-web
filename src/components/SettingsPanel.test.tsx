@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   formatProfiles,
   getFormatProfileOverrides,
@@ -6,7 +6,7 @@ import {
   type FormatProfile,
 } from "wikitext-fmt/browser";
 
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import type { ResolvedBrowserOptions } from "../formatter/protocol.js";
@@ -23,34 +23,85 @@ const profileOverrides = Object.fromEntries(
   ]),
 ) as Parameters<typeof SettingsPanel>[0]["profileOverrides"];
 
+function renderPanel(overrides: Partial<Parameters<typeof SettingsPanel>[0]> = {}) {
+  const props: Parameters<typeof SettingsPanel>[0] = {
+    settings: createDefaultSettings({
+      ...resolveFormatProfile("default"),
+    } as ResolvedBrowserOptions),
+    onChange: vi.fn(),
+    onFormatterChange: vi.fn(),
+    onClose: vi.fn(),
+    onRestoreDefaults: vi.fn(),
+    onReset: vi.fn(),
+    profiles,
+    profileOverrides,
+    ...overrides,
+  };
+  render(<SettingsPanel {...props} />);
+  return props;
+}
+
+afterEach(cleanup);
+
 describe("SettingsPanel", () => {
-  it("exposes restore and reset settings actions", async () => {
+  it("opens as a labelled dialog and exposes restore and reset actions", async () => {
     const user = userEvent.setup();
-    const onRestoreDefaults = vi.fn();
-    const onReset = vi.fn();
-    render(
-      <SettingsPanel
-        settings={createDefaultSettings({
-          ...resolveFormatProfile("default"),
-        } as ResolvedBrowserOptions)}
-        onChange={vi.fn()}
-        onFormatterChange={vi.fn()}
-        onClose={vi.fn()}
-        onRestoreDefaults={onRestoreDefaults}
-        onReset={onReset}
-        profiles={profiles}
-        profileOverrides={profileOverrides}
-      />,
-    );
+    const props = renderPanel();
+
+    expect(screen.getByRole("dialog", { name: "Settings" })).toBeVisible();
     await user.click(
-      screen.getByRole("button", { name: "Restore core defaults" }),
+      screen.getByRole("button", { name: "Restore default rules" }),
     );
-    await user.click(screen.getByRole("button", { name: "Reset settings" }));
-    expect(onRestoreDefaults).toHaveBeenCalledOnce();
-    expect(onReset).toHaveBeenCalledOnce();
+    await user.click(screen.getByRole("button", { name: "Reset everything" }));
+    expect(props.onRestoreDefaults).toHaveBeenCalledOnce();
+    expect(props.onReset).toHaveBeenCalledOnce();
     expect(
-      screen.getByText("MediaWiki bundled browser configuration"),
+      screen.getByText("MediaWiki, built-in browser configuration"),
     ).toBeInTheDocument();
-    expect(screen.queryByRole("option", { name: "Aggressive" })).toBeNull();
   });
+
+  it("switches presets and toggles rules through labelled controls", async () => {
+    const user = userEvent.setup();
+    const props = renderPanel();
+
+    expect(screen.getByRole("radio", { name: "Default" })).toBeChecked();
+    await user.click(screen.getByRole("radio", { name: "Complete" }));
+    expect(props.onFormatterChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ profile: "production" }),
+    );
+
+    const templates = screen.getByRole("switch", { name: "Format templates" });
+    expect(templates).toBeChecked();
+    expect(screen.getByLabelText("Line width")).toHaveValue(120);
+    await user.click(templates);
+    expect(props.onFormatterChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ formatTemplates: false }),
+    );
+  });
+
+  it("commits only valid line widths", async () => {
+    const user = userEvent.setup();
+    const props = renderPanel();
+    const lineWidth = screen.getByLabelText("Line width");
+
+    await user.clear(lineWidth);
+    await user.type(lineWidth, "5");
+    expect(props.onFormatterChange).not.toHaveBeenCalled();
+    await user.type(lineWidth, "0");
+    expect(props.onFormatterChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ lineWidth: 50 }),
+    );
+  });
+
+  it("offers the theme choice, which is hidden from the header on phones", async () => {
+    const user = userEvent.setup();
+    const props = renderPanel();
+
+    expect(screen.getByRole("radio", { name: "Match system" })).toBeChecked();
+    await user.click(screen.getByRole("radio", { name: "Dark" }));
+    expect(props.onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ theme: "dark" }),
+    );
+  });
+
 });

@@ -24,7 +24,7 @@ test("never transmits, logs, URL-encodes, or persists Wikitext", async ({ page }
     buffer: Buffer.from(`==${marker}-file==\n`),
   });
   await page.getByRole("button", { name: "Format" }).click();
-  await expect(page.getByText("Formatted with changes")).toBeVisible();
+  await expect(page.getByRole("status")).toContainText("Formatted");
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Download" }).click();
   const download = await downloadPromise;
@@ -35,12 +35,12 @@ test("never transmits, logs, URL-encodes, or persists Wikitext", async ({ page }
 
   await page.locator('[data-testid="source-editor"] .cm-content').click();
   await page.keyboard.insertText(" stale edit");
-  await expect(page.getByText("Output is outdated")).toBeVisible();
-  await page.getByRole("button", { name: "Diff" }).click();
-  await expect(page.getByText("Previous formatting run")).toBeVisible();
+  await expect(page.getByRole("status")).toContainText("Out of date");
+  await page.getByRole("tab", { name: /^Changes/ }).click();
+  await expect(page.getByText("Compared with the source as it was when you last formatted.")).toBeVisible();
   await page.getByRole("button", { name: "Format" }).click();
-  await expect(page.getByText(/Formatted with changes|Already formatted/)).toBeVisible();
-  await page.getByRole("button", { name: "Apply output" }).click();
+  await expect(page.getByRole("status")).toContainText(/Formatted|No changes needed/);
+  await page.getByRole("button", { name: "Replace source" }).click();
   await page.keyboard.press("Control+z");
 
   await fileInput.setInputFiles({
@@ -49,7 +49,7 @@ test("never transmits, logs, URL-encodes, or persists Wikitext", async ({ page }
     buffer: Buffer.concat([Buffer.from([0]), Buffer.from(marker)]),
   });
   await page.getByRole("button", { name: "Format" }).click();
-  await expect(page.getByText("Fail-closed")).toBeVisible();
+  await expect(page.getByRole("status")).toContainText("Left unchanged");
 
   const storage = await page.evaluate(() =>
     Object.fromEntries(Array.from({ length: localStorage.length }, (_, index) => {

@@ -1,3 +1,6 @@
+import "@fontsource/libertinus-serif/latin-400.css";
+import "@fontsource/libertinus-serif/latin-600.css";
+import "@fontsource-variable/jetbrains-mono/wght.css";
 import "./styles/tokens.css";
 import "./styles/app.css";
 

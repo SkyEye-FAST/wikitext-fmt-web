@@ -28,7 +28,6 @@ describe("EditorPane", () => {
 
     expect(ref.current?.getValue()).toBe("==Title==\n");
     expect(onDocumentChange).toHaveBeenCalledWith({ characters: 10, lines: 2 });
-    expect(screen.getByLabelText("2 lines, 10 characters")).toBeVisible();
 
     act(() => ref.current?.focus());
     expect(screen.getByRole("textbox", { name: "Source" })).toHaveFocus();
