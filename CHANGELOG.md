@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+### Changed
+
+- Redesign the workspace: Source and Result editors joined by a Format
+  button, Result and Changes tabs, and a report bar with a one-sentence
+  status, the active preset, and expandable details. On narrow screens one
+  pane shows at a time.
+- Rewrite all interface copy in English, Simplified Chinese, and Traditional
+  Chinese. Failure codes are now explained in plain language, with the core's
+  exact message kept under Technical details.
+- Add an empty-source card with Paste, Open a file, and Try an example, and
+  accept files dropped onto the source.
+- Move settings into a modal sheet with Default and Complete presets, inline
+  previews of layout choices, and the theme choice.
+- Replace the inline notices with toasts; clearing the source can be undone
+  from the toast.
+- Restyle with a MediaWiki Codex–based palette, Libertinus Serif headings,
+  and JetBrains Mono editors.
+- Remove manual spaces between Han and Latin text from the Chinese catalogs;
+  supporting browsers add the spacing through CSS `text-autospace`.
+- Add `radix-ui`, `sonner`, `@fontsource/libertinus-serif`, and
+  `@fontsource-variable/jetbrains-mono`.
+
+### Fixed
+
+- Undoing **Replace source** restores the earlier source even when it follows
+  typing within the editor's undo-grouping window.
+- Return focus to the control that opened Settings when the sheet closes.
+- Make the scrollable editor regions keyboard-focusable.
+- Deduplicate `@lezer/common` and `@lezer/highlight` so syntax highlighting
+  cannot crash on mismatched copies.
+- Stop the header from overflowing on narrow screens and at 200% zoom.
+
 ## 0.4.0 — 2026-10-22
 
 ### Added

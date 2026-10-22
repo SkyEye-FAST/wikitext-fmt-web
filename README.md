@@ -6,13 +6,14 @@ Formatting runs locally in your browser. Source text is not uploaded, logged, pl
 
 ## Features
 
-- CodeMirror 6 source and read-only output editors with line numbers, search, bracket matching, line wrapping, and MediaWiki Wikitext highlighting.
+- Two CodeMirror 6 editors, Source and Result, joined by a Format button with its Ctrl/Cmd+Enter shortcut. Both have line numbers, search, bracket matching, optional line wrapping, and MediaWiki Wikitext highlighting.
 - Explicit formatting through `wikitext-fmt/browser`; formatting never runs on each keystroke or on the main UI thread.
-- Changed, already-formatted, fail-closed, unexpected-error, and explicitly outdated-result states.
-- Exact structured failure fields, warnings, rule counters, and structural-equivalence diagnostics.
-- Side-by-side CodeMirror merge diff on wide screens and unified diff on narrow screens.
-- Copy, local file opening, browser-generated downloads, applying current output, clear, and example workflows.
-- Core formatter settings, system/light/dark themes, and responsive desktop/mobile layouts.
+- A one-sentence status for every outcome: formatted, no changes needed, left unchanged (fail-closed), formatter error, and out of date.
+- A report bar whose Details panel lists what changed, skipped rules, why a result was rejected, and the core's exact failure code, stage and message.
+- A Changes tab with a side-by-side merge view on wide screens and a unified view on narrow ones.
+- Paste, open or drop a file, try an example, copy, download, replace the source with the result (undoable), and clear with Undo.
+- A settings sheet with Default and Complete presets, per-rule controls, and the theme and line-wrapping choices.
+- System, light and dark themes; responsive layouts down to 320px and 200% zoom.
 - No backend, analytics, advertising, external parser CDN, service worker, or Wikitext preview rendering.
 
 This project is independent of the core formatter repository and consumes the exact published npm dependency `wikitext-fmt: "0.10.0"` as an ordinary external application. It is not affiliated with the Wikimedia Foundation.
@@ -56,7 +57,7 @@ wikitext-fmt/browser + bundled wikiparser-node runtime
 ```
 
 - `src/app/` composes the workspace and application state.
-- `src/components/` contains focused UI components, including lazy settings and diff surfaces.
+- `src/components/` contains the header, Source and Result panes, the format seam, the report bar, and the lazily loaded settings and diff surfaces.
 - `src/editor/` owns CodeMirror state, local Wikitext language support, and themes.
 - `src/formatter/` owns the typed Worker protocol, transport, cancellation, result classification, and the only formatter runtime import.
 - `src/settings/` validates, migrates, and persists theme and formatter settings.
@@ -64,7 +65,7 @@ wikitext-fmt/browser + bundled wikiparser-node runtime
 
 CodeMirror is the mutable authority for the source document; ordinary keystrokes update only editor-local statistics and do not copy the full document into React state. A completed formatting run retains one immutable submitted snapshot together with source and formatter-option revisions, the detailed result, and duration. Output, diagnostics, and Diff are derived from that one run. Editing source or formatting options keeps the prior output visible but marks it outdated; Diff continues comparing the submitted snapshot with its own output. A new result is discarded if either revision changes before the Worker responds. Theme, language, line wrapping, and panel visibility do not invalidate output.
 
-**Apply output** is available only for a current successful run. It replaces the CodeMirror source document in one undoable transaction, returns focus to the source editor, and clears the completed run so an earlier snapshot cannot be mistaken for a result for the newly applied source.
+**Replace source** is available only for a current successful run. It replaces the CodeMirror source document in one transaction with its own undo step, returns focus to the source editor, and clears the completed run so an earlier snapshot cannot be mistaken for a result for the newly applied source.
 
 Every format request receives a monotonically increasing ID and a Worker generation. The explicit `initialize` handshake produces exactly one generation-bound `ready` response after the formatter module has loaded. The client rejects superseded operations, settles pending work exactly once on restart, and ignores all messages and errors from old generations. Stop terminates the busy Worker and creates a new module Worker while CodeMirror source and settings remain intact. Module-load errors, invalid responses, and formatter exceptions are presented as unexpected errors; structured formatter failures remain distinct and retain the core package's exact code, stage, and message.
 
@@ -72,13 +73,15 @@ The main React bundle imports only public `wikitext-fmt/browser` types. `formatW
 
 ## Formatter settings
 
-The settings drawer exposes:
+The settings sheet exposes:
 
-- General: profile, line width, reliability level, and editor line wrapping.
-- Templates: template formatting, inline spacing, parameter layout, and line width.
-- Tables: table formatting, safe caption/opener/row-attribute spacing, and cell-separator style. Preserve mode preserves only inline cell separators.
-- Structure: headings, lists, section spacing, blank-line normalization, and HTML void-tag style.
-- Links and metadata: categories, file links, wikilinks, external links, references, redirects, behavior switches, interlanguage links, placements, and interlanguage prefixes.
+- Preset: Default or Complete.
+- Templates: template formatting, line width, one-line call spacing, and multi-line parameter layout.
+- Tables: table formatting and how cells joined with `||` or `!!` are laid out. "Keep as written" preserves only inline cell separators.
+- Page layout: headings, lists, space around headings, blank-line collapsing, and break-tag style.
+- Links and footer: wikilinks, external links, file links, references, redirects, categories, behavior switches, interlanguage links, their positions, and language prefixes.
+- Display: theme and line wrapping.
+- Advanced: rule reliability limit and the read-only parser configuration.
 
 The parser configuration is read-only: **MediaWiki bundled browser configuration**. The first release does not expose arbitrary `parserConfig`, siteinfo fetching, or complex localization alias editing. The formatter browser build supports only its bundled `mediawiki`/`default` configuration.
 
@@ -86,18 +89,20 @@ Only the language preference, theme preference, line-wrapping preference, and va
 
 ## Language support
 
-The UI is available in **English**, **简体中文** (Simplified Chinese), and **繁體中文** (Traditional Chinese). A language selector sits next to the theme selector in the page header.
+The UI is available in **English**, **简体中文** (Simplified Chinese), and **繁體中文** (Traditional Chinese). A language menu sits in the page header.
 
 | Setting | Behaviour |
 | --- | --- |
-| Follow browser | Detects the best match from `navigator.languages` (zh-CN/zh-SG/zh-MY → zh-Hans; zh-TW/zh-HK/zh-MO → zh-Hant; other → English). |
+| Browser language | Detects the best match from `navigator.languages` (zh-CN/zh-SG/zh-MY → zh-Hans; zh-TW/zh-HK/zh-MO → zh-Hant; other → English). |
 | English | Forces the English UI regardless of browser settings. |
 | 简体中文 | Forces Simplified Chinese. |
 | 繁體中文 | Forces Traditional Chinese. |
 
 The language preference is stored in `localStorage` (settings schema v3) so it is available before the formatter Worker finishes loading. Changing the language updates all React UI text, CodeMirror and diff accessible names, `document.documentElement.lang`, the page title, and meta tags immediately without rebuilding the Worker or clearing source text.
 
-**The formatter core returns diagnostics, failure codes, failure messages, and rule IDs in English.** The UI translates surrounding labels (e.g. "Stage:", "Rule", "Severity", table headers, button text) but preserves the core's exact original message text so it remains searchable and matches existing tests and documentation.
+**The formatter core returns diagnostics, failure codes, failure messages, and rule IDs in English.** The UI explains each failure code in plain language and translates the surrounding labels, but preserves the core's exact original message text under **Technical details** so it remains searchable.
+
+The Chinese catalogs contain no manual spaces between Han characters and Latin letters or digits. The page sets CSS `text-autospace: normal`, so browsers that support it add that spacing; code, shortcuts and the editors opt out. Browsers without `text-autospace` show the text unspaced, and no spacing is added next to symbols such as `||` or `<br>`.
 
 ## Testing and verification
 
@@ -114,7 +119,7 @@ pnpm check
 
 Vitest and React Testing Library cover settings validation/migration, storage privacy, Worker typing/lifecycle/stale responses, classification, structured failure rendering, helpers, statistics, and settings reset actions. Integration tests run the real installed `wikitext-fmt@0.10.0` browser package for headings, templates, table captions and attributes, split/preserve separators, nested and top-level list boundaries, redirects, references, interlanguage links, unchanged text, structured fail-closed output, CRLF, and idempotency.
 
-Playwright provides full Chromium coverage plus focused Firefox and WebKit smoke coverage. It covers iterative format → stale output → Diff → reformat → apply → undo flows, changed status, output inspection, setting changes, persistence without source retention, keyboard formatting, Stop/recreation, local file/download behavior, unique-marker network and storage privacy checks, axe accessibility scans, 200% zoom, and responsive layouts.
+Playwright provides full Chromium coverage plus focused Firefox and WebKit smoke coverage. It covers iterative format → out of date → Changes → reformat → replace source → undo flows, presets and setting persistence, file drop, clear with undo, settings focus handling, Stop/recreation, fail-closed details, language switching, unique-marker network and storage privacy checks, axe accessibility scans, 200% zoom, and responsive layouts.
 
 The bundle check rejects Node built-ins, `fast-glob`, CLI/config-discovery/VS Code code, core-workspace references, and deep package imports in the Worker graph. It reports raw and gzip baselines without arbitrary failure thresholds.
 
