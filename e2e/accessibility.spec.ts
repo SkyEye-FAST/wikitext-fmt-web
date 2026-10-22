@@ -68,7 +68,7 @@ test("keeps controls available at mobile sizes and 200 percent zoom", async ({ p
     await page.setViewportSize(viewport);
     await page.reload();
     await expect(page.getByRole("button", { name: "Format" })).toBeVisible();
-    await expect(page.getByLabel("Language")).toBeVisible();
+    await expect(page.getByRole("button", { name: /^Language/ })).toBeVisible();
     await expect(page.getByRole("button", { name: "Settings" })).toBeVisible();
     const formatBox = await page.getByRole("button", { name: "Format" }).boundingBox();
     expect(formatBox?.height).toBeGreaterThanOrEqual(36);

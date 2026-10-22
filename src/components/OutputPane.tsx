@@ -1,4 +1,4 @@
-import { lazy, type Ref, Suspense } from "react";
+import { lazy, type Ref, Suspense, useEffect, useRef } from "react";
 
 import { Copy, Download, Replace } from "lucide-react";
 import { Tabs } from "radix-ui";
@@ -53,9 +53,24 @@ export function OutputPane({
   const stale = Boolean(run) && freshness !== "current";
   const failed = Boolean(run?.result.failure);
   const identical = run ? run.result.formatted === run.sourceSnapshot : false;
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // Changed lines flash once when a new result arrives. The flag is
+  // short-lived so lines CodeMirror renders later, on scroll, stay still.
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!run || !section) return;
+    section.dataset.fresh = "";
+    const timer = window.setTimeout(() => delete section.dataset.fresh, 900);
+    return () => {
+      window.clearTimeout(timer);
+      delete section.dataset.fresh;
+    };
+  }, [run]);
 
   return (
     <section
+      ref={sectionRef}
       className="pane pane-output"
       aria-labelledby="output-title"
       data-hidden-on-mobile={hidden || undefined}
@@ -80,7 +95,11 @@ export function OutputPane({
                 {t("output.tab.changes")}
                 {run && !failed && !stale && !identical ? (
                   <>
-                    <span className="tab-count" aria-hidden="true">
+                    <span
+                      key={changedLines.size}
+                      className="tab-count"
+                      aria-hidden="true"
+                    >
                       {changedLines.size.toLocaleString(locale)}
                     </span>
                     <span className="visually-hidden">

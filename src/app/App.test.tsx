@@ -28,6 +28,15 @@ afterEach(() => {
   });
 });
 
+/** Picks an interface language from the header menu. */
+async function chooseLanguage(
+  user: ReturnType<typeof userEvent.setup>,
+  option: string,
+) {
+  await user.click(screen.getByRole("button", { name: /^Language/ }));
+  await user.click(await screen.findByRole("menuitemradio", { name: option }));
+}
+
 /** The status line at the bottom of the page. */
 function reportStatus() {
   const status = document.querySelector<HTMLElement>(".report-status");
@@ -146,7 +155,7 @@ describe("App formatting snapshots", () => {
     await within(reportStatus()).findByText("Formatted");
     await user.click(screen.getByRole("radio", { name: "Dark" }));
     expect(reportStatus()).not.toHaveTextContent("Out of date");
-    await user.selectOptions(screen.getByLabelText("Language"), "zh-Hans");
+    await chooseLanguage(user, "简体中文");
     expect(reportStatus()).not.toHaveTextContent("已过期");
 
     await user.click(screen.getByRole("button", { name: "设置" }));
@@ -337,7 +346,7 @@ describe("App formatter client lifecycle", () => {
     const client = clients[0];
     expect(client).toBeDefined();
 
-    await user.selectOptions(screen.getByLabelText("Language"), "zh-Hans");
+    await chooseLanguage(user, "简体中文");
     expect(factory).toHaveBeenCalledTimes(1);
     expect(client?.dispose).not.toHaveBeenCalled();
     expect(client?.restart).not.toHaveBeenCalled();
@@ -368,7 +377,7 @@ describe("App formatter client lifecycle", () => {
     await screen.findByRole("button", { name: "Format" });
     await user.click(screen.getByRole("button", { name: "Load example" }));
     await user.click(screen.getByRole("button", { name: "Format" }));
-    await user.selectOptions(screen.getByLabelText("Language"), "zh-Hant");
+    await chooseLanguage(user, "繁體中文");
 
     await act(async () => {
       resolveFormat({
@@ -476,7 +485,7 @@ describe("App formatter client lifecycle", () => {
     expect(formatButton).toHaveAttribute("title", "Format (Ctrl+Enter)");
 
     expect(
-      screen.getByRole("heading", { name: "Paste wikitext or drop a file here" }),
+      screen.getByRole("heading", { name: "Paste wikitext or drop a file" }),
     ).toBeVisible();
     expect(formatButton).toHaveAttribute("aria-keyshortcuts", "Control+Enter");
     expect(document.querySelector(".seam-shortcut")).toHaveTextContent(

@@ -1,4 +1,5 @@
-import { Globe, Monitor, Moon, Settings2, Sun } from "lucide-react";
+import { Check, ChevronDown, Globe, Monitor, Moon, Settings2, Sun } from "lucide-react";
+import { DropdownMenu } from "radix-ui";
 
 import { FRONTEND_REPOSITORY_URL } from "../app/routes.js";
 import type { LanguagePreference } from "../i18n/locales.js";
@@ -19,6 +20,16 @@ const THEME_OPTIONS = [
   { value: "dark", Icon: Moon, key: "theme.dark" },
 ] as const;
 
+const LANGUAGE_OPTIONS = [
+  { value: "en", key: "language.en" },
+  { value: "zh-Hans", key: "language.zh-Hans" },
+  { value: "zh-Hant", key: "language.zh-Hant" },
+] as const;
+
+function isLanguagePreference(value: string): value is LanguagePreference {
+  return value === "system" || LANGUAGE_OPTIONS.some((option) => option.value === value);
+}
+
 function GitHubMark() {
   return (
     <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
@@ -38,6 +49,10 @@ export function AppHeader({
   onOpenSettings,
 }: AppHeaderProps) {
   const { t } = useI18n();
+  const currentLanguage =
+    language === "system"
+      ? t("language.follow-browser")
+      : t(LANGUAGE_OPTIONS.find((option) => option.value === language)?.key ?? "language.en");
 
   return (
     <header className="app-header">
@@ -71,21 +86,43 @@ export function AppHeader({
           ))}
         </fieldset>
 
-        <label className="language-select" title={t("language.label")}>
-          <Globe size={15} aria-hidden="true" />
-          <select
-            aria-label={t("language.label")}
-            value={language}
-            onChange={(event) =>
-              onLanguageChange(event.target.value as LanguagePreference)
-            }
+        <DropdownMenu.Root modal={false}>
+          <DropdownMenu.Trigger
+            className="button is-quiet language-trigger"
+            aria-label={t("language.current", { language: currentLanguage })}
+            title={t("language.label")}
           >
-            <option value="system">{t("language.follow-browser")}</option>
-            <option value="en">{t("language.en")}</option>
-            <option value="zh-Hans">{t("language.zh-Hans")}</option>
-            <option value="zh-Hant">{t("language.zh-Hant")}</option>
-          </select>
-        </label>
+            <Globe size={15} aria-hidden="true" />
+            <span className="button-label">{currentLanguage}</span>
+            <ChevronDown className="language-chevron" size={14} aria-hidden="true" />
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Portal>
+            <DropdownMenu.Content className="menu" align="end" sideOffset={4} collisionPadding={8}>
+              <DropdownMenu.RadioGroup
+                value={language}
+                onValueChange={(value) => {
+                  if (isLanguagePreference(value)) onLanguageChange(value);
+                }}
+              >
+                <DropdownMenu.RadioItem className="menu-item" value="system">
+                  <DropdownMenu.ItemIndicator className="menu-indicator">
+                    <Check size={14} aria-hidden="true" />
+                  </DropdownMenu.ItemIndicator>
+                  {t("language.follow-browser")}
+                </DropdownMenu.RadioItem>
+                <DropdownMenu.Separator className="menu-separator" />
+                {LANGUAGE_OPTIONS.map(({ value, key }) => (
+                  <DropdownMenu.RadioItem key={value} className="menu-item" value={value} lang={value}>
+                    <DropdownMenu.ItemIndicator className="menu-indicator">
+                      <Check size={14} aria-hidden="true" />
+                    </DropdownMenu.ItemIndicator>
+                    {t(key)}
+                  </DropdownMenu.RadioItem>
+                ))}
+              </DropdownMenu.RadioGroup>
+            </DropdownMenu.Content>
+          </DropdownMenu.Portal>
+        </DropdownMenu.Root>
 
         <button
           type="button"

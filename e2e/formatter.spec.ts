@@ -101,9 +101,10 @@ test("shows no-change and real structured fail-closed states", async ({ page }) 
 
 test("switches, persists, and restores the interface language", async ({ page }) => {
   await page.getByRole("button", { name: "Load example" }).click();
-  await page.getByLabel("Language").selectOption("zh-Hans");
+  await page.getByRole("button", { name: /^Language/ }).click();
+  await page.getByRole("menuitemradio", { name: "简体中文" }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "zh-Hans");
-  await expect(page.getByLabel("语言")).toHaveValue("zh-Hans");
+  await expect(page.getByRole("button", { name: "语言：简体中文" })).toBeVisible();
   await expect(page.locator("#source-stats")).toContainText("行");
   await expect(page.locator(".report-preset")).toContainText("默认");
   await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /MediaWiki维基文本/);
@@ -112,10 +113,12 @@ test("switches, persists, and restores the interface language", async ({ page })
   expect(await page.evaluate(() => localStorage.getItem("wikitext-formatter.locale"))).toBeNull();
 
   await page.reload();
-  await expect(page.getByLabel("语言")).toHaveValue("zh-Hans");
-  await page.getByLabel("语言").selectOption("zh-Hant");
+  await expect(page.getByRole("button", { name: "语言：简体中文" })).toBeVisible();
+  await page.getByRole("button", { name: "语言：简体中文" }).click();
+  await expect(page.getByRole("menuitemradio", { name: "简体中文" })).toHaveAttribute("aria-checked", "true");
+  await page.getByRole("menuitemradio", { name: "繁體中文" }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "zh-Hant");
-  await expect(page.getByRole("heading", { name: "貼上維基文字，或將檔案拖放至此處" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "貼上維基文字或拖放檔案" })).toBeVisible();
   await expect(page.locator(".report-preset")).toContainText("預設");
 });
 
@@ -152,7 +155,7 @@ test("clears the source and undoes the clear from the notification", async ({ pa
   await expect(source).toContainText("Example article");
   await page.getByRole("button", { name: "Clear" }).click();
   await expect(source).toHaveText("");
-  await expect(page.getByRole("heading", { name: "Paste wikitext or drop a file here" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Paste wikitext or drop a file" })).toBeVisible();
   await page.getByRole("button", { name: "Undo" }).click();
   await expect(source).toContainText("Example article");
 });

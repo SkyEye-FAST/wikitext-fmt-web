@@ -15,6 +15,7 @@
   "theme.light": "Light",
   "theme.dark": "Dark",
   "language.label": "Language",
+  "language.current": "Language: {language}",
   "language.follow-browser": "Browser language",
   "language.en": "English",
   "language.zh-Hans": "简体中文",
@@ -33,7 +34,7 @@
   "editor.clear": "Clear",
   "editor.clear.title": "Clear the source",
 
-  "empty.title": "Paste wikitext or drop a file here",
+  "empty.title": "Paste wikitext or drop a file",
   "empty.paste": "Paste",
   "empty.open": "Open file",
   "empty.example": "Load example",

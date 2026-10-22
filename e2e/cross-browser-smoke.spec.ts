@@ -18,11 +18,14 @@ test("runs the critical formatter workflow", async ({ page }) => {
   await page.keyboard.insertText("stale edit");
   await expect(page.getByRole("status")).toContainText("Out of date");
   await expect(page.getByRole("button", { name: "Replace source" })).toBeDisabled();
-  await page.getByLabel("Language").selectOption("zh-Hans");
+  await page.getByRole("button", { name: /^Language/ }).click();
+  await page.getByRole("menuitemradio", { name: "简体中文" }).click();
   await expect(page.getByRole("status")).toContainText("已过期");
-  await page.getByLabel("语言").selectOption("zh-Hant");
+  await page.getByRole("button", { name: /^语言/ }).click();
+  await page.getByRole("menuitemradio", { name: "繁體中文" }).click();
   await expect(page.getByRole("status")).toContainText("已過期");
-  await page.getByLabel("語言").selectOption("en");
+  await page.getByRole("button", { name: /^語言/ }).click();
+  await page.getByRole("menuitemradio", { name: "English" }).click();
 
   await page.locator('input[type="file"]').setInputFiles({
     name: "Malformed.wikitext",

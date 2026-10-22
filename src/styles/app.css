@@ -96,6 +96,57 @@ kbd,
   }
 }
 
+/* ---------- Motion ---------- */
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes status-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+
+/* The workspace assembles once on load: header, then the two documents
+   around the seam, then the status bar. "backwards" leaves no transform
+   behind, so nothing becomes a containing block afterwards. */
+.app-shell > .app-header,
+.workspace > .pane,
+.workspace > .format-seam,
+.app-shell > .report {
+  animation: rise-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+.workspace > .format-seam {
+  animation-delay: 60ms;
+}
+
+.workspace > .pane-output {
+  animation-delay: 110ms;
+}
+
+.app-shell > .report {
+  animation-delay: 160ms;
+}
+
+/* Theme and language switches crossfade the whole page. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 200ms;
+}
+
 /* ---------- Controls ---------- */
 
 .button,
@@ -296,30 +347,104 @@ kbd {
   outline-offset: 1px;
 }
 
-.language-select {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
+.language-trigger {
+  gap: 5px;
+  padding: 0 8px 0 10px;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.language-trigger > svg:first-child {
   color: var(--ink-subtle);
 }
 
-.language-select svg {
+.language-chevron {
+  color: var(--ink-faint);
+  transition: transform 160ms ease;
+}
+
+.language-trigger[data-state="open"] {
+  background: var(--rule-soft);
+}
+
+.language-trigger[data-state="open"] .language-chevron {
+  transform: rotate(180deg);
+}
+
+/* ---------- Menus ---------- */
+
+.menu {
+  z-index: 50;
+  min-width: max(var(--radix-dropdown-menu-trigger-width), 168px);
+  padding: 4px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-large);
+  background: var(--raised);
+  box-shadow: var(--shadow);
+  transform-origin: var(--radix-dropdown-menu-content-transform-origin);
+}
+
+.menu[data-state="open"] {
+  animation: menu-in 140ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.menu[data-state="closed"] {
+  animation: menu-out 100ms ease-in forwards;
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+}
+
+@keyframes menu-out {
+  to {
+    opacity: 0;
+    transform: translateY(-2px) scale(0.98);
+  }
+}
+
+.menu-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px 0 30px;
+  border-radius: 4px;
+  color: var(--ink);
+  white-space: nowrap;
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+}
+
+.menu-item[data-highlighted] {
+  background: var(--rule-soft);
+}
+
+.menu-item[data-state="checked"] {
+  color: var(--progressive);
+  font-weight: 600;
+}
+
+.menu-item:focus-visible {
+  outline: 2px solid var(--progressive);
+  outline-offset: -2px;
+}
+
+.menu-indicator {
   position: absolute;
   left: 9px;
-  pointer-events: none;
+  display: inline-grid;
+  place-items: center;
+  animation: pop 160ms ease-out;
 }
 
-.language-select select {
-  height: var(--control-height);
-  padding: 0 10px 0 30px;
-  border: 1px solid transparent;
-  border-radius: var(--radius);
-  background: transparent;
-  color: var(--ink);
-  cursor: pointer;
-}
-
-.language-select select:hover {
+.menu-separator {
+  height: 1px;
+  margin: 4px 6px;
   background: var(--rule-soft);
 }
 
@@ -343,6 +468,7 @@ kbd {
   min-width: 0;
   min-height: 0;
   background: var(--paper);
+  container: pane / inline-size;
 }
 
 .output-tabs {
@@ -503,6 +629,7 @@ kbd {
   line-height: 18px;
   text-align: center;
   font-variant-numeric: tabular-nums;
+  animation: pop 240ms cubic-bezier(0.3, 1.4, 0.5, 1);
 }
 
 .tab[data-state="active"] {
@@ -517,6 +644,14 @@ kbd {
   height: 2px;
   background: var(--progressive);
   content: "";
+  animation: underline-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes underline-in {
+  from {
+    transform: scaleX(0.2);
+    opacity: 0;
+  }
 }
 
 .tab:focus-visible {
@@ -575,6 +710,7 @@ kbd {
 }
 
 .format-disc {
+  position: relative;
   display: grid;
   place-items: center;
   width: 52px;
@@ -587,7 +723,34 @@ kbd {
     0 2px 6px rgb(51 102 204 / 35%);
   transition:
     background-color 120ms ease,
-    transform 120ms ease;
+    transform 160ms cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+
+/* While formatting, a ring ripples out from the disc. */
+.format-disc::after {
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--progressive);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  content: "";
+}
+
+.format-seam[data-busy] .format-disc::after {
+  animation: ripple 1400ms cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+}
+
+@keyframes ripple {
+  from {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(1.5);
+  }
 }
 
 .format-button:hover:not(:disabled) .format-disc {
@@ -597,6 +760,7 @@ kbd {
 
 .format-button:active:not(:disabled) .format-disc {
   background: var(--progressive-active);
+  transform: translateX(2px) scale(0.94);
 }
 
 .format-button:disabled {
@@ -635,6 +799,7 @@ kbd {
   font-size: 11px;
   font-weight: 600;
   text-align: center;
+  animation: pop 200ms ease-out;
 }
 
 /* ---------- Empty states ---------- */
@@ -646,6 +811,7 @@ kbd {
   justify-content: center;
   padding: clamp(32px, 12vh, 120px) 24px 24px;
   pointer-events: none;
+  container-type: inline-size;
 }
 
 .empty-card {
@@ -653,8 +819,26 @@ kbd {
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  max-width: 380px;
+  max-width: 440px;
   text-align: center;
+}
+
+/* The prompt settles in, then its actions follow one by one. */
+.empty-title {
+  animation: rise-in 320ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+.empty-actions > * {
+  animation: rise-in 320ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  animation-delay: calc(80ms + var(--i, 0) * 50ms);
+}
+
+.empty-actions > :nth-child(2) {
+  --i: 1;
+}
+
+.empty-actions > :nth-child(3) {
+  --i: 2;
 }
 
 /* Only the buttons take clicks; anywhere else lands in the editor beneath. */
@@ -664,14 +848,16 @@ kbd {
 
 .empty-title {
   font-family: var(--font-serif);
-  font-size: 24px;
+  /* Shrinks with a narrow pane so the line stays whole. */
+  font-size: clamp(17px, 7cqi, 24px);
   font-weight: 600;
   line-height: 1.25;
+  text-wrap: balance;
 }
 
 .empty-state.is-passive .empty-title {
   color: var(--ink-subtle);
-  font-size: 20px;
+  font-size: clamp(16px, 6cqi, 20px);
 }
 
 .empty-actions {
@@ -692,6 +878,11 @@ kbd {
   border-radius: var(--radius-large);
   background: color-mix(in srgb, var(--progressive-soft) 88%, transparent);
   pointer-events: none;
+  animation: fade-in 140ms ease;
+}
+
+.drop-card {
+  animation: rise-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .drop-card {
@@ -714,6 +905,17 @@ kbd {
 .cm-output-changed {
   background: var(--diff-added-line);
   box-shadow: inset 3px 0 0 var(--diff-added);
+}
+
+.pane-output[data-fresh] .cm-output-changed {
+  animation: line-flash 800ms ease-out;
+}
+
+@keyframes line-flash {
+  from {
+    background: var(--diff-added);
+    box-shadow: inset 6px 0 0 var(--progressive);
+  }
 }
 
 .cm-editor .cm-changedLine,
@@ -796,6 +998,8 @@ kbd {
   align-items: center;
   gap: 6px;
   font-weight: 600;
+  white-space: nowrap;
+  animation: status-in 220ms ease-out;
 }
 
 .report-bar[data-tone="busy"] .report-label {
@@ -861,6 +1065,11 @@ kbd {
   white-space: nowrap;
 }
 
+.report-count {
+  animation: status-in 240ms ease-out backwards;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
 .report-count-jump {
   margin: 0 -4px;
   padding: 2px 4px;
@@ -922,10 +1131,19 @@ kbd {
   display: flex;
   flex-direction: column;
   width: min(460px, 100vw);
+  container: sheet / inline-size;
   border-left: 1px solid var(--rule);
   background: var(--paper);
   box-shadow: var(--shadow);
   animation: slide-in 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.sheet-overlay[data-state="closed"] {
+  animation: fade-out 160ms ease forwards;
+}
+
+.sheet[data-state="closed"] {
+  animation: slide-out 160ms ease-in forwards;
 }
 
 .sheet:focus {
@@ -940,6 +1158,19 @@ kbd {
 
 @keyframes slide-in {
   from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slide-out {
+  to {
     transform: translateX(24px);
     opacity: 0;
   }
@@ -1115,8 +1346,12 @@ kbd {
 
 .segment {
   position: relative;
-  flex: 1;
-  min-width: 0;
+  /* Equal widths, but never narrower than a label on one line. */
+  flex: 1 1 0;
+}
+
+.segment-label {
+  white-space: nowrap;
 }
 
 .segment + .segment {
@@ -1144,6 +1379,10 @@ kbd {
   font-weight: 600;
   text-align: center;
   pointer-events: none;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease,
+    box-shadow 120ms ease;
 }
 
 .segment:hover .segment-face {
@@ -1174,6 +1413,25 @@ kbd {
 
 .segment input:checked + .segment-face .segment-preview {
   color: inherit;
+}
+
+/* On small phones, choices with a preview stack: label left, sample right. */
+@container sheet (max-width: 380px) {
+  .segmented.has-preview {
+    flex-direction: column;
+  }
+
+  .segmented.has-preview .segment + .segment {
+    border-top: 1px solid var(--rule-strong);
+    border-left: 0;
+  }
+
+  .segmented.has-preview .segment-face {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 10px;
+  }
 }
 
 .number-input,
@@ -1266,7 +1524,38 @@ kbd {
 
 /* ---------- Responsive ---------- */
 
-@media (max-width: 1240px) {
+/* Pane headers give way by width of the pane itself, in two steps: the
+   output title goes first (the Result and Changes tabs already name the
+   pane), then the action labels. English labels run longer than Chinese. */
+@container pane (max-width: 690px) {
+  .pane-output:lang(en) .pane-title {
+    display: none;
+  }
+}
+
+@container pane (max-width: 530px) {
+  .pane-output .pane-title {
+    display: none;
+  }
+}
+
+@container pane (max-width: 540px) {
+  .pane:lang(en) .pane-actions .button-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .pane:lang(en) .pane-actions .button {
+    width: var(--control-height);
+    padding: 0;
+  }
+}
+
+@container pane (max-width: 420px) {
   .pane-actions .button-label {
     position: absolute;
     width: 1px;
@@ -1289,11 +1578,6 @@ kbd {
     display: none;
   }
 
-  /* The Result and Changes tabs already name the pane. */
-  .pane-output .pane-title {
-    display: none;
-  }
-
   .workspace {
     grid-template-columns: minmax(0, 1fr) 80px minmax(0, 1fr);
   }
@@ -1313,14 +1597,8 @@ kbd {
     display: none;
   }
 
-  .language-select select {
-    width: 34px;
-    padding: 0;
-    color: transparent;
-  }
-
-  .language-select svg {
-    left: 10px;
+  .language-chevron {
+    display: none;
   }
 
   .header-tools .button-label {
@@ -1432,6 +1710,27 @@ kbd {
     box-shadow: none;
   }
 
+  .format-disc::after {
+    display: none;
+  }
+
+  .format-button {
+    transition: transform 120ms ease;
+  }
+
+  .format-button:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  .format-button:active:not(:disabled) .format-disc {
+    transform: none;
+  }
+
+  /* Switching views shows the pane at once. */
+  .workspace > .pane-output {
+    animation-delay: 0ms;
+  }
+
   .format-button:hover:not(:disabled) .format-disc {
     background: none;
     transform: none;
@@ -1456,6 +1755,8 @@ kbd {
 
   .report-status {
     gap: 2px 8px;
+    /* Never narrower than its label; the counts move to the next line. */
+    min-width: min-content;
   }
 
   .report-fact {
@@ -1480,6 +1781,16 @@ kbd {
 
   .sheet-body {
     padding: 4px 16px 20px;
+  }
+}
+
+@media (max-width: 360px) {
+  .wordmark {
+    font-size: 17px;
+  }
+
+  .wordmark-brace {
+    margin: 0 0.06em;
   }
 }
 

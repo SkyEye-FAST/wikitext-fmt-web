@@ -63,6 +63,7 @@ import {
   triggerTextDownload,
 } from "../utils/document.js";
 import { getShortcutLabels } from "../utils/platform.js";
+import { withViewTransition } from "../utils/viewTransition.js";
 import {
   type FormatRun,
   isApplicableFormatRun,
@@ -140,7 +141,14 @@ function useResolvedTheme(preference: ThemePreference): ResolvedTheme {
     media.addEventListener("change", update);
     return () => media.removeEventListener("change", update);
   }, []);
-  return preference === "system" ? systemTheme : preference;
+  const preferred = preference === "system" ? systemTheme : preference;
+  // The choice itself updates at once; the page follows with a crossfade.
+  const [applied, setApplied] = useState(preferred);
+  useEffect(() => {
+    if (applied === preferred) return;
+    withViewTransition(() => setApplied(preferred));
+  }, [applied, preferred]);
+  return applied;
 }
 
 function useResolvedLocale(preference: LanguagePreference): SupportedLocale {
@@ -337,6 +345,8 @@ function AppMain({
   const [outputTab, setOutputTab] = useState<OutputTab>("result");
   const [mobileView, setMobileView] = useState<MobileView>("source");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // Loaded on first use, then kept mounted so the sheet can animate out.
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [busy, setBusy] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [sourceFilename, setSourceFilename] = useState<string>();
@@ -666,8 +676,15 @@ function AppMain({
   }
 
   function handleLanguageChange(lang: LanguagePreference): void {
-    setLanguagePref(lang);
-    setSettings((s) => ({ ...s, language: lang }));
+    withViewTransition(() => {
+      setLanguagePref(lang);
+      setSettings((s) => ({ ...s, language: lang }));
+    });
+  }
+
+  function openSettings(): void {
+    setSettingsLoaded(true);
+    setSettingsOpen(true);
   }
 
   // Files dropped anywhere on the workspace open as the source. Listening in
@@ -748,7 +765,7 @@ function AppMain({
         language={languagePref}
         onThemeChange={(theme) => setSettings((s) => ({ ...s, theme }))}
         onLanguageChange={handleLanguageChange}
-        onOpenSettings={() => setSettingsOpen(true)}
+        onOpenSettings={openSettings}
       />
       <input
         ref={fileInputRef}
@@ -838,7 +855,7 @@ function AppMain({
         notice={notice}
         presetLabel={presetLabel}
         shortcuts={shortcuts}
-        onAdjust={() => setSettingsOpen(true)}
+        onAdjust={openSettings}
         onGoToLine={handleGoToLine}
       />
 
@@ -850,9 +867,10 @@ function AppMain({
         toastOptions={{ className: "toast" }}
       />
 
-      {settingsOpen ? (
+      {settingsLoaded ? (
         <Suspense fallback={null}>
           <SettingsPanel
+            open={settingsOpen}
             settings={settings}
             onChange={setSettings}
             onFormatterChange={updateFormatter}

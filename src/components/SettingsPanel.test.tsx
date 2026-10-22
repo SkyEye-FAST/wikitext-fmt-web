@@ -25,6 +25,7 @@ const profileOverrides = Object.fromEntries(
 
 function renderPanel(overrides: Partial<Parameters<typeof SettingsPanel>[0]> = {}) {
   const props: Parameters<typeof SettingsPanel>[0] = {
+    open: true,
     settings: createDefaultSettings({
       ...resolveFormatProfile("default"),
     } as ResolvedBrowserOptions),

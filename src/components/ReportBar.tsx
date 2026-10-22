@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 import {
   CircleCheck,
   CircleDot,
@@ -150,12 +152,16 @@ function ToneIcon({ tone }: { tone: Tone }) {
 
 function RuleCountItem({
   count,
+  index,
   onGoToLine,
 }: {
   count: RuleCount;
+  index: number;
   onGoToLine: (line: number) => void;
 }) {
   const { t, locale } = useI18n();
+  // Items enter one after another, in reading order.
+  const style = { "--i": index } as CSSProperties;
   const content = (
     <>
       <span className="report-count-name">
@@ -182,11 +188,15 @@ function RuleCountItem({
   );
 
   if (count.line === undefined) {
-    return <li className="report-count">{content}</li>;
+    return (
+      <li className="report-count" style={style}>
+        {content}
+      </li>
+    );
   }
   const line = count.line;
   return (
-    <li className="report-count">
+    <li className="report-count" style={style}>
       <button
         type="button"
         className="report-count-jump"
@@ -228,7 +238,7 @@ export function ReportBar({
     <footer className="report" aria-label={t("report.label")}>
       <div className="report-bar" data-tone={presentation.tone}>
         <div className="report-status" role="status" aria-live="polite">
-          <span className="report-label">
+          <span key={presentation.label} className="report-label">
             <ToneIcon tone={presentation.tone} />
             {presentation.label}
           </span>
@@ -255,10 +265,11 @@ export function ReportBar({
 
         {counts.length > 0 ? (
           <ul className="report-counts" aria-label={t("report.counts")}>
-            {counts.map((count) => (
+            {counts.map((count, index) => (
               <RuleCountItem
                 key={count.rule}
                 count={count}
+                index={index}
                 onGoToLine={onGoToLine}
               />
             ))}

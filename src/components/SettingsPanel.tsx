@@ -1,4 +1,4 @@
-import { type ReactNode, useId, useState } from "react";
+import { type ReactNode, useId, useRef, useState } from "react";
 
 import { X } from "lucide-react";
 import { Dialog, Switch } from "radix-ui";
@@ -14,6 +14,7 @@ import { useI18n } from "../i18n/useI18n.js";
 import { applyCoreProfile, type AppSettings } from "../settings/schema.js";
 
 interface SettingsPanelProps {
+  open: boolean;
   settings: AppSettings;
   onChange: (settings: AppSettings) => void;
   onFormatterChange: (formatter: ResolvedBrowserOptions) => void;
@@ -256,6 +257,7 @@ function PrefixesField({
 }
 
 export default function SettingsPanel({
+  open,
   settings,
   onChange,
   onFormatterChange,
@@ -271,11 +273,7 @@ export default function SettingsPanel({
   const formatter = settings.formatter;
   // The panel opens from more than one control and has no Dialog.Trigger, so
   // remember whichever one opened it and hand focus back there on close.
-  const [opener] = useState(() =>
-    document.activeElement instanceof HTMLElement
-      ? document.activeElement
-      : null,
-  );
+  const opener = useRef<HTMLElement | null>(null);
 
   function update<K extends keyof Options>(key: K, value: Options[K]): void {
     onFormatterChange({ ...formatter, [key]: value });
@@ -307,16 +305,22 @@ export default function SettingsPanel({
   ];
 
   return (
-    <Dialog.Root open onOpenChange={(open) => !open && onClose()}>
+    <Dialog.Root open={open} onOpenChange={(next) => !next && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay className="sheet-overlay" />
         <Dialog.Content
           className="sheet"
           aria-describedby={undefined}
+          onOpenAutoFocus={() => {
+            opener.current =
+              document.activeElement instanceof HTMLElement
+                ? document.activeElement
+                : null;
+          }}
           onCloseAutoFocus={(event) => {
-            if (!opener?.isConnected) return;
+            if (!opener.current?.isConnected) return;
             event.preventDefault();
-            opener.focus();
+            opener.current.focus();
           }}
         >
           <header className="sheet-header">
