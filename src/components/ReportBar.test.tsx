@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { FormatDetailedResult } from "wikitext-fmt/browser";
 
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -19,10 +20,7 @@ const shortcuts = {
 function renderBar(status: FormatStatus, extra = {}) {
   const props = {
     status,
-    changedLineCount: 0,
     presetLabel: "Default",
-    formatterVersion: "0.10.0",
-    webVersion: "0.5.0",
     shortcuts,
     onAdjust: vi.fn(),
     onGoToLine: vi.fn(),
@@ -32,32 +30,50 @@ function renderBar(status: FormatStatus, extra = {}) {
   return { ...props, ...view };
 }
 
+function resultWithTable(): FormatDetailedResult {
+  const result = createDetailedResult("x");
+  return {
+    ...result,
+    tableFormatDiagnostics: {
+      ...result.tableFormatDiagnostics,
+      tablesChanged: 1,
+    },
+    tableDiagnostics: [
+      { changed: true, ambiguous: false, line: 23 },
+    ] as unknown as FormatDetailedResult["tableDiagnostics"],
+  };
+}
+
 describe("ReportBar", () => {
-  it("summarizes a successful run and keeps the details collapsed", async () => {
+  it("counts changes by rule and jumps to a line", async () => {
     const user = userEvent.setup();
     const props = renderBar(
       { kind: "changed", durationMs: 42 },
-      { result: createDetailedResult("x"), changedLineCount: 3 },
+      { result: resultWithTable() },
     );
 
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Formatted3 lines changed in 42 ms.",
-    );
-    const toggle = screen.getByRole("button", { name: "Details" });
-    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("status")).toHaveTextContent("Formatted42 ms");
+    const counts = screen.getByRole("list", { name: "Changes by rule" });
+    expect(counts).toHaveTextContent("Tables1");
 
-    await user.click(toggle);
-    expect(
-      screen.getByRole("button", { name: "Hide details" }),
-    ).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByText("No rule reported a change.")).toBeVisible();
-    expect(screen.getByText(/never uploaded/)).toBeVisible();
+    await user.click(screen.getByRole("button", { name: /Go to line 23/ }));
+    expect(props.onGoToLine).toHaveBeenCalledWith(23);
 
-    await user.click(screen.getByRole("button", { name: "Adjust" }));
+    await user.click(screen.getByRole("button", { name: "Default preset" }));
     expect(props.onAdjust).toHaveBeenCalledOnce();
   });
 
-  it("opens the details by itself when the formatter declines a change", () => {
+  it("shows no counts when nothing changed", () => {
+    renderBar(
+      { kind: "unchanged", durationMs: 4 },
+      { result: createDetailedResult("same") },
+    );
+
+    expect(screen.getByRole("status")).toHaveTextContent("No changes");
+    expect(screen.queryByRole("list")).not.toBeInTheDocument();
+  });
+
+  it("names a declined change and keeps the core message in a tooltip", () => {
     const failure = {
       code: "table-equivalence" as const,
       stage: "tables",
@@ -65,26 +81,30 @@ describe("ReportBar", () => {
     };
     renderBar(
       { kind: "failure", durationMs: 5, failure },
-      { result: { ...createDetailedResult("same"), failure } },
+      {
+        result: {
+          ...createDetailedResult("same"),
+          failure,
+          warning: failure.message,
+        },
+      },
     );
 
-    expect(screen.getByRole("status")).toHaveTextContent("Left unchanged");
-    expect(
-      screen.getByRole("button", { name: "Hide details" }),
-    ).toHaveAttribute("aria-expanded", "true");
-    expect(
-      screen.getByText("Why your text was left unchanged"),
-    ).toBeVisible();
-    expect(
-      screen.getAllByText(/would have changed a table's structure/).length,
-    ).toBeGreaterThan(0);
+    expect(screen.getByRole("status")).toHaveTextContent(
+      /Not formatted.*Would change table structure.*table-equivalence/,
+    );
+    expect(screen.queryByText("cell count differs")).not.toBeInTheDocument();
+    expect(screen.getByText("table-equivalence")).toHaveAttribute(
+      "title",
+      "Stage: tables\ncell count differs",
+    );
   });
 
   it("reports a stale result with the reason", () => {
     renderBar({ kind: "outdated", freshness: "options-outdated" });
 
     expect(screen.getByRole("status")).toHaveTextContent(
-      "Settings changed after this result was made.",
+      "Out of dateSettings changed",
     );
   });
 });

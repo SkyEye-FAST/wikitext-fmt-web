@@ -1,24 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import type { MessageCatalog } from "../i18n/types.js";
 import { createDetailedResult } from "../test/fixtures.js";
 import {
   classifyResult,
   classifyUnexpectedError,
-  summarizeRuleDiagnostics,
+  countRuleChanges,
 } from "./resultSummary.js";
-
-function t(
-  key: keyof MessageCatalog,
-  params?: Record<string, string | number>,
-): string {
-  // Return English-like output for testing — the exact messages are tested
-  // in the i18n catalog tests.
-  if (params?.count !== undefined) {
-    return String(params.count);
-  }
-  return String(key);
-}
 
 describe("formatter result classification", () => {
   it("distinguishes changed and unchanged results", () => {
@@ -54,13 +41,13 @@ describe("formatter result classification", () => {
     });
   });
 
-  it("summarizes rule counters without inventing causes", () => {
+  it("counts each rule's changes without inventing causes", () => {
     const result = createDetailedResult("formatted");
     result.templateDiagnostics.templatesChanged = 2;
     result.tableFormatDiagnostics.tablesSkippedAmbiguous = 1;
-    const rows = summarizeRuleDiagnostics(result, t);
-    expect(rows).toHaveLength(2);
-    expect(rows[0]).toMatchObject({ rule: "templates", severity: "info" });
-    expect(rows[1]).toMatchObject({ rule: "tables", severity: "warning" });
+    expect(countRuleChanges(result)).toEqual([
+      { rule: "templates", changed: 2, skipped: 0 },
+      { rule: "tables", changed: 0, skipped: 1, line: undefined },
+    ]);
   });
 });

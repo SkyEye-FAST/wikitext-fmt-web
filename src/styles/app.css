@@ -229,7 +229,7 @@ kbd {
   font-weight: 400;
   line-height: 1.15;
   letter-spacing: 0.005em;
-  /* Wraps only when even the tagline has gone, e.g. at 200% zoom on a phone. */
+  /* Wraps only when space runs out, e.g. at 200% zoom on a phone. */
   text-wrap: balance;
 }
 
@@ -245,29 +245,6 @@ kbd {
 
 .wordmark-brace:first-child {
   margin-left: 0;
-}
-
-.brand-tagline {
-  flex-shrink: 100;
-  overflow: hidden;
-  color: var(--ink-subtle);
-  font-size: 13px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.local-badge {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 8px;
-  border-radius: 999px;
-  background: var(--success-soft);
-  color: var(--success);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: help;
 }
 
 .header-tools {
@@ -692,18 +669,9 @@ kbd {
   line-height: 1.25;
 }
 
-.empty-body {
-  color: var(--ink-subtle);
-}
-
 .empty-state.is-passive .empty-title {
   color: var(--ink-subtle);
   font-size: 20px;
-}
-
-.empty-state.is-passive .empty-body {
-  color: var(--ink-faint);
-  font-size: 13px;
 }
 
 .empty-actions {
@@ -712,11 +680,6 @@ kbd {
   justify-content: center;
   gap: 8px;
   margin-top: 4px;
-}
-
-.empty-hint {
-  color: var(--ink-faint);
-  font-size: 12px;
 }
 
 .drop-overlay {
@@ -806,139 +769,9 @@ kbd {
 /* ---------- Report bar ---------- */
 
 .report {
-  display: flex;
   flex: none;
-  flex-direction: column;
   border-top: 1px solid var(--rule);
   background: var(--chrome);
-}
-
-.report-panel {
-  max-height: min(42vh, 360px);
-  overflow: auto;
-  border-bottom: 1px solid var(--rule-soft);
-  background: var(--paper);
-}
-
-.report-panel-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  max-width: 880px;
-  padding: 16px 20px 14px;
-}
-
-.report-panel h3 {
-  margin-bottom: 6px;
-  font-family: var(--font-serif);
-  font-size: 17px;
-  font-weight: 600;
-}
-
-.report-callout {
-  padding: 10px 14px;
-  border-left: 3px solid;
-  border-radius: 0 var(--radius) var(--radius) 0;
-}
-
-.report-callout.is-failure {
-  border-color: var(--destructive);
-  background: var(--destructive-soft);
-}
-
-.report-callout.is-warning {
-  border-color: var(--warning);
-  background: var(--warning-soft);
-}
-
-.report-technical {
-  margin-top: 8px;
-  color: var(--ink-subtle);
-  font-size: 13px;
-}
-
-.report-technical summary {
-  cursor: pointer;
-}
-
-.report-technical p {
-  margin-top: 4px;
-  overflow-wrap: anywhere;
-}
-
-.change-list {
-  display: flex;
-  flex-direction: column;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.change-row {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  padding: 5px 0;
-  border-bottom: 1px solid var(--rule-soft);
-}
-
-.change-row:last-child {
-  border-bottom: 0;
-}
-
-.change-kind {
-  flex: none;
-  align-self: center;
-  display: inline-flex;
-}
-
-.change-row.is-info .change-kind {
-  color: var(--success);
-}
-
-.change-row.is-warning .change-kind {
-  color: var(--warning);
-}
-
-.change-message {
-  flex: 1;
-}
-
-.change-row .link-button {
-  flex: none;
-  font-size: 12.5px;
-}
-
-.report-muted {
-  color: var(--ink-subtle);
-}
-
-.report-footer {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 6px 20px;
-  padding-top: 10px;
-  border-top: 1px solid var(--rule-soft);
-  color: var(--ink-faint);
-  font-size: 12px;
-}
-
-.report-privacy {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.report-privacy svg {
-  flex: none;
-  color: var(--success);
-}
-
-.report-meta {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 12px;
 }
 
 .report-bar {
@@ -981,28 +814,92 @@ kbd {
   color: var(--destructive);
 }
 
-.report-detail {
+.report-fact,
+.report-code {
   overflow: hidden;
   color: var(--ink-subtle);
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
-.report-tools {
-  display: flex;
+.report-code {
   flex: none;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
+  max-width: 24ch;
+  font-family: var(--font-mono);
+  font-size: 12px;
 }
 
-.report-preset {
+.report-warning {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 48ch;
+}
+
+.report-warning svg {
+  flex: none;
+  color: var(--warning);
+}
+
+/* Per-rule counts read like an editor's status items: name, then number. */
+.report-counts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 2px 14px;
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+  list-style: none;
+}
+
+.report-count,
+.report-count-jump {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.report-count-jump {
+  margin: 0 -4px;
+  padding: 2px 4px;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.report-count-jump:hover .report-count-name {
+  color: var(--progressive);
+  text-decoration: underline;
+}
+
+.report-count-name {
   color: var(--ink-subtle);
 }
 
-.report-toggle.button {
+.report-count-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.report-count-skipped {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--warning);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.report-preset.button {
+  flex: none;
   min-height: 28px;
   padding: 0 8px;
+  color: var(--ink-subtle);
   font-size: 13px;
 }
 
@@ -1051,10 +948,10 @@ kbd {
 .sheet-header {
   display: flex;
   flex: none;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 18px 16px 14px 24px;
+  padding: 14px 16px 14px 24px;
   border-bottom: 1px solid var(--rule-soft);
 }
 
@@ -1063,12 +960,6 @@ kbd {
   font-size: 24px;
   font-weight: 600;
   line-height: 1.2;
-}
-
-.sheet-description {
-  margin-top: 4px;
-  color: var(--ink-subtle);
-  font-size: 13px;
 }
 
 .sheet-body {
@@ -1162,6 +1053,10 @@ kbd {
 }
 
 .setting-value {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
   color: var(--ink-subtle);
   font-size: 13px;
   text-align: right;
@@ -1372,10 +1267,6 @@ kbd {
 /* ---------- Responsive ---------- */
 
 @media (max-width: 1240px) {
-  .brand-tagline {
-    display: none;
-  }
-
   .pane-actions .button-label {
     position: absolute;
     width: 1px;
@@ -1405,12 +1296,6 @@ kbd {
 
   .workspace {
     grid-template-columns: minmax(0, 1fr) 80px minmax(0, 1fr);
-  }
-}
-
-@media (max-width: 900px) {
-  .local-badge {
-    display: none;
   }
 }
 
@@ -1558,18 +1443,33 @@ kbd {
   }
 
   .report-bar {
-    flex-wrap: wrap;
-    gap: 4px 12px;
+    gap: 8px;
     padding: 6px 6px 6px 12px;
   }
 
-  .report-detail,
-  .report-preset {
-    display: none;
+  /* The reason wraps under the label rather than disappearing, since it is
+     the only place a failure is explained. */
+  .report-bar,
+  .report-status {
+    flex-wrap: wrap;
   }
 
-  .report-panel-inner {
-    padding: 14px;
+  .report-status {
+    gap: 2px 8px;
+  }
+
+  .report-fact {
+    font-size: 13px;
+    white-space: normal;
+  }
+
+  .report-counts {
+    justify-content: flex-start;
+  }
+
+  /* Settings is in the header. */
+  .report-preset {
+    display: none;
   }
 
   .sheet-header,

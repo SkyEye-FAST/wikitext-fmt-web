@@ -38,7 +38,6 @@ const catalogs: [string, MessageCatalog][] = [
 const enKeys = Object.keys(enMessages) as (keyof MessageCatalog)[];
 const freshnessKeys = [
   "output.apply",
-  "output.apply.unavailable",
   "diff.previous-run",
   "status.outdated",
   "status.outdated.source",
@@ -111,7 +110,7 @@ describe("i18n catalog consistency", () => {
 describe("interpolation and plurals", () => {
   it("interpolates named parameters", () => {
     const t = createT(enMessages);
-    expect(t("report.versions", { web: "0.5.0", fmt: "0.10.0" })).toBe(
+    expect(t("settings.version.value", { web: "0.5.0", fmt: "0.10.0" })).toBe(
       "wikitext-fmt 0.10.0 · web app 0.5.0",
     );
     expect(t("editor.stats.aria", { lines: 10, characters: 200 })).toBe(
@@ -127,21 +126,12 @@ describe("interpolation and plurals", () => {
 
     expect(t("output.changed-lines", { count: 1 })).toBe("1 line changed");
     expect(t("output.changed-lines", { count: 5 })).toBe("5 lines changed");
-
-    // One template.
-    expect(t("summary.templates-changed", { count: 1 })).toBe(
-      "Reformatted 1 template.",
-    );
-    // Multiple templates.
-    expect(t("summary.templates-changed", { count: 3 })).toBe(
-      "Reformatted 3 templates.",
-    );
   });
 
   it("returns the template as-is when params are missing for interpolation", () => {
     const t = createT(enMessages);
     // Missing params should still produce sensible output (the placeholder key).
-    const result = t("report.versions");
+    const result = t("settings.version.value");
     expect(result).toContain("{fmt}");
     expect(result).toContain("{web}");
   });

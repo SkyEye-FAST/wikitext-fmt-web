@@ -35,6 +35,8 @@ function renderPanel(overrides: Partial<Parameters<typeof SettingsPanel>[0]> = {
     onReset: vi.fn(),
     profiles,
     profileOverrides,
+    formatterVersion: "0.10.0",
+    webVersion: "0.5.0",
     ...overrides,
   };
   render(<SettingsPanel {...props} />);
@@ -52,12 +54,15 @@ describe("SettingsPanel", () => {
     await user.click(
       screen.getByRole("button", { name: "Restore default rules" }),
     );
-    await user.click(screen.getByRole("button", { name: "Reset everything" }));
+    await user.click(screen.getByRole("button", { name: "Reset all" }));
     expect(props.onRestoreDefaults).toHaveBeenCalledOnce();
     expect(props.onReset).toHaveBeenCalledOnce();
     expect(
-      screen.getByText("MediaWiki, built-in browser configuration"),
+      screen.getByText("wikitext-fmt 0.10.0 · web app 0.5.0"),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Formatter engine" }),
+    ).toHaveAttribute("href", expect.stringContaining("github.com"));
   });
 
   it("switches presets and toggles rules through labelled controls", async () => {
@@ -97,7 +102,7 @@ describe("SettingsPanel", () => {
     const user = userEvent.setup();
     const props = renderPanel();
 
-    expect(screen.getByRole("radio", { name: "Match system" })).toBeChecked();
+    expect(screen.getByRole("radio", { name: "System" })).toBeChecked();
     await user.click(screen.getByRole("radio", { name: "Dark" }));
     expect(props.onChange).toHaveBeenLastCalledWith(
       expect.objectContaining({ theme: "dark" }),

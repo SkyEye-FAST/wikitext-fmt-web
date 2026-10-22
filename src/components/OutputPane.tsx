@@ -120,7 +120,7 @@ export function OutputPane({
               title={
                 canApply
                   ? t("output.apply.title", { shortcut: shortcuts.undo })
-                  : t("output.apply.unavailable")
+                  : undefined
               }
               disabled={!canApply}
               onClick={onApply}
@@ -147,7 +147,6 @@ export function OutputPane({
             <div className="empty-state is-passive">
               <div className="empty-card">
                 <h3 className="empty-title">{t("output.empty.title")}</h3>
-                <p className="empty-body">{t("output.empty.body")}</p>
               </div>
             </div>
           )}

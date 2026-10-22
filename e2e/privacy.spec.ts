@@ -37,9 +37,9 @@ test("never transmits, logs, URL-encodes, or persists Wikitext", async ({ page }
   await page.keyboard.insertText(" stale edit");
   await expect(page.getByRole("status")).toContainText("Out of date");
   await page.getByRole("tab", { name: /^Changes/ }).click();
-  await expect(page.getByText("Compared with the source as it was when you last formatted.")).toBeVisible();
+  await expect(page.getByText("Compared with the source as last formatted")).toBeVisible();
   await page.getByRole("button", { name: "Format" }).click();
-  await expect(page.getByRole("status")).toContainText(/Formatted|No changes needed/);
+  await expect(page.getByRole("status")).toContainText(/Formatted|No changes/);
   await page.getByRole("button", { name: "Replace source" }).click();
   await page.keyboard.press("Control+z");
 
@@ -49,7 +49,7 @@ test("never transmits, logs, URL-encodes, or persists Wikitext", async ({ page }
     buffer: Buffer.concat([Buffer.from([0]), Buffer.from(marker)]),
   });
   await page.getByRole("button", { name: "Format" }).click();
-  await expect(page.getByRole("status")).toContainText("Left unchanged");
+  await expect(page.getByRole("status")).toContainText("Not formatted");
 
   const storage = await page.evaluate(() =>
     Object.fromEntries(Array.from({ length: localStorage.length }, (_, index) => {

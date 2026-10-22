@@ -1,4 +1,4 @@
-import { Globe, Lock, Monitor, Moon, Settings2, Sun } from "lucide-react";
+import { Globe, Monitor, Moon, Settings2, Sun } from "lucide-react";
 
 import { FRONTEND_REPOSITORY_URL } from "../app/routes.js";
 import type { LanguagePreference } from "../i18n/locales.js";
@@ -51,13 +51,7 @@ export function AppHeader({
             {"}}"}
           </span>
         </h1>
-        <p className="brand-tagline">{t("brand.tagline")}</p>
       </div>
-
-      <span className="local-badge" title={t("header.local.detail")}>
-        <Lock size={13} aria-hidden="true" />
-        {t("header.local")}
-      </span>
 
       <div className="header-tools">
         <fieldset className="theme-switch">

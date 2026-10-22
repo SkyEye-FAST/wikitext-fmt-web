@@ -789,7 +789,6 @@ function AppMain({
           filename={sourceFilename}
           lineWrapping={settings.lineWrapping}
           theme={resolvedTheme}
-          shortcuts={shortcuts}
           hidden={mobileView !== "source"}
           onDocumentChange={handleSourceDocumentChange}
           onFormat={format}
@@ -836,11 +835,8 @@ function AppMain({
       <ReportBar
         status={status}
         result={formatRun?.result}
-        changedLineCount={changedLines.size}
         notice={notice}
         presetLabel={presetLabel}
-        formatterVersion={formatterVersion}
-        webVersion={__WIKITEXT_FMT_WEB_VERSION__}
         shortcuts={shortcuts}
         onAdjust={() => setSettingsOpen(true)}
         onGoToLine={handleGoToLine}
@@ -864,6 +860,8 @@ function AppMain({
             onRestoreDefaults={() => updateFormatter({ ...defaults })}
             profiles={profiles}
             profileOverrides={profileOverrides}
+            formatterVersion={formatterVersion}
+            webVersion={__WIKITEXT_FMT_WEB_VERSION__}
             onReset={resetAllSettings}
           />
         </Suspense>

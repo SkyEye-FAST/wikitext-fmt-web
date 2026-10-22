@@ -5,12 +5,14 @@ test("runs the critical formatter workflow", async ({ page }) => {
   await expect(page).toHaveTitle(/Wikitext Formatter/);
   await expect(page.getByRole("button", { name: "Format" })).toBeVisible();
 
-  await page.getByRole("button", { name: "Try an example" }).click();
+  await page.getByRole("button", { name: "Load example" }).click();
   await page.getByRole("button", { name: "Format" }).click();
   await expect(page.getByRole("status")).toContainText("Formatted");
   await expect(page.locator('[data-testid="output-editor"] .cm-content')).toContainText("Example article");
-  await page.getByRole("button", { name: "Details" }).click();
+  await expect(page.getByRole("list", { name: "Changes by rule" })).toContainText("Templates");
+  await page.getByRole("button", { name: "Default preset" }).click();
   await expect(page.getByText("wikitext-fmt 0.10.0 · web app 0.5.0")).toBeVisible();
+  await page.getByRole("button", { name: "Close settings" }).click();
 
   await page.locator('[data-testid="source-editor"] .cm-content').click();
   await page.keyboard.insertText("stale edit");
@@ -28,15 +30,14 @@ test("runs the critical formatter workflow", async ({ page }) => {
     buffer: Buffer.from([0]),
   });
   await page.getByRole("button", { name: "Format" }).click();
-  await expect(page.getByRole("status")).toContainText("Left unchanged");
-  await page.getByText("Technical details").click();
-  await expect(page.getByText("input-roundtrip")).toBeVisible();
+  await expect(page.getByRole("status")).toContainText("Not formatted");
+  await expect(page.getByRole("status")).toContainText("input-roundtrip");
 
   await page.getByRole("radio", { name: "Dark" }).check();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 
   await page.getByRole("button", { name: "Clear" }).click();
-  await page.getByRole("button", { name: "Try an example" }).click();
+  await page.getByRole("button", { name: "Load example" }).click();
   await page.getByRole("button", { name: "Format" }).click();
   await expect(page.getByRole("status")).toContainText("Formatted");
   const downloadPromise = page.waitForEvent("download");

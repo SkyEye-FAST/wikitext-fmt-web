@@ -11,7 +11,6 @@ import {
 import type { ResolvedTheme } from "../editor/themes.js";
 import { useI18n } from "../i18n/useI18n.js";
 import type { DocumentStatistics } from "../utils/document.js";
-import type { ShortcutLabels } from "../utils/platform.js";
 import { EditorPane, type EditorPaneHandle } from "./EditorPane.js";
 
 interface SourcePaneProps {
@@ -20,7 +19,6 @@ interface SourcePaneProps {
   filename?: string;
   lineWrapping: boolean;
   theme: ResolvedTheme;
-  shortcuts: ShortcutLabels;
   hidden?: boolean;
   onDocumentChange: (statistics: DocumentStatistics) => void;
   onFormat: () => void;
@@ -36,7 +34,6 @@ export function SourcePane({
   filename,
   lineWrapping,
   theme,
-  shortcuts,
   hidden,
   onDocumentChange,
   onFormat,
@@ -113,7 +110,6 @@ export function SourcePane({
           <div className="empty-state">
             <div className="empty-card">
               <h3 className="empty-title">{t("empty.title")}</h3>
-              <p className="empty-body">{t("empty.body")}</p>
               <div className="empty-actions">
                 <button
                   type="button"
@@ -137,9 +133,6 @@ export function SourcePane({
                   {t("empty.example")}
                 </button>
               </div>
-              <p className="empty-hint">
-                {t("empty.shortcut", { shortcut: shortcuts.format })}
-              </p>
             </div>
           </div>
         ) : null}

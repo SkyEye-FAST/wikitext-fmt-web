@@ -6,6 +6,10 @@ async function expectNoAxeViolations(page: Page): Promise<void> {
   expect(results.violations).toEqual([]);
 }
 
+// Axe samples colours at one instant; a transition caught halfway reads as low
+// contrast. Reduced motion settles every state within 1 ms.
+test.use({ reducedMotion: "reduce" });
+
 test.beforeEach(async ({ page }) => {
   await page.goto(".");
   await expect(page.getByRole("button", { name: "Format" })).toBeVisible();
@@ -14,15 +18,12 @@ test.beforeEach(async ({ page }) => {
 test("has no automated accessibility violations in primary states", async ({ page }) => {
   await expectNoAxeViolations(page);
 
-  await page.getByRole("button", { name: "Try an example" }).click();
+  await page.getByRole("button", { name: "Load example" }).click();
   await page.getByRole("button", { name: "Format" }).click();
   await expect(page.getByRole("status")).toContainText("Formatted");
   await expectNoAxeViolations(page);
 
-  await page.getByRole("button", { name: "Details" }).click();
-  await expect(page.getByRole("button", { name: "Hide details" })).toHaveAttribute("aria-expanded", "true");
-  await expectNoAxeViolations(page);
-  await page.getByRole("button", { name: "Hide details" }).click();
+  await expect(page.getByRole("list", { name: "Changes by rule" })).toBeVisible();
 
   await page.locator('[data-testid="source-editor"] .cm-content').click();
   await page.keyboard.insertText("stale edit");
@@ -46,7 +47,7 @@ test("has no automated accessibility violations in primary states", async ({ pag
 });
 
 test("supports keyboard use and announces status", async ({ page }) => {
-  await page.getByRole("button", { name: "Try an example" }).click();
+  await page.getByRole("button", { name: "Load example" }).click();
   await page.getByRole("button", { name: "Format" }).focus();
   await page.keyboard.press("Enter");
   await expect(page.getByRole("status")).toContainText("Formatted");

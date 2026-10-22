@@ -23,10 +23,28 @@ export type FormatStatus =
       messageKey?: "status.formatting-stopped";
     };
 
-export interface RuleDiagnosticSummary {
-  rule: string;
-  severity: "info" | "warning";
-  message: string;
+/** Rules the status bar counts, in the order it lists them. */
+export const COUNTED_RULES = [
+  "templates",
+  "tables",
+  "lists",
+  "section-spacing",
+  "wikilinks",
+  "external-links",
+  "file-links",
+  "references",
+  "categories",
+  "redirects",
+] as const;
+
+export type CountedRule = (typeof COUNTED_RULES)[number];
+
+export interface RuleCount {
+  rule: CountedRule;
+  changed: number;
+  /** Ambiguous constructs the rule left as written. */
+  skipped: number;
+  /** First line worth jumping to, when the formatter reports one. */
   line?: number;
 }
 
@@ -88,143 +106,59 @@ export function failureMessageKey(
     : "failure.unknown";
 }
 
-type TFunction = (
-  key: keyof MessageCatalog,
-  params?: Record<string, string | number>,
-) => string;
-
-export function summarizeRuleDiagnostics(
-  result: FormatDetailedResult,
-  t: TFunction,
-): RuleDiagnosticSummary[] {
-  const rows: RuleDiagnosticSummary[] = [];
-  const templates = result.templateDiagnostics;
+export function countRuleChanges(result: FormatDetailedResult): RuleCount[] {
   const tables = result.tableFormatDiagnostics;
-  const lists = result.listDiagnostics;
+  const spacing = result.sectionSpacingDiagnostics;
+  const tableLine =
+    result.tableDiagnostics?.find((table) => table.ambiguous && table.line > 0)
+      ?.line ??
+    result.tableDiagnostics?.find((table) => table.changed && table.line > 0)
+      ?.line;
 
-  if (templates.templatesChanged > 0) {
-    rows.push({
-      rule: "templates",
-      severity: "info",
-      message: t("summary.templates-changed", {
-        count: templates.templatesChanged,
-      }),
-    });
-  }
-  if (templates.templatesSkippedAmbiguous > 0) {
-    rows.push({
-      rule: "templates",
-      severity: "warning",
-      message: t("summary.templates-skipped", {
-        count: templates.templatesSkippedAmbiguous,
-      }),
-    });
-  }
-  if (tables.tablesChanged > 0) {
-    const tableWithLine = result.tableDiagnostics?.find(
-      (td) => td.changed && td.line > 0,
-    );
-    rows.push({
-      rule: "tables",
-      severity: "info",
-      message: t("summary.tables-changed", { count: tables.tablesChanged }),
-      line: tableWithLine?.line,
-    });
-  }
-  if (tables.tablesSkippedAmbiguous > 0) {
-    const tableWithLine = result.tableDiagnostics?.find(
-      (td) => td.ambiguous && td.line > 0,
-    );
-    rows.push({
-      rule: "tables",
-      severity: "warning",
-      message: t("summary.tables-skipped", {
-        count: tables.tablesSkippedAmbiguous,
-      }),
-      line: tableWithLine?.line,
-    });
-  }
-  if (lists.listLinesChanged > 0) {
-    rows.push({
-      rule: "lists",
-      severity: "info",
-      message: t("summary.lists-changed", { count: lists.listLinesChanged }),
-    });
-  }
-  if (result.footerDiagnostics.categoriesMoved > 0) {
-    rows.push({
-      rule: "categories",
-      severity: "info",
-      message: t("summary.categories-moved", {
-        count: result.footerDiagnostics.categoriesMoved,
-      }),
-    });
-  }
-  if (result.redirectDiagnostics.redirectsFormatted > 0) {
-    rows.push({
-      rule: "redirects",
-      severity: "info",
-      message: t("summary.redirects-formatted"),
-    });
-  }
-  if (result.fileLinkDiagnostics.fileLinksFormatted > 0) {
-    rows.push({
-      rule: "file-links",
-      severity: "info",
-      message: t("summary.file-links-formatted", {
-        count: result.fileLinkDiagnostics.fileLinksFormatted,
-      }),
-    });
-  }
-  if (result.wikilinkDiagnostics.wikilinksFormatted > 0) {
-    rows.push({
-      rule: "wikilinks",
-      severity: "info",
-      message: t("summary.wikilinks-formatted", {
-        count: result.wikilinkDiagnostics.wikilinksFormatted,
-      }),
-    });
-  }
-  if (result.externalLinkDiagnostics.externalLinksFormatted > 0) {
-    rows.push({
-      rule: "external-links",
-      severity: "info",
-      message: t("summary.external-links-formatted", {
-        count: result.externalLinkDiagnostics.externalLinksFormatted,
-      }),
-    });
-  }
-  if (result.referenceDiagnostics.referencesFormatted > 0) {
-    rows.push({
-      rule: "references",
-      severity: "info",
-      message: t("summary.references-formatted", {
-        count: result.referenceDiagnostics.referencesFormatted,
-      }),
-    });
-  }
-  if (
-    result.sectionSpacingDiagnostics.sectionSpacingBeforeHeadingsInserted > 0 ||
-    result.sectionSpacingDiagnostics.sectionSpacingAfterHeadingsInserted > 0
-  ) {
-    rows.push({
-      rule: "section-spacing",
-      severity: "info",
-      message: t("summary.section-spacing-normalized"),
-    });
-  }
+  const counts: Record<CountedRule, Omit<RuleCount, "rule">> = {
+    templates: {
+      changed: result.templateDiagnostics.templatesChanged,
+      skipped: result.templateDiagnostics.templatesSkippedAmbiguous,
+    },
+    tables: {
+      changed: tables.tablesChanged,
+      skipped: tables.tablesSkippedAmbiguous,
+      line: tableLine,
+    },
+    lists: { changed: result.listDiagnostics.listLinesChanged, skipped: 0 },
+    "section-spacing": {
+      changed:
+        spacing.sectionSpacingBeforeHeadingsInserted +
+        spacing.sectionSpacingAfterHeadingsInserted,
+      skipped: 0,
+    },
+    wikilinks: {
+      changed: result.wikilinkDiagnostics.wikilinksFormatted,
+      skipped: 0,
+    },
+    "external-links": {
+      changed: result.externalLinkDiagnostics.externalLinksFormatted,
+      skipped: 0,
+    },
+    "file-links": {
+      changed: result.fileLinkDiagnostics.fileLinksFormatted,
+      skipped: 0,
+    },
+    references: {
+      changed: result.referenceDiagnostics.referencesFormatted,
+      skipped: 0,
+    },
+    categories: {
+      changed: result.footerDiagnostics.categoriesMoved,
+      skipped: 0,
+    },
+    redirects: {
+      changed: result.redirectDiagnostics.redirectsFormatted,
+      skipped: 0,
+    },
+  };
 
-  for (const equivalence of result.equivalenceDiagnostics) {
-    if (!equivalence.equivalent) {
-      rows.push({
-        rule: `${equivalence.structure}-equivalence`,
-        severity: "warning",
-        message:
-          equivalence.reason ??
-          t("summary.equivalence-failed", { structure: equivalence.structure }),
-      });
-    }
-  }
-
-  return rows;
+  return COUNTED_RULES.map((rule) => ({ rule, ...counts[rule] })).filter(
+    (count) => count.changed > 0 || count.skipped > 0,
+  );
 }

@@ -67,7 +67,7 @@ describe("App formatting snapshots", () => {
       await pendingFormat;
     });
 
-    expect(reportStatus()).toHaveTextContent(/result was set aside/i);
+    expect(reportStatus()).toHaveTextContent(/result discarded/i);
     expect(screen.getByTestId("output-editor")).not.toHaveTextContent(
       "stale output",
     );
@@ -90,7 +90,7 @@ describe("App formatting snapshots", () => {
     render(<App createFormatterClient={() => client} />);
 
     await user.click(
-      await screen.findByRole("button", { name: "Try an example" }),
+      await screen.findByRole("button", { name: "Load example" }),
     );
     await user.click(screen.getByRole("button", { name: "Format" }));
     await within(reportStatus()).findByText("Formatted");
@@ -98,7 +98,7 @@ describe("App formatting snapshots", () => {
     await user.keyboard("x");
 
     expect(within(reportStatus()).getByText("Out of date")).toBeVisible();
-    expect(reportStatus()).toHaveTextContent(/you edited the source/i);
+    expect(reportStatus()).toHaveTextContent(/source edited/i);
     expect(screen.getByTestId("output-editor")).toHaveTextContent("Formatted");
     expect(
       screen.getByRole("button", { name: "Replace source" }),
@@ -117,7 +117,7 @@ describe("App formatting snapshots", () => {
     render(<App createFormatterClient={() => client} />);
 
     await user.click(
-      await screen.findByRole("button", { name: "Try an example" }),
+      await screen.findByRole("button", { name: "Load example" }),
     );
 
     expect(document.title).toBe("Wikitext Formatter");
@@ -140,7 +140,7 @@ describe("App formatting snapshots", () => {
     render(<App createFormatterClient={() => client} />);
 
     await user.click(
-      await screen.findByRole("button", { name: "Try an example" }),
+      await screen.findByRole("button", { name: "Load example" }),
     );
     await user.click(screen.getByRole("button", { name: "Format" }));
     await within(reportStatus()).findByText("Formatted");
@@ -157,10 +157,10 @@ describe("App formatting snapshots", () => {
     await user.type(lineWidth, "88");
 
     expect(reportStatus()).toHaveTextContent("已过期");
-    expect(reportStatus()).toHaveTextContent("生成此结果后设置有变化");
+    expect(reportStatus()).toHaveTextContent("设置已更改");
     await user.keyboard("{Escape}");
     expect(
-      screen.getByRole("button", { name: "替换源文本" }),
+      screen.getByRole("button", { name: "替换源代码" }),
     ).toBeDisabled();
   });
 
@@ -184,7 +184,7 @@ describe("App formatting snapshots", () => {
     render(<App createFormatterClient={() => client} />);
 
     await user.click(
-      await screen.findByRole("button", { name: "Try an example" }),
+      await screen.findByRole("button", { name: "Load example" }),
     );
     await user.click(screen.getByRole("button", { name: "Format" }));
     await user.click(screen.getByRole("button", { name: "Settings" }));
@@ -199,7 +199,7 @@ describe("App formatting snapshots", () => {
       await pendingFormat;
     });
 
-    expect(reportStatus()).toHaveTextContent(/result was set aside/i);
+    expect(reportStatus()).toHaveTextContent(/result discarded/i);
     expect(screen.getByTestId("output-editor")).not.toHaveTextContent(
       "discarded output",
     );
@@ -222,7 +222,7 @@ describe("App formatting snapshots", () => {
     render(<App createFormatterClient={() => client} />);
 
     await user.click(
-      await screen.findByRole("button", { name: "Try an example" }),
+      await screen.findByRole("button", { name: "Load example" }),
     );
     await user.click(screen.getByRole("button", { name: "Format" }));
     await within(reportStatus()).findByText("Formatted");
@@ -255,7 +255,7 @@ describe("App formatting snapshots", () => {
     render(<App createFormatterClient={() => client} />);
 
     await user.click(
-      await screen.findByRole("button", { name: "Try an example" }),
+      await screen.findByRole("button", { name: "Load example" }),
     );
     await user.click(screen.getByRole("button", { name: "Format" }));
     await within(reportStatus()).findByText("Formatted");
@@ -268,7 +268,7 @@ describe("App formatting snapshots", () => {
       "",
     );
     expect(
-      screen.getByRole("button", { name: "Try an example" }),
+      screen.getByRole("button", { name: "Load example" }),
     ).toBeVisible();
 
     await user.click(await screen.findByRole("button", { name: "Undo" }));
@@ -299,7 +299,7 @@ describe("App formatting snapshots", () => {
       screen.getByRole("textbox", { name: "Source" }),
     ).toHaveAccessibleDescription("1 line, 18 characters");
     expect(
-      screen.queryByRole("button", { name: "Try an example" }),
+      screen.queryByRole("button", { name: "Load example" }),
     ).not.toBeInTheDocument();
   });
 });
@@ -366,7 +366,7 @@ describe("App formatter client lifecycle", () => {
     const { unmount } = render(<App createFormatterClient={factory} />);
 
     await screen.findByRole("button", { name: "Format" });
-    await user.click(screen.getByRole("button", { name: "Try an example" }));
+    await user.click(screen.getByRole("button", { name: "Load example" }));
     await user.click(screen.getByRole("button", { name: "Format" }));
     await user.selectOptions(screen.getByLabelText("Language"), "zh-Hant");
 
@@ -476,11 +476,14 @@ describe("App formatter client lifecycle", () => {
     expect(formatButton).toHaveAttribute("title", "Format (Ctrl+Enter)");
 
     expect(
-      screen.getByRole("heading", { name: "Paste wikitext to get started" }),
+      screen.getByRole("heading", { name: "Paste wikitext or drop a file here" }),
     ).toBeVisible();
-    expect(screen.getByText("Press Ctrl+Enter to format")).toBeVisible();
+    expect(formatButton).toHaveAttribute("aria-keyshortcuts", "Control+Enter");
+    expect(document.querySelector(".seam-shortcut")).toHaveTextContent(
+      "Ctrl+Enter",
+    );
     expect(
-      screen.getByRole("heading", { name: "The formatted text appears here" }),
+      screen.getByRole("heading", { name: "No result yet" }),
     ).toBeVisible();
     expect(
       screen.getByRole("button", { name: "Replace source" }),

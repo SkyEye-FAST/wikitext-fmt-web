@@ -3,6 +3,7 @@ import { type ReactNode, useId, useState } from "react";
 import { X } from "lucide-react";
 import { Dialog, Switch } from "radix-ui";
 
+import { CORE_REPOSITORY_URL } from "../app/routes.js";
 import type {
   FormatterProfileOverrides,
   FormatterProfiles,
@@ -21,6 +22,8 @@ interface SettingsPanelProps {
   onReset: () => void;
   profiles: FormatterProfiles;
   profileOverrides: FormatterProfileOverrides;
+  formatterVersion: string;
+  webVersion: string;
 }
 
 type Options = ResolvedBrowserOptions;
@@ -261,6 +264,8 @@ export default function SettingsPanel({
   onReset,
   profiles,
   profileOverrides,
+  formatterVersion,
+  webVersion,
 }: SettingsPanelProps) {
   const { t } = useI18n();
   const formatter = settings.formatter;
@@ -307,7 +312,7 @@ export default function SettingsPanel({
         <Dialog.Overlay className="sheet-overlay" />
         <Dialog.Content
           className="sheet"
-          aria-describedby="settings-description"
+          aria-describedby={undefined}
           onCloseAutoFocus={(event) => {
             if (!opener?.isConnected) return;
             event.preventDefault();
@@ -315,17 +320,9 @@ export default function SettingsPanel({
           }}
         >
           <header className="sheet-header">
-            <div>
-              <Dialog.Title className="sheet-title">
-                {t("settings.title")}
-              </Dialog.Title>
-              <Dialog.Description
-                id="settings-description"
-                className="sheet-description"
-              >
-                {t("settings.description")}
-              </Dialog.Description>
-            </div>
+            <Dialog.Title className="sheet-title">
+              {t("settings.title")}
+            </Dialog.Title>
             <Dialog.Close asChild>
               <button
                 type="button"
@@ -565,7 +562,6 @@ export default function SettingsPanel({
               />
               <ToggleRow
                 label={t("settings.wrap-lines")}
-                hint={t("settings.wrap-lines.hint")}
                 checked={settings.lineWrapping}
                 onChange={(lineWrapping) =>
                   onChange({ ...settings, lineWrapping })
@@ -590,18 +586,22 @@ export default function SettingsPanel({
               />
               <div className="setting-row setting-field">
                 <div className="setting-text">
-                  <span className="setting-label">
-                    {t("settings.parser-config")}
-                  </span>
+                  <span className="setting-label">{t("settings.version")}</span>
                 </div>
                 <span className="setting-value">
-                  {t("settings.parser-config.value")}
+                  {t("settings.version.value", {
+                    fmt: formatterVersion,
+                    web: webVersion,
+                  })}
+                  <a href={CORE_REPOSITORY_URL} target="_blank" rel="noreferrer">
+                    {t("settings.version.engine")}
+                  </a>
                 </span>
               </div>
             </SettingsSection>
           </div>
 
-          <footer className="sheet-footer">
+          <div className="sheet-footer">
             <button
               type="button"
               className="button"
@@ -617,7 +617,7 @@ export default function SettingsPanel({
             >
               {t("settings.reset-all")}
             </button>
-          </footer>
+          </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

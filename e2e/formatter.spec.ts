@@ -14,7 +14,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("formats the example, shows changes, and persists settings without source", async ({ page }) => {
-  await page.getByRole("button", { name: "Try an example" }).click();
+  await page.getByRole("button", { name: "Load example" }).click();
   await page.getByRole("button", { name: "Format" }).click();
   await expect(status(page)).toContainText("Formatted");
   await expect(page.locator('[data-testid="output-editor"] .cm-content')).toContainText("Example article");
@@ -24,10 +24,10 @@ test("formats the example, shows changes, and persists settings without source",
   await page.getByRole("button", { name: "Settings" }).click();
   await page.getByLabel("Line width").fill("88");
   await page.getByRole("button", { name: "Close settings" }).click();
-  await expect(status(page)).toContainText("Settings changed after this result was made");
+  await expect(status(page)).toContainText("Settings changed");
   await page.getByRole("tab", { name: "Result" }).click();
   await page.getByRole("button", { name: "Format" }).click();
-  await expect(status(page)).toContainText(/Formatted|No changes needed/);
+  await expect(status(page)).toContainText(/Formatted|No changes/);
 
   await page.reload();
   await expect(page.getByRole("button", { name: "Format" })).toBeVisible();
@@ -40,7 +40,7 @@ test("uses the complete preset for references and interlanguage footers", async 
   await page.getByRole("button", { name: "Settings" }).click();
   await page.getByRole("radio", { name: "Complete" }).check();
   await page.getByRole("button", { name: "Close settings" }).click();
-  await expect(page.locator(".report-tools")).toContainText("Complete preset");
+  await expect(page.locator(".report-preset")).toContainText("Complete preset");
 
   const fileInput = page.locator('input[type="file"]');
   await fileInput.setInputFiles({
@@ -58,7 +58,7 @@ test("uses the complete preset for references and interlanguage footers", async 
     buffer: Buffer.from("[[w:Example]]\n\nBody\n"),
   });
   await page.getByRole("button", { name: "Format" }).click();
-  await expect(status(page)).toContainText("No changes needed");
+  await expect(status(page)).toContainText("No changes");
   await expect.poll(() => outputText(page)).toBe("[[w:Example]]\n\nBody\n");
 });
 
@@ -84,7 +84,7 @@ test("shows no-change and real structured fail-closed states", async ({ page }) 
     buffer: Buffer.from("== Title ==\n"),
   });
   await page.getByRole("button", { name: "Format" }).click();
-  await expect(status(page)).toContainText("No changes needed");
+  await expect(status(page)).toContainText("No changes");
 
   await fileInput.setInputFiles({
     name: "Malformed.wikitext",
@@ -92,22 +92,20 @@ test("shows no-change and real structured fail-closed states", async ({ page }) 
     buffer: Buffer.from([0]),
   });
   await page.getByRole("button", { name: "Format" }).click();
-  await expect(status(page)).toContainText("Left unchanged");
-  // A declined change opens the report on its own.
-  await expect(page.getByText("Why your text was left unchanged")).toBeVisible();
-  await page.getByText("Technical details").click();
-  await expect(page.getByText("input-roundtrip")).toBeVisible();
-  await expect(page.getByText("Stage: initial-roundtrip")).toBeVisible();
+  await expect(status(page)).toContainText("Not formatted");
+  await expect(status(page)).toContainText("does not round-trip byte for byte");
+  await expect(status(page)).toContainText("input-roundtrip");
+  await expect(status(page).locator(".report-code")).toHaveAttribute("title", /initial-roundtrip/);
   await expect(page.getByRole("button", { name: "Replace source" })).toBeDisabled();
 });
 
 test("switches, persists, and restores the interface language", async ({ page }) => {
-  await page.getByRole("button", { name: "Try an example" }).click();
+  await page.getByRole("button", { name: "Load example" }).click();
   await page.getByLabel("Language").selectOption("zh-Hans");
   await expect(page.locator("html")).toHaveAttribute("lang", "zh-Hans");
   await expect(page.getByLabel("语言")).toHaveValue("zh-Hans");
   await expect(page.locator("#source-stats")).toContainText("行");
-  await expect(page.locator(".report-tools")).toContainText("默认");
+  await expect(page.locator(".report-preset")).toContainText("默认");
   await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /MediaWiki维基文本/);
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem("wikitext-formatter.settings") ?? "null") as { language?: string });
   expect(stored.language).toBe("zh-Hans");
@@ -117,12 +115,12 @@ test("switches, persists, and restores the interface language", async ({ page })
   await expect(page.getByLabel("语言")).toHaveValue("zh-Hans");
   await page.getByLabel("语言").selectOption("zh-Hant");
   await expect(page.locator("html")).toHaveAttribute("lang", "zh-Hant");
-  await expect(page.getByRole("heading", { name: "貼上維基文字即可開始" })).toBeVisible();
-  await expect(page.locator(".report-tools")).toContainText("預設");
+  await expect(page.getByRole("heading", { name: "貼上維基文字，或將檔案拖放至此處" })).toBeVisible();
+  await expect(page.locator(".report-preset")).toContainText("預設");
 });
 
 test("keeps an iterative formatting run tied to its submitted source", async ({ page }) => {
-  await page.getByRole("button", { name: "Try an example" }).click();
+  await page.getByRole("button", { name: "Load example" }).click();
   await page.getByRole("button", { name: "Format" }).click();
   await expect(status(page)).toContainText("Formatted");
 
@@ -135,10 +133,10 @@ test("keeps an iterative formatting run tied to its submitted source", async ({ 
 
   await page.getByRole("tab", { name: /^Changes/ }).click();
   await expect(page.getByTestId("diff-view")).toBeVisible();
-  await expect(page.getByText("Compared with the source as it was when you last formatted.")).toBeVisible();
+  await expect(page.getByText("Compared with the source as last formatted")).toBeVisible();
 
   await page.getByRole("button", { name: "Format" }).click();
-  await expect(status(page)).toContainText(/Formatted|No changes needed/);
+  await expect(status(page)).toContainText(/Formatted|No changes/);
   await expect(status(page)).not.toContainText("Out of date");
   const sourceBeforeApply = await source.innerText();
   await page.getByRole("button", { name: "Replace source" }).click();
@@ -149,12 +147,12 @@ test("keeps an iterative formatting run tied to its submitted source", async ({ 
 });
 
 test("clears the source and undoes the clear from the notification", async ({ page }) => {
-  await page.getByRole("button", { name: "Try an example" }).click();
+  await page.getByRole("button", { name: "Load example" }).click();
   const source = page.locator('[data-testid="source-editor"] .cm-content');
   await expect(source).toContainText("Example article");
   await page.getByRole("button", { name: "Clear" }).click();
   await expect(source).toHaveText("");
-  await expect(page.getByRole("heading", { name: "Paste wikitext to get started" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Paste wikitext or drop a file here" })).toBeVisible();
   await page.getByRole("button", { name: "Undo" }).click();
   await expect(source).toContainText("Example article");
 });
@@ -164,7 +162,7 @@ test("traps settings focus and restores it on Escape", async ({ page }) => {
   await settingsButton.click();
   await expect(page.getByRole("button", { name: "Close settings" })).toBeFocused();
   await page.keyboard.press("Shift+Tab");
-  await expect(page.getByRole("button", { name: "Reset everything" })).toBeFocused();
+  await expect(page.getByRole("button", { name: "Reset all" })).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog", { name: "Settings" })).toBeHidden();
   await expect(settingsButton).toBeFocused();
@@ -178,7 +176,7 @@ test("shows one pane at a time in a narrow mobile layout", async ({ page }) => {
   expect(sourceBox?.height).toBeGreaterThan(250);
   await expect(page.getByTestId("output-editor")).toBeHidden();
 
-  await page.getByRole("button", { name: "Try an example" }).click();
+  await page.getByRole("button", { name: "Load example" }).click();
   await page.getByRole("button", { name: "Format" }).click();
   await expect(status(page)).toContainText("Formatted");
   // A finished run brings the result into view.
@@ -197,14 +195,14 @@ test("warns for a large document and recovers after Stop", async ({ page }) => {
     mimeType: "text/plain",
     buffer: Buffer.from("plain text\n".repeat(100_001)),
   });
-  await expect(page.getByText(/This file is over 1 MB/)).toBeVisible();
+  await expect(page.getByText(/1 MB/)).toBeVisible();
 
   await page.getByRole("button", { name: "Format" }).click();
   await page.getByRole("button", { name: "Stop" }).click();
-  await expect(status(page)).toContainText(/Formatting stopped/);
+  await expect(status(page)).toContainText(/Stopped/);
 
   await page.getByRole("button", { name: "Clear" }).click();
-  await page.getByRole("button", { name: "Try an example" }).click();
+  await page.getByRole("button", { name: "Load example" }).click();
   await page.getByRole("button", { name: "Format" }).click();
   await expect(status(page)).toContainText("Formatted");
 });
