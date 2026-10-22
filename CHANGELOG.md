@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.6.0 — 2026-10-22
+
 ### Changed
 
 - Replace the full-width report panel with a status bar: a status label,

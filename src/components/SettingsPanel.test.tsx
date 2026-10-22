@@ -37,7 +37,7 @@ function renderPanel(overrides: Partial<Parameters<typeof SettingsPanel>[0]> = {
     profiles,
     profileOverrides,
     formatterVersion: "0.10.0",
-    webVersion: "0.5.0",
+    webVersion: "0.6.0",
     ...overrides,
   };
   render(<SettingsPanel {...props} />);
@@ -59,7 +59,7 @@ describe("SettingsPanel", () => {
     expect(props.onRestoreDefaults).toHaveBeenCalledOnce();
     expect(props.onReset).toHaveBeenCalledOnce();
     expect(
-      screen.getByText("wikitext-fmt 0.10.0 · web app 0.5.0"),
+      screen.getByText("wikitext-fmt 0.10.0 · web app 0.6.0"),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Formatter engine" }),
