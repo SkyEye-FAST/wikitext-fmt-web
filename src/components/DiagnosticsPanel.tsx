@@ -1,4 +1,4 @@
-import { AlertCircle, AlertTriangle, Info } from "lucide-react";
+import { AlertCircle, AlertTriangle, Info, MapPin } from "lucide-react";
 import type { FormatDetailedResult } from "wikitext-fmt/browser";
 
 import {
@@ -13,12 +13,14 @@ interface DiagnosticsPanelProps {
   result?: FormatDetailedResult;
   status: FormatStatus;
   notice?: keyof MessageCatalog;
+  onGoToLine?: (line: number) => void;
 }
 
 export function DiagnosticsPanel({
   result,
   status,
   notice,
+  onGoToLine,
 }: DiagnosticsPanelProps) {
   const { t } = useI18n();
   const rows = result ? summarizeRuleDiagnostics(result, t) : [];
@@ -82,25 +84,67 @@ export function DiagnosticsPanel({
                 <tr>
                   <th>{t("diagnostics.table.rule")}</th>
                   <th>{t("diagnostics.table.severity")}</th>
+                  <th>{t("diagnostics.table.location")}</th>
                   <th>{t("diagnostics.table.message")}</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((row, index) => (
-                  <tr key={`${row.rule}-${index}`}>
+                  <tr
+                    key={`${row.rule}-${index}`}
+                    className={
+                      row.line !== undefined && onGoToLine
+                        ? "has-location"
+                        : undefined
+                    }
+                    onClick={
+                      row.line !== undefined && onGoToLine
+                        ? (event) => {
+                            if (
+                              !(event.target as HTMLElement).closest("button")
+                            ) {
+                              onGoToLine(row.line!);
+                            }
+                          }
+                        : undefined
+                    }
+                  >
                     <td>
                       <code>{row.rule}</code>
                     </td>
                     <td>
                       {row.severity === "warning" ? (
-                        <AlertTriangle size={15} />
+                        <AlertTriangle size={15} aria-hidden="true" />
                       ) : (
-                        <Info size={15} />
+                        <Info size={15} aria-hidden="true" />
                       )}{" "}
                       {t(
                         row.severity === "warning"
                           ? "diagnostics.severity.warning"
                           : "diagnostics.severity.info",
+                      )}
+                    </td>
+                    <td>
+                      {row.line !== undefined && onGoToLine ? (
+                        <button
+                          type="button"
+                          className="diagnostic-goto-btn"
+                          title={t("diagnostics.goto", { line: row.line })}
+                          aria-label={t("diagnostics.goto", { line: row.line })}
+                          onClick={() => onGoToLine(row.line!)}
+                        >
+                          <MapPin size={13} aria-hidden="true" />
+                          <span>{row.line}</span>
+                        </button>
+                      ) : row.line !== undefined ? (
+                        <span>{row.line}</span>
+                      ) : (
+                        <span
+                          className="diagnostic-no-location"
+                          aria-hidden="true"
+                        >
+                          —
+                        </span>
                       )}
                     </td>
                     <td>{row.message}</td>

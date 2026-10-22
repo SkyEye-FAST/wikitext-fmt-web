@@ -26,6 +26,7 @@ export interface RuleDiagnosticSummary {
   rule: string;
   severity: "info" | "warning";
   message: string;
+  line?: number;
 }
 
 export function classifyResult(
@@ -109,19 +110,27 @@ export function summarizeRuleDiagnostics(
     });
   }
   if (tables.tablesChanged > 0) {
+    const tableWithLine = result.tableDiagnostics?.find(
+      (td) => td.changed && td.line > 0,
+    );
     rows.push({
       rule: "tables",
       severity: "info",
       message: t("summary.tables-changed", { count: tables.tablesChanged }),
+      line: tableWithLine?.line,
     });
   }
   if (tables.tablesSkippedAmbiguous > 0) {
+    const tableWithLine = result.tableDiagnostics?.find(
+      (td) => td.ambiguous && td.line > 0,
+    );
     rows.push({
       rule: "tables",
       severity: "warning",
       message: t("summary.tables-skipped", {
         count: tables.tablesSkippedAmbiguous,
       }),
+      line: tableWithLine?.line,
     });
   }
   if (lists.listLinesChanged > 0) {

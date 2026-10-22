@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+### Added
+
+- Highlight output lines changed by the current format run in the read-only
+  output editor; documents over 20,000 lines skip the highlight.
+- Add a diagnostics location column; table rows link to the first affected
+  source line and select it in the source editor.
+- Show a localized placeholder with the format shortcut in the empty output
+  editor, and the shortcut in the Format button tooltip.
+
+### Changed
+
+- Show template, list, and table layouts in the built-in example.
+- Raise the smallest interface text to 12px and give the diagnostics columns
+  stable widths.
+
+### Fixed
+
+- Ctrl/Cmd+Enter in the source editor now formats without first inserting a
+  blank line at the cursor.
+
 ## 0.3.1 — 2026-08-24
 
 ### Changed

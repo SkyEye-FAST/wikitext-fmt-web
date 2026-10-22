@@ -322,7 +322,7 @@ a {
 
 .pane-muted,
 .pane-stats {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -345,6 +345,11 @@ a {
 .diff-host > .cm-mergeView {
   min-height: 0;
   height: 100%;
+}
+
+.editor-host .cm-placeholder {
+  color: var(--text-muted);
+  font-family: var(--font-ui);
 }
 
 .editor-host > .cm-editor,
@@ -402,7 +407,7 @@ a {
   align-items: center;
   gap: 14px;
   color: var(--text-muted);
-  font-size: 11.5px;
+  font-size: 12px;
   min-width: 0;
 }
 
@@ -446,7 +451,7 @@ a {
 .privacy-notice {
   margin: 0;
   color: var(--text-muted);
-  font-size: 11.5px;
+  font-size: 12px;
   flex-shrink: 0;
 }
 
@@ -467,7 +472,7 @@ a {
 
 .diagnostics-panel > header span {
   color: var(--text-subtle);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .diagnostic-content {
@@ -530,7 +535,7 @@ a {
 
 .diagnostics-panel th {
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -546,6 +551,72 @@ a {
   padding: 6px 12px;
   color: var(--text-subtle);
   font-size: 12px;
+}
+
+.diagnostics-panel td:nth-child(1),
+.diagnostics-panel th:nth-child(1) {
+  width: 120px;
+  white-space: nowrap;
+}
+
+.diagnostics-panel td:nth-child(2),
+.diagnostics-panel th:nth-child(2) {
+  width: 90px;
+  white-space: nowrap;
+}
+
+.diagnostics-panel td:nth-child(3),
+.diagnostics-panel th:nth-child(3) {
+  width: 80px;
+  white-space: nowrap;
+}
+
+.diagnostics-panel td:nth-child(4),
+.diagnostics-panel th:nth-child(4) {
+  width: auto;
+}
+
+.diagnostics-panel tr.has-location {
+  cursor: pointer;
+}
+
+.diagnostics-panel tr.has-location:hover {
+  background: var(--surface-subtle);
+}
+
+.diagnostic-goto-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  line-height: 1.4;
+  min-height: 0;
+}
+
+.diagnostic-goto-btn:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.diagnostic-goto-btn:focus-visible {
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--focus);
+}
+
+.diagnostic-no-location {
+  color: var(--text-subtle);
+}
+
+.cm-output-changed {
+  background: var(--success-soft) !important;
 }
 
 .settings-backdrop {
@@ -615,7 +686,7 @@ a {
 
 .settings-panel legend {
   padding: 0 4px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 750;
   color: var(--text);
 }
@@ -624,7 +695,7 @@ a {
   display: grid;
   gap: 3px;
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 650;
   min-width: 0;
 }
@@ -657,7 +728,7 @@ a {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .setting-toggle input {
@@ -687,7 +758,7 @@ a {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -832,7 +903,7 @@ a {
     min-width: 0;
     min-height: 32px;
     padding: 3px 18px 3px 6px;
-    font-size: 11.5px;
+    font-size: 12px;
   }
 
   .editor-toolbar {
@@ -855,7 +926,7 @@ a {
   }
 
   .toolbar-button span {
-    font-size: 11.5px;
+    font-size: 13px;
   }
 
   .workspace {
@@ -892,13 +963,13 @@ a {
     justify-content: flex-start;
     flex-wrap: wrap;
     gap: 6px 12px;
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .privacy-notice {
     white-space: normal;
     line-height: 1.35;
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .diagnostic-content {

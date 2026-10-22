@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -30,6 +31,7 @@ import {
   clientErrorMessageKey,
   type FormatStatus as Status,
 } from "../formatter/resultSummary.js";
+import { computeChangedLines } from "../editor/changedLineDecorations.js";
 import { I18nProvider } from "../i18n/I18nProvider.js";
 import {
   type LanguagePreference,
@@ -476,8 +478,22 @@ function AppMain({
     formatRef.current = format;
   }, [format]);
 
+  const handleGoToLine = useCallback((line: number) => {
+    sourceEditorRef.current?.goToLine(line);
+  }, []);
+
+  const changedLines = useMemo(() => {
+    if (!formatRun || freshness !== "current") return new Set<number>();
+    return computeChangedLines(
+      formatRun.sourceSnapshot,
+      formatRun.result.formatted,
+    );
+  }, [formatRun, freshness]);
+
   useEffect(() => {
     function handleShortcut(event: KeyboardEvent): void {
+      // The source editor's own keymap has already formatted.
+      if (event.defaultPrevented) return;
       if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
         event.preventDefault();
         void formatRef.current();
@@ -658,6 +674,7 @@ function AppMain({
             onDocumentChange={handleSourceDocumentChange}
             lineWrapping={settings.lineWrapping}
             theme={resolvedTheme}
+            onFormat={format}
           />
           <EditorPane
             ref={outputEditorRef}
@@ -667,6 +684,8 @@ function AppMain({
             readOnly
             lineWrapping={settings.lineWrapping}
             theme={resolvedTheme}
+            placeholder={t("editor.output.placeholder")}
+            changedLines={changedLines}
           />
         </div>
         {diffVisible ? (
@@ -698,6 +717,7 @@ function AppMain({
           result={formatRun?.result}
           status={status}
           notice={notice}
+          onGoToLine={handleGoToLine}
         />
       </aside>
 

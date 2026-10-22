@@ -1,9 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import { createDetailedResult } from "../test/fixtures.js";
 import { DiagnosticsPanel } from "./DiagnosticsPanel.js";
+
+afterEach(cleanup);
 
 describe("DiagnosticsPanel", () => {
   it("renders structured failures without rewriting core fields", () => {
@@ -40,5 +43,111 @@ describe("DiagnosticsPanel", () => {
     expect(
       screen.getByText("Core warning").closest(".warning-callout"),
     ).toBeInTheDocument();
+  });
+
+  it("renders location column header and go-to-line button when row has a line number", () => {
+    const result = createDetailedResult("source");
+    result.tableFormatDiagnostics.tablesChanged = 1;
+    result.tableDiagnostics = [
+      {
+        line: 42,
+        start: 0,
+        end: 20,
+        changed: true,
+        ambiguous: false,
+      },
+    ];
+    const onGoToLine = vi.fn();
+    render(
+      <DiagnosticsPanel
+        result={result}
+        status={{ kind: "unchanged", durationMs: 1 }}
+        onGoToLine={onGoToLine}
+      />,
+    );
+    expect(
+      screen.getByRole("columnheader", { name: "Location" }),
+    ).toBeInTheDocument();
+    const btn = screen.getByRole("button", { name: "Go to line 42" });
+    expect(btn).toBeInTheDocument();
+    expect(btn).toHaveTextContent("42");
+
+    btn.click();
+    expect(onGoToLine).toHaveBeenCalledWith(42);
+  });
+
+  it("calls onGoToLine when clicking the row with a location", () => {
+    const result = createDetailedResult("source");
+    result.tableFormatDiagnostics.tablesChanged = 1;
+    result.tableDiagnostics = [
+      {
+        line: 15,
+        start: 0,
+        end: 20,
+        changed: true,
+        ambiguous: false,
+      },
+    ];
+    const onGoToLine = vi.fn();
+    render(
+      <DiagnosticsPanel
+        result={result}
+        status={{ kind: "unchanged", durationMs: 1 }}
+        onGoToLine={onGoToLine}
+      />,
+    );
+    const row = screen.getByText("tables").closest("tr");
+    expect(row).toHaveClass("has-location");
+    row?.click();
+    expect(onGoToLine).toHaveBeenCalledWith(15);
+  });
+
+  it("renders dash for rows without line numbers and does not call onGoToLine", () => {
+    const result = createDetailedResult("source");
+    result.templateDiagnostics.templatesChanged = 1;
+    const onGoToLine = vi.fn();
+    render(
+      <DiagnosticsPanel
+        result={result}
+        status={{ kind: "unchanged", durationMs: 1 }}
+        onGoToLine={onGoToLine}
+      />,
+    );
+    expect(
+      screen.queryByRole("button", { name: /go to line/i }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("—")).toBeInTheDocument();
+    const row = screen.getByText("templates").closest("tr");
+    expect(row).not.toHaveClass("has-location");
+    row?.click();
+    expect(onGoToLine).not.toHaveBeenCalled();
+  });
+
+  it("allows keyboard activation on the go-to button", async () => {
+    const user = userEvent.setup();
+    const result = createDetailedResult("source");
+    result.tableFormatDiagnostics.tablesChanged = 1;
+    result.tableDiagnostics = [
+      {
+        line: 23,
+        start: 0,
+        end: 20,
+        changed: true,
+        ambiguous: false,
+      },
+    ];
+    const onGoToLine = vi.fn();
+    render(
+      <DiagnosticsPanel
+        result={result}
+        status={{ kind: "unchanged", durationMs: 1 }}
+        onGoToLine={onGoToLine}
+      />,
+    );
+    const btn = screen.getByRole("button", { name: "Go to line 23" });
+    btn.focus();
+    expect(btn).toHaveFocus();
+    await user.keyboard("{Enter}");
+    expect(onGoToLine).toHaveBeenCalledWith(23);
   });
 });

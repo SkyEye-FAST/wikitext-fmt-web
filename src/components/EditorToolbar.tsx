@@ -65,6 +65,7 @@ export function EditorToolbar(props: EditorToolbarProps) {
           className="button-primary"
           icon={<Play size={15} />}
           onClick={props.onFormat}
+          title={t("toolbar.format-title")}
         >
           {t("toolbar.format")}
         </ToolbarButton>

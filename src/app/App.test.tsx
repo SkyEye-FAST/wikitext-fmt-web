@@ -395,4 +395,49 @@ describe("App formatter client lifecycle", () => {
       expect(description.content).toContain("MediaWiki");
     },
   );
+
+  it("triggers formatting with Ctrl+Enter and Cmd+Enter shortcut", async () => {
+    const metadata = createMetadata({ ...defaultOptions });
+    const client: FormatterClientPort = {
+      ready: vi.fn().mockResolvedValue(metadata),
+      format: vi.fn().mockResolvedValue({
+        result: createDetailedResult("==Formatted via shortcut==\n"),
+        durationMs: 1,
+      }),
+      restart: vi.fn().mockResolvedValue(metadata),
+      dispose: vi.fn(),
+    };
+    const user = userEvent.setup();
+    render(<App createFormatterClient={() => client} />);
+
+    await screen.findByRole("button", { name: "Format" });
+
+    // Ctrl+Enter
+    await user.keyboard("{Control>}{Enter}{/Control}");
+    expect(client.format).toHaveBeenCalledTimes(1);
+
+    // Cmd+Enter (Meta+Enter)
+    await user.keyboard("{Meta>}{Enter}{/Meta}");
+    expect(client.format).toHaveBeenCalledTimes(2);
+  });
+
+  it("displays format shortcut tooltip and localized empty output placeholder", async () => {
+    const metadata = createMetadata({ ...defaultOptions });
+    const client: FormatterClientPort = {
+      ready: vi.fn().mockResolvedValue(metadata),
+      format: vi.fn(),
+      restart: vi.fn().mockResolvedValue(metadata),
+      dispose: vi.fn(),
+    };
+    render(<App createFormatterClient={() => client} />);
+
+    const formatButton = await screen.findByRole("button", { name: "Format" });
+    expect(formatButton).toHaveAttribute("title", "Format (Ctrl+Enter)");
+
+    expect(
+      screen.getByText(
+        "Formatted output appears here. Press Ctrl+Enter to format.",
+      ),
+    ).toBeInTheDocument();
+  });
 });

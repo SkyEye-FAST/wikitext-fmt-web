@@ -14,6 +14,9 @@ import {
   createEditorExtensions,
   createEditorState,
 } from "../editor/createEditorState.js";
+import {
+  setChangedLines,
+} from "../editor/changedLineDecorations.js";
 import type { ResolvedTheme } from "../editor/themes.js";
 import { useI18n } from "../i18n/useI18n.js";
 import {
@@ -25,6 +28,7 @@ export interface EditorPaneHandle {
   getValue(): string;
   setValue(value: string): void;
   focus(): void;
+  goToLine(line: number): void;
 }
 
 interface EditorPaneProps {
@@ -36,6 +40,9 @@ interface EditorPaneProps {
   lineWrapping: boolean;
   theme: ResolvedTheme;
   mutedLabel?: string;
+  placeholder?: string;
+  changedLines?: Set<number>;
+  onFormat?: () => void;
 }
 
 const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(
@@ -49,6 +56,9 @@ const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(
       lineWrapping,
       theme,
       mutedLabel,
+      placeholder,
+      changedLines,
+      onFormat,
     }: EditorPaneProps,
     forwardedRef,
   ) {
@@ -56,6 +66,10 @@ const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(
     const viewRef = useRef<EditorView | null>(null);
     const initialValueRef = useRef(initialValue);
     const onDocumentChangeRef = useRef(onDocumentChange);
+    const onFormatRef = useRef(onFormat);
+    useEffect(() => {
+      onFormatRef.current = onFormat;
+    }, [onFormat]);
     const [stats, setStats] = useState(() =>
       getDocumentStatistics(initialValue),
     );
@@ -95,6 +109,19 @@ const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(
           });
         },
         focus: () => viewRef.current?.focus(),
+        goToLine: (line: number) => {
+          const view = viewRef.current;
+          if (!view) return;
+          const doc = view.state.doc;
+          const clampedLine = Math.max(1, Math.min(line, doc.lines));
+          const lineObj = doc.line(clampedLine);
+          view.dispatch({
+            selection: { anchor: lineObj.from, head: lineObj.to },
+            scrollIntoView: true,
+            effects: EditorView.scrollIntoView(lineObj.from, { y: "center" }),
+          });
+          view.focus();
+        },
       }),
       [],
     );
@@ -109,6 +136,9 @@ const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(
         readOnly,
         lineWrapping,
         theme,
+        enableChangedLines: readOnly,
+        placeholder,
+        onFormat: onFormat ? () => onFormatRef.current?.() : undefined,
         onDocumentChange: (nextStatistics) => {
           setStats(nextStatistics);
           onDocumentChangeRef.current?.(nextStatistics);
@@ -139,6 +169,9 @@ const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(
             readOnly,
             lineWrapping,
             theme,
+            enableChangedLines: readOnly,
+            placeholder,
+            onFormat: onFormat ? () => onFormatRef.current?.() : undefined,
             onDocumentChange: (nextStatistics) => {
               setStats(nextStatistics);
               onDocumentChangeRef.current?.(nextStatistics);
@@ -148,7 +181,16 @@ const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(
       });
       view.contentDOM.setAttribute("aria-label", label);
       view.contentDOM.toggleAttribute("aria-readonly", readOnly);
-    }, [label, lineWrapping, readOnly, theme]);
+    }, [label, lineWrapping, onFormat, placeholder, readOnly, theme]);
+
+    // Dispatch changed lines to the editor view when prop changes
+    useEffect(() => {
+      const view = viewRef.current;
+      if (!view || !readOnly) return;
+      view.dispatch({
+        effects: setChangedLines.of(changedLines ?? new Set()),
+      });
+    }, [changedLines, readOnly]);
 
     const numberFormatter = new Intl.NumberFormat(locale);
     const formattedLines = numberFormatter.format(stats.lines);

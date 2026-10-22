@@ -11,7 +11,7 @@ import {
   indentOnInput,
 } from "@codemirror/language";
 import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
-import { EditorState, type Extension } from "@codemirror/state";
+import { EditorState, type Extension, Prec } from "@codemirror/state";
 import {
   crosshairCursor,
   drawSelection,
@@ -21,10 +21,12 @@ import {
   highlightActiveLineGutter,
   keymap,
   lineNumbers,
+  placeholder,
   rectangularSelection,
 } from "@codemirror/view";
 
 import type { DocumentStatistics } from "../utils/document.js";
+import { changedLineDecorations } from "./changedLineDecorations.js";
 import { createWikitextExtensions } from "./createWikitextExtensions.js";
 import {
   createEditorTheme,
@@ -37,6 +39,9 @@ export interface EditorExtensionOptions {
   lineWrapping: boolean;
   theme: ResolvedTheme;
   onDocumentChange?: (statistics: DocumentStatistics) => void;
+  enableChangedLines?: boolean;
+  placeholder?: string;
+  onFormat?: () => void;
 }
 
 export interface EditorStateOptions extends EditorExtensionOptions {
@@ -77,6 +82,29 @@ export function createEditorExtensions(
 
   if (options.lineWrapping) {
     extensions.push(EditorView.lineWrapping);
+  }
+  if (options.enableChangedLines) {
+    extensions.push(...changedLineDecorations());
+  }
+  if (options.placeholder) {
+    extensions.push(placeholder(options.placeholder));
+  }
+  if (options.onFormat) {
+    const onFormat = options.onFormat;
+    // Outrank defaultKeymap, whose Mod-Enter would insert a blank line first.
+    extensions.push(
+      Prec.highest(
+        keymap.of([
+          {
+            key: "Mod-Enter",
+            run: () => {
+              onFormat();
+              return true;
+            },
+          },
+        ]),
+      ),
+    );
   }
   if (options.onDocumentChange) {
     extensions.push(
