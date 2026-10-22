@@ -25,14 +25,14 @@
     "check": "pnpm lint && pnpm check:api-removals && pnpm typecheck && pnpm test:run && pnpm build && pnpm check:bundle && pnpm check:metadata"
   },
   "dependencies": {
-    "@bhsd/codemirror-wikitext": "^0.12.0",
+    "@bhsd/codemirror-wikitext": "^0.12.1",
     "@codemirror/autocomplete": "^6.20.3",
     "@codemirror/commands": "^6.11.1",
-    "@codemirror/language": "^6.12.4",
+    "@codemirror/language": "^6.13.1",
     "@codemirror/merge": "^6.12.2",
     "@codemirror/search": "^6.7.2",
     "@codemirror/state": "^6.7.6",
-    "@codemirror/view": "^6.43.13",
+    "@codemirror/view": "^6.43.14",
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "@fontsource/libertinus-serif": "^5.3.0",
     "@lezer/common": "^1.5.3",
