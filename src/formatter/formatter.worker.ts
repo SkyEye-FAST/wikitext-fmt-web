@@ -71,12 +71,72 @@ workerScope.addEventListener(
       return;
     }
 
-    const { generation, requestId, source, options } = event.data;
+    const request = event.data;
+    const { generation, requestId } = request;
     const startedAt = performance.now();
 
     try {
       const formatter = await loadFormatter();
-      const result = formatter.formatWikitextSafeDetailed(source, options);
+      if (request.type === "load-site-profile") {
+        const profile =
+          "json" in request.input
+            ? formatter.normalizeSiteProfile(JSON.parse(request.input.json))
+            : await formatter.loadSiteProfile(
+                request.input.apiUrl,
+                (url, init) =>
+                  fetch(url, {
+                    ...init,
+                    credentials: "omit",
+                    redirect: "error",
+                  }),
+              );
+        post({
+          type: "site-profile",
+          generation,
+          requestId,
+          profile,
+          serialized: formatter.serializeSiteProfile(profile),
+          options: formatter.siteProfileFormatOptions(profile),
+        });
+        return;
+      }
+      if (request.type === "template-data") {
+        const profile = formatter.normalizeSiteProfile(request.profile);
+        if (!request.title.trim() || /[{}|\r\n#<>[\]]/u.test(request.title)) {
+          throw new Error("Invalid template title");
+        }
+        let template =
+          Object.entries(profile.templates ?? {}).find(
+            ([title]) => title === request.title,
+          )?.[1] ?? null;
+        if (!template && profile.apiUrl && profile.extensions.templateData) {
+          const response = await fetch(
+            formatter.siteProfileTemplateDataUrl(
+              profile.apiUrl,
+              [request.title],
+              request.language,
+            ),
+            { credentials: "omit", redirect: "error" },
+          );
+          if (!response.ok)
+            throw new Error(`TemplateData HTTP ${response.status}`);
+          const templates = formatter.normalizeTemplateDataResponse(
+            await response.json(),
+          );
+          template =
+            Object.entries(templates).find(
+              ([title]) => title === request.title,
+            )?.[1] ??
+            Object.values(templates)[0] ??
+            null;
+        }
+        post({ type: "template-data", generation, requestId, template });
+        return;
+      }
+      const result = formatter.formatWikitextSafeDetailed(
+        request.source,
+        request.options,
+      );
       post({
         type: "result",
         generation,

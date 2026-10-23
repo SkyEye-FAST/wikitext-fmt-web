@@ -8,6 +8,8 @@ import { DEFAULT_MONO_FONT_STACK } from "../editor/themes.js";
 import type {
   FormatterProfileOverrides,
   FormatterProfiles,
+  LoadedSiteProfile,
+  SiteProfileInput,
   ResolvedBrowserOptions,
 } from "../formatter/protocol.js";
 import type { MessageCatalog } from "../i18n/types.js";
@@ -33,6 +35,12 @@ interface SettingsPanelProps {
   profileOverrides: FormatterProfileOverrides;
   formatterVersion: string;
   webVersion: string;
+  siteProfile: LoadedSiteProfile | null;
+  siteBusy: boolean;
+  siteError: "fetch" | "import" | null;
+  onLoadSite: (input: SiteProfileInput) => void;
+  onRemoveSite: () => void;
+  onTemplateDataChange: (enabled: boolean) => void;
 }
 
 type Options = ResolvedBrowserOptions;
@@ -46,9 +54,17 @@ interface ToggleRowProps {
   checked: boolean;
   onChange: (checked: boolean) => void;
   children?: ReactNode;
+  disabled?: boolean;
 }
 
-function ToggleRow({ label, hint, checked, onChange, children }: ToggleRowProps) {
+function ToggleRow({
+  label,
+  hint,
+  checked,
+  onChange,
+  children,
+  disabled,
+}: ToggleRowProps) {
   const id = useId();
   return (
     <div className="setting-row">
@@ -65,6 +81,7 @@ function ToggleRow({ label, hint, checked, onChange, children }: ToggleRowProps)
           id={id}
           className="switch"
           checked={checked}
+          disabled={disabled}
           onCheckedChange={onChange}
           aria-describedby={hint ? `${id}-hint` : undefined}
         >
@@ -370,6 +387,174 @@ function parsePrefixes(text: string): string[] {
     .filter(Boolean);
 }
 
+type SiteSettingsProps = Pick<
+  SettingsPanelProps,
+  | "siteProfile"
+  | "siteBusy"
+  | "siteError"
+  | "onLoadSite"
+  | "onRemoveSite"
+  | "onTemplateDataChange"
+>;
+
+function SiteSettings({
+  siteProfile,
+  siteBusy,
+  siteError,
+  onLoadSite,
+  onRemoveSite,
+  onTemplateDataChange,
+}: SiteSettingsProps) {
+  const { t } = useI18n();
+  const id = useId();
+  const fileInput = useRef<HTMLInputElement>(null);
+  const profile = siteProfile?.profile;
+  const [apiUrl, setApiUrl] = useState(profile?.apiUrl ?? "");
+  const [previousUrl, setPreviousUrl] = useState(profile?.apiUrl);
+  const [readError, setReadError] = useState(false);
+  if (previousUrl !== profile?.apiUrl) {
+    setPreviousUrl(profile?.apiUrl);
+    setApiUrl(profile?.apiUrl ?? "");
+  }
+
+  function exportProfile(): void {
+    if (!siteProfile) return;
+    const url = URL.createObjectURL(
+      new Blob([siteProfile.serialized], {
+        type: "application/json;charset=utf-8",
+      }),
+    );
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    const name = Array.from(siteProfile.profile.name, (character) =>
+      character.charCodeAt(0) < 32 ? "_" : character,
+    ).join("");
+    anchor.download = `${name.replace(/[<>:"/\\|?*]/gu, "_")}.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  return (
+    <SettingsSection title={t("settings.section.site")}>
+      <div className="setting-row site-summary">
+        {profile ? (
+          <strong>{profile.name}</strong>
+        ) : (
+          <span className="setting-hint">{t("settings.site.none")}</span>
+        )}
+        {profile?.apiUrl ? (
+          <span className="setting-hint site-api">{profile.apiUrl}</span>
+        ) : null}
+        {profile ? (
+          <span className="setting-hint">
+            {t("settings.site.counts", {
+              templates: Object.keys(profile.templates ?? {}).length,
+              interwiki: profile.interwiki?.length ?? 0,
+            })}
+          </span>
+        ) : null}
+      </div>
+      <form
+        className="setting-row site-form"
+        noValidate
+        onSubmit={(event) => {
+          event.preventDefault();
+          setReadError(false);
+          onLoadSite({ apiUrl: apiUrl.trim() });
+        }}
+      >
+        <label className="setting-label" htmlFor={id}>
+          {t("settings.site.api")}
+        </label>
+        <div className="site-api-field">
+          <input
+            id={id}
+            className="text-input"
+            type="url"
+            value={apiUrl}
+            placeholder="https://example.org/w/api.php"
+            spellCheck={false}
+            autoComplete="off"
+            onChange={(event) => setApiUrl(event.target.value)}
+          />
+          <button
+            className="button"
+            type="submit"
+            disabled={siteBusy || !apiUrl.trim()}
+          >
+            {t(siteBusy ? "settings.site.loading" : "settings.site.fetch")}
+          </button>
+        </div>
+      </form>
+      <div className="setting-row site-actions">
+        <input
+          ref={fileInput}
+          type="file"
+          accept=".json,application/json"
+          className="visually-hidden"
+          tabIndex={-1}
+          aria-label={t("settings.site.import")}
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            event.target.value = "";
+            if (!file) return;
+            setReadError(false);
+            void file.text().then(
+              (json) => onLoadSite({ json }),
+              () => setReadError(true),
+            );
+          }}
+        />
+        <button
+          className="button"
+          type="button"
+          disabled={siteBusy}
+          onClick={() => fileInput.current?.click()}
+        >
+          {t("settings.site.import")}
+        </button>
+        <button
+          className="button"
+          type="button"
+          disabled={!profile || siteBusy}
+          onClick={exportProfile}
+        >
+          {t("settings.site.export")}
+        </button>
+        <button
+          className="button is-quiet is-destructive"
+          type="button"
+          disabled={!profile && !siteBusy}
+          onClick={() => {
+            setReadError(false);
+            onRemoveSite();
+          }}
+        >
+          {t("settings.site.remove")}
+        </button>
+      </div>
+      {profile ? (
+        <ToggleRow
+          label={t("settings.site.template-data")}
+          hint={t("settings.site.template-data.hint")}
+          checked={profile.extensions.templateData}
+          disabled={siteBusy}
+          onChange={onTemplateDataChange}
+        />
+      ) : null}
+      {siteError || readError ? (
+        <p role="alert" className="setting-hint site-error">
+          {t(
+            siteError === "fetch" && !readError
+              ? "settings.site.fetch-error"
+              : "settings.site.import-error",
+          )}
+        </p>
+      ) : null}
+    </SettingsSection>
+  );
+}
+
 function PrefixesField({
   value,
   onCommit,
@@ -425,6 +610,12 @@ export default function SettingsPanel({
   profileOverrides,
   formatterVersion,
   webVersion,
+  siteProfile,
+  siteBusy,
+  siteError,
+  onLoadSite,
+  onRemoveSite,
+  onTemplateDataChange,
 }: SettingsPanelProps) {
   const { t } = useI18n();
   const formatter = settings.formatter;
@@ -710,6 +901,14 @@ export default function SettingsPanel({
               )}
             </SettingsSection>
 
+            <SiteSettings
+              siteProfile={siteProfile}
+              siteBusy={siteBusy}
+              siteError={siteError}
+              onLoadSite={onLoadSite}
+              onRemoveSite={onRemoveSite}
+              onTemplateDataChange={onTemplateDataChange}
+            />
             <SettingsSection title={t("settings.section.editor")}>
               <ChoiceRow
                 legend={t("theme.label")}
@@ -814,7 +1013,11 @@ export default function SettingsPanel({
                     fmt: formatterVersion,
                     web: webVersion,
                   })}
-                  <a href={CORE_REPOSITORY_URL} target="_blank" rel="noreferrer">
+                  <a
+                    href={CORE_REPOSITORY_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
                     {t("settings.version.engine")}
                   </a>
                 </span>

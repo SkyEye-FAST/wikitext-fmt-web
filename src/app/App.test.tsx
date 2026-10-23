@@ -60,6 +60,8 @@ describe("App formatting snapshots", () => {
       format: vi.fn().mockReturnValue(pendingFormat),
       restart: vi.fn().mockResolvedValue(metadata),
       dispose: vi.fn(),
+      loadSiteProfile: vi.fn(),
+      templateData: vi.fn(),
     };
     const user = userEvent.setup();
     render(<App createFormatterClient={() => client} />);
@@ -94,6 +96,8 @@ describe("App formatting snapshots", () => {
         }),
       restart: vi.fn().mockResolvedValue(metadata),
       dispose: vi.fn(),
+      loadSiteProfile: vi.fn(),
+      templateData: vi.fn(),
     };
     const user = userEvent.setup();
     render(<App createFormatterClient={() => client} />);
@@ -121,6 +125,8 @@ describe("App formatting snapshots", () => {
       format: vi.fn(),
       restart: vi.fn().mockResolvedValue(metadata),
       dispose: vi.fn(),
+      loadSiteProfile: vi.fn(),
+      templateData: vi.fn(),
     };
     const user = userEvent.setup();
     render(<App createFormatterClient={() => client} />);
@@ -144,6 +150,8 @@ describe("App formatting snapshots", () => {
         }),
       restart: vi.fn().mockResolvedValue(metadata),
       dispose: vi.fn(),
+      loadSiteProfile: vi.fn(),
+      templateData: vi.fn(),
     };
     const user = userEvent.setup();
     render(<App createFormatterClient={() => client} />);
@@ -188,6 +196,8 @@ describe("App formatting snapshots", () => {
       format: vi.fn().mockReturnValue(pendingFormat),
       restart: vi.fn().mockResolvedValue(metadata),
       dispose: vi.fn(),
+      loadSiteProfile: vi.fn(),
+      templateData: vi.fn(),
     };
     const user = userEvent.setup();
     render(<App createFormatterClient={() => client} />);
@@ -226,6 +236,8 @@ describe("App formatting snapshots", () => {
         }),
       restart: vi.fn().mockResolvedValue(metadata),
       dispose: vi.fn(),
+      loadSiteProfile: vi.fn(),
+      templateData: vi.fn(),
     };
     const user = userEvent.setup();
     render(<App createFormatterClient={() => client} />);
@@ -259,6 +271,8 @@ describe("App formatting snapshots", () => {
         }),
       restart: vi.fn().mockResolvedValue(metadata),
       dispose: vi.fn(),
+      loadSiteProfile: vi.fn(),
+      templateData: vi.fn(),
     };
     const user = userEvent.setup();
     render(<App createFormatterClient={() => client} />);
@@ -294,6 +308,8 @@ describe("App formatting snapshots", () => {
       format: vi.fn(),
       restart: vi.fn().mockResolvedValue(metadata),
       dispose: vi.fn(),
+      loadSiteProfile: vi.fn(),
+      templateData: vi.fn(),
     };
     const user = userEvent.setup();
     render(<App createFormatterClient={() => client} />);
@@ -329,6 +345,8 @@ describe("App formatter client lifecycle", () => {
           .fn()
           .mockResolvedValue(createMetadata({ ...defaultOptions })),
         dispose: vi.fn(),
+      loadSiteProfile: vi.fn(),
+      templateData: vi.fn(),
       };
       clients.push(client);
       return client;
@@ -433,6 +451,8 @@ describe("App formatter client lifecycle", () => {
         format: vi.fn(),
         restart: vi.fn(),
         dispose: vi.fn(),
+      loadSiteProfile: vi.fn(),
+      templateData: vi.fn(),
       };
       const description = document.createElement("meta");
       description.name = "description";
@@ -456,6 +476,8 @@ describe("App formatter client lifecycle", () => {
       }),
       restart: vi.fn().mockResolvedValue(metadata),
       dispose: vi.fn(),
+      loadSiteProfile: vi.fn(),
+      templateData: vi.fn(),
     };
     const user = userEvent.setup();
     render(<App createFormatterClient={() => client} />);
@@ -478,6 +500,8 @@ describe("App formatter client lifecycle", () => {
       format: vi.fn(),
       restart: vi.fn().mockResolvedValue(metadata),
       dispose: vi.fn(),
+      loadSiteProfile: vi.fn(),
+      templateData: vi.fn(),
     };
     render(<App createFormatterClient={() => client} />);
 

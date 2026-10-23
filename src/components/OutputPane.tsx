@@ -24,6 +24,7 @@ interface OutputPaneProps {
   sourceFilename?: string;
   lineWrapping: boolean;
   theme: ResolvedTheme;
+  interwiki?: string[];
   shortcuts: ShortcutLabels;
   hidden?: boolean;
   onTabChange: (tab: OutputTab) => void;
@@ -42,6 +43,7 @@ export function OutputPane({
   sourceFilename,
   lineWrapping,
   theme,
+  interwiki,
   shortcuts,
   hidden,
   onTabChange,
@@ -160,6 +162,7 @@ export function OutputPane({
             readOnly
             lineWrapping={lineWrapping}
             theme={theme}
+            interwiki={interwiki}
             changedLines={changedLines}
           />
           {run ? null : (
@@ -190,6 +193,7 @@ export function OutputPane({
                   theme={theme}
                   lineWrapping={lineWrapping}
                   label={t("diff.label")}
+                  interwiki={interwiki}
                 />
               </Suspense>
             </>

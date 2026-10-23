@@ -1491,6 +1491,40 @@ input.text-input {
   opacity: 0.6;
 }
 
+.site-summary,
+.site-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.site-api {
+  overflow-wrap: anywhere;
+}
+
+.site-api-field,
+.site-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.site-api-field .text-input {
+  min-width: 0;
+  flex: 1;
+}
+.site-api-field .button {
+  flex: none;
+}
+.site-actions {
+  flex-wrap: wrap;
+}
+.site-error {
+  color: var(--destructive);
+}
+.cm-tooltip.cm-completionInfo {
+  white-space: pre-wrap;
+}
+
 /* ---------- Toasts ---------- */
 
 [data-sonner-toaster][data-sonner-theme] {

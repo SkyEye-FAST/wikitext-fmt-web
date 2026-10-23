@@ -38,6 +38,12 @@ function renderPanel(overrides: Partial<Parameters<typeof SettingsPanel>[0]> = {
     profileOverrides,
     formatterVersion: "0.10.0",
     webVersion: "0.6.0",
+    siteProfile: null,
+    siteBusy: false,
+    siteError: null,
+    onLoadSite: vi.fn(),
+    onRemoveSite: vi.fn(),
+    onTemplateDataChange: vi.fn(),
     ...overrides,
   };
   render(<SettingsPanel {...props} />);

@@ -1,4 +1,5 @@
 import type { Ref } from "react";
+import type { CompletionSource } from "@codemirror/autocomplete";
 
 import {
   ClipboardPaste,
@@ -19,6 +20,8 @@ interface SourcePaneProps {
   filename?: string;
   lineWrapping: boolean;
   theme: ResolvedTheme;
+  interwiki?: string[];
+  completionSource?: CompletionSource;
   hidden?: boolean;
   onDocumentChange: (statistics: DocumentStatistics) => void;
   onFormat: () => void;
@@ -34,6 +37,8 @@ export function SourcePane({
   filename,
   lineWrapping,
   theme,
+  interwiki,
+  completionSource,
   hidden,
   onDocumentChange,
   onFormat,
@@ -103,6 +108,8 @@ export function SourcePane({
           onDocumentChange={onDocumentChange}
           lineWrapping={lineWrapping}
           theme={theme}
+          interwiki={interwiki}
+          completionSource={completionSource}
           onFormat={onFormat}
           describedBy="source-stats"
         />

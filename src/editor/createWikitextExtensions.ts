@@ -6,6 +6,11 @@ import type { Extension } from "@codemirror/state";
 
 const bundledParserConfig = parserConfig as unknown as ConfigData;
 
-export function createWikitextExtensions(): Extension[] {
-  return [mediawikiLanguage(bundledParserConfig), bracketMatching()];
+export function createWikitextExtensions(interwiki?: string[]): Extension[] {
+  return [
+    mediawikiLanguage(
+      interwiki ? { ...bundledParserConfig, interwiki } : bundledParserConfig,
+    ),
+    bracketMatching(),
+  ];
 }

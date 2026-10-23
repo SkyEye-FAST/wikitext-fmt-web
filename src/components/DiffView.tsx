@@ -13,6 +13,7 @@ interface DiffViewProps {
   theme: ResolvedTheme;
   lineWrapping: boolean;
   label: string;
+  interwiki?: string[];
 }
 
 /**
@@ -26,6 +27,7 @@ export default function DiffView({
   theme,
   lineWrapping,
   label,
+  interwiki,
 }: DiffViewProps) {
   const hostRef = useRef<HTMLDivElement>(null);
 
@@ -37,7 +39,12 @@ export default function DiffView({
       state: EditorState.create({
         doc: formatted,
         extensions: [
-          ...createEditorExtensions({ readOnly: true, lineWrapping, theme }),
+          ...createEditorExtensions({
+            readOnly: true,
+            lineWrapping,
+            theme,
+            interwiki,
+          }),
           unifiedMergeView({
             original,
             gutter: true,
@@ -51,7 +58,7 @@ export default function DiffView({
     });
     view.contentDOM.setAttribute("aria-label", label);
     return () => view.destroy();
-  }, [formatted, label, lineWrapping, original, theme]);
+  }, [formatted, label, lineWrapping, original, theme, interwiki]);
 
   return <div ref={hostRef} className="editor-host" data-testid="diff-view" />;
 }

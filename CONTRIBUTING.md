@@ -17,7 +17,7 @@ pnpm e2e
 ## Pull requests
 
 - Keep runtime formatter imports inside `src/formatter/formatter.worker.ts`.
-- Never persist, log, place in URLs, or transmit Wikitext source.
+- Never persist, log, place in URLs, or transmit Wikitext source. The only requests to a wiki are siteinfo on Fetch and TemplateData for the template being completed.
 - Add focused tests for result interpretation, settings migration, Worker lifecycle, and user-visible flows.
 - Run `pnpm check`, `pnpm e2e`, and `pnpm check:bundle` before opening a pull request.
 - Update the README when browser support, deployment, settings, or privacy behavior changes.

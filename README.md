@@ -2,7 +2,7 @@
 
 Wikitext Formatter is a static, browser-only interface for safely formatting MediaWiki Wikitext. It uses the published [`wikitext-fmt`](https://github.com/SkyEye-FAST/wikitext-fmt) package and runs all parsing and formatting locally in a module Web Worker.
 
-Formatting runs locally in your browser. Source text is not uploaded, logged, placed in URLs, or persisted in browser storage.
+Formatting runs locally in your browser. Source text is not uploaded, logged, placed in URLs, or persisted in browser storage. With a site profile loaded, the Worker sends two kinds of requests to that wiki, without credentials: siteinfo when Fetch is selected, and TemplateData for the title of the template being completed, when TemplateData is on.
 
 ## Features
 
@@ -75,16 +75,17 @@ The main React bundle imports only public `wikitext-fmt/browser` types. `formatW
 The settings sheet exposes:
 
 - Preset: Default or Complete.
+- Site: fetch a profile from a MediaWiki API URL, import/export JSON, remove it, or switch TemplateData access. Profiles supply template names, parameter and value suggestions in Source, interwiki highlighting and prefix suggestions, and formatter options.
 - Templates: template formatting, line width, one-line call spacing, and multi-line parameter layout.
 - Tables: table formatting and how cells joined with `||` or `!!` are laid out. "Keep as written" preserves only inline cell separators.
 - Page layout: headings, lists, space around headings, blank-line collapsing, and break-tag style.
 - Links and footer: wikilinks, external links, file links, references, redirects, categories, behavior switches, interlanguage links, their positions, and language prefixes.
 - Display: theme, line wrapping, font size, font family (a CSS `font-family` list), ligatures (off, on, or on except the lines holding a cursor or selection) and font features (a CSS `font-feature-settings` value).
-- Advanced: rule reliability limit and the read-only parser configuration.
+- Advanced: rule reliability limit and formatter/app versions.
 
-The parser configuration is read-only: **MediaWiki bundled browser configuration**. The first release does not expose arbitrary `parserConfig`, siteinfo fetching, or complex localization alias editing. The formatter browser build supports only its bundled `mediawiki`/`default` configuration.
+The formatter uses the bundled MediaWiki browser parser configuration. Loading a site profile applies its formatter options once; subsequent edits remain adjustable. Profile localization aliases accompany each format request, and interwiki prefixes extend editor highlighting. TemplateData uses embedded profile data first, then session-cached wiki requests when enabled.
 
-Only the language preference, theme preference, line-wrapping preference, editor font settings, and validated formatter settings are saved to `localStorage`. Source, output, completed-run snapshots, files, diagnostics, and failure details are never persisted.
+Language, theme, line wrapping, editor typography, and validated formatter settings are saved to `localStorage`. The serialized site profile is stored separately under `wikitext-formatter.site-profile` and revalidated in the Worker on startup; restoring it preserves subsequent formatter setting changes. Source, output, completed-run snapshots, files, diagnostics, and fetched TemplateData are never persisted.
 
 ## Language support
 
@@ -147,7 +148,7 @@ The build target is ES2022 because the formatter browser runtime uses modern ESM
 
 - The application does not render a live MediaWiki preview and never injects Wikitext as HTML.
 - Parsing uses the bundled MediaWiki/default browser configuration; named filesystem parser configurations are Node-only.
-- Siteinfo and advanced localization alias controls are not exposed in the first release.
+- Fetching a profile and TemplateData requires the wiki API to allow anonymous CORS requests over HTTPS. Localization aliases are edited in an imported profile.
 - Very large documents are allowed and produce a warning; formatting and visible diff computation can still consume substantial memory.
 - Diff is computed only while the diff surface is visible.
 

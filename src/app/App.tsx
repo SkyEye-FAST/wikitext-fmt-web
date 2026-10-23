@@ -19,6 +19,7 @@ import { type OutputTab, OutputPane } from "../components/OutputPane.js";
 import { ReportBar } from "../components/ReportBar.js";
 import { SourcePane } from "../components/SourcePane.js";
 import { computeChangedLines } from "../editor/changedLineDecorations.js";
+import { createSiteCompletionSource } from "../editor/siteCompletions.js";
 import type { ResolvedTheme } from "../editor/themes.js";
 import {
   FormatterClient,
@@ -27,6 +28,8 @@ import {
 } from "../formatter/client.js";
 import type {
   FormatterMetadata,
+  LoadedSiteProfile,
+  SiteProfileInput,
   ResolvedBrowserOptions,
 } from "../formatter/protocol.js";
 import {
@@ -48,6 +51,7 @@ import { LARGE_DOCUMENT_WARNING_BYTES } from "../settings/defaults.js";
 import {
   type AppSettings,
   createDefaultSettings,
+  sanitizeFormatterSettings,
   type ThemePreference,
 } from "../settings/schema.js";
 import {
@@ -56,6 +60,10 @@ import {
   loadStoredLanguagePreference,
   saveSettings,
 } from "../settings/storage.js";
+import {
+  restoreSiteProfile,
+  saveSiteProfile,
+} from "../settings/siteProfileStorage.js";
 import {
   copyText,
   type DocumentStatistics,
@@ -75,7 +83,12 @@ const SettingsPanel = lazy(() => import("../components/SettingsPanel.js"));
 
 export type FormatterClientPort = Pick<
   FormatterClient,
-  "ready" | "format" | "restart" | "dispose"
+  | "ready"
+  | "format"
+  | "restart"
+  | "dispose"
+  | "loadSiteProfile"
+  | "templateData"
 >;
 
 type MobileView = "source" | "output";
@@ -121,6 +134,21 @@ function areFormatterOptionsEqual(
   right: ResolvedBrowserOptions,
 ): boolean {
   return areOptionValuesEqual(left, right);
+}
+
+function siteLocalizationOptions(loaded: LoadedSiteProfile | null) {
+  const options = loaded?.options;
+  return {
+    ...(options?.localizationAliases
+      ? { localizationAliases: options.localizationAliases }
+      : {}),
+    ...(options?.localizationSource
+      ? { localizationSource: options.localizationSource }
+      : {}),
+    ...(options?.localizedSyntaxStyle
+      ? { localizedSyntaxStyle: options.localizedSyntaxStyle }
+      : {}),
+  };
 }
 
 function hasDraggedFiles(event: DragEvent): boolean {
@@ -230,6 +258,8 @@ export default function App({
   const [defaults, setDefaults] = useState<ResolvedBrowserOptions | null>(null);
   const [formatterMetadata, setFormatterMetadata] =
     useState<FormatterMetadata | null>(null);
+  const [initialSiteProfile, setInitialSiteProfile] =
+    useState<LoadedSiteProfile | null>(null);
 
   const locale = useResolvedLocale(languagePref);
 
@@ -256,8 +286,13 @@ export default function App({
     if (!client) return;
     let active = true;
     void client.ready().then(
-      (metadata) => {
+      async (metadata) => {
         if (!active) return;
+        const restored = await restoreSiteProfile((input) =>
+          client.loadSiteProfile(input),
+        );
+        if (!active) return;
+        setInitialSiteProfile(restored);
         setDefaults(metadata.defaults);
         setFormatterMetadata(metadata);
         setFormatterVersion(metadata.version);
@@ -293,6 +328,7 @@ export default function App({
         languagePref={languagePref}
         setLanguagePref={setLanguagePref}
         client={client}
+        initialSiteProfile={initialSiteProfile}
       />
     </I18nProvider>
   );
@@ -307,6 +343,7 @@ interface AppMainProps {
   languagePref: LanguagePreference;
   setLanguagePref: (pref: LanguagePreference) => void;
   client: FormatterClientPort;
+  initialSiteProfile: LoadedSiteProfile | null;
 }
 
 function AppMain({
@@ -318,8 +355,30 @@ function AppMain({
   languagePref,
   setLanguagePref,
   client,
+  initialSiteProfile,
 }: AppMainProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const [siteProfile, setSiteProfile] = useState(initialSiteProfile);
+  const siteProfileRef = useRef(initialSiteProfile);
+  const siteLoadToken = useRef(0);
+  const [siteBusy, setSiteBusy] = useState(false);
+  const [siteError, setSiteError] = useState<"fetch" | "import" | null>(null);
+  const interwiki = useMemo(
+    () => siteProfile?.profile.interwiki?.map((entry) => entry.prefix),
+    [siteProfile],
+  );
+  const completionSource = useMemo(
+    () =>
+      siteProfile
+        ? createSiteCompletionSource(
+            siteProfile.profile,
+            locale,
+            (profile, title, language) =>
+              client.templateData(profile, title, language),
+          )
+        : undefined,
+    [siteProfile, locale, client],
+  );
   const [shortcuts] = useState(getShortcutLabels);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const workspaceRef = useRef<HTMLElement>(null);
@@ -493,6 +552,59 @@ function AppMain({
     [updateResultFreshness],
   );
 
+  function acceptSiteProfile(
+    loaded: LoadedSiteProfile | null,
+    applyOptions: boolean,
+  ): void {
+    const localizationChanged = !areOptionValuesEqual(
+      siteLocalizationOptions(siteProfileRef.current),
+      siteLocalizationOptions(loaded),
+    );
+    siteProfileRef.current = loaded;
+    setSiteProfile(loaded);
+    saveSiteProfile(loaded?.serialized ?? null);
+    // The profile's localization overlay can change formatting even when all
+    // persisted options are identical.
+    if (localizationChanged) {
+      formatterRevisionRef.current += 1;
+      updateResultFreshness();
+    }
+    if (loaded && applyOptions) {
+      updateFormatter(
+        sanitizeFormatterSettings(
+          { ...formatterOptionsRef.current, ...loaded.options },
+          defaults,
+        ),
+      );
+    }
+  }
+
+  async function loadSite(
+    input: SiteProfileInput,
+    applyOptions = true,
+  ): Promise<void> {
+    const token = ++siteLoadToken.current;
+    setSiteBusy(true);
+    setSiteError(null);
+    try {
+      const loaded = await client.loadSiteProfile(input);
+      if (token === siteLoadToken.current)
+        acceptSiteProfile(loaded, applyOptions);
+    } catch {
+      if (token === siteLoadToken.current)
+        setSiteError("apiUrl" in input ? "fetch" : "import");
+    } finally {
+      if (token === siteLoadToken.current) setSiteBusy(false);
+    }
+  }
+
+  function removeSite(): void {
+    siteLoadToken.current += 1;
+    setSiteBusy(false);
+    setSiteError(null);
+    acceptSiteProfile(null, false);
+  }
+
   const format = useCallback(async () => {
     if (busyRef.current) return;
     const sourceEditor = sourceEditorRef.current;
@@ -503,7 +615,10 @@ function AppMain({
     const sourceSnapshot = sourceEditor.getValue();
     const sourceRevision = sourceRevisionRef.current;
     const formatterRevision = formatterRevisionRef.current;
-    const formatterOptions = formatterOptionsRef.current;
+    const formatterOptions = {
+      ...formatterOptionsRef.current,
+      ...siteLocalizationOptions(siteProfileRef.current),
+    };
     const operationToken = ++activeFormatRef.current;
     busyRef.current = true;
     setBusy(true);
@@ -705,6 +820,7 @@ function AppMain({
     clearStoredSettings();
     setLanguagePref("system");
     replaceAllSettings(createDefaultSettings(defaults));
+    removeSite();
   }
 
   function handleLanguageChange(lang: LanguagePreference): void {
@@ -838,6 +954,8 @@ function AppMain({
           filename={sourceFilename}
           lineWrapping={settings.lineWrapping}
           theme={resolvedTheme}
+          interwiki={interwiki}
+          completionSource={completionSource}
           hidden={mobileView !== "source"}
           onDocumentChange={handleSourceDocumentChange}
           onFormat={format}
@@ -865,6 +983,7 @@ function AppMain({
           theme={resolvedTheme}
           shortcuts={shortcuts}
           hidden={mobileView !== "output"}
+          interwiki={interwiki}
           onTabChange={setOutputTab}
           onCopy={() => void copyOutput()}
           onDownload={() => triggerTextDownload(output, sourceFilename)}
@@ -913,6 +1032,24 @@ function AppMain({
             formatterVersion={formatterVersion}
             webVersion={__WIKITEXT_FMT_WEB_VERSION__}
             onReset={resetAllSettings}
+            siteProfile={siteProfile}
+            siteBusy={siteBusy}
+            siteError={siteError}
+            onLoadSite={(input) => void loadSite(input)}
+            onRemoveSite={removeSite}
+            onTemplateDataChange={(enabled) => {
+              if (siteProfile) {
+                void loadSite(
+                  {
+                    json: JSON.stringify({
+                      ...siteProfile.profile,
+                      extensions: { templateData: enabled },
+                    }),
+                  },
+                  false,
+                );
+              }
+            }}
           />
         </Suspense>
       ) : null}

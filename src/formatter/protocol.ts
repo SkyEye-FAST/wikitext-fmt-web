@@ -4,6 +4,8 @@ import type {
   FormatOptions,
   FormatProfile,
   ResolvedFormatOptions,
+  SiteProfile,
+  SiteProfileTemplate,
 } from "wikitext-fmt/browser";
 
 export type ResolvedBrowserOptions = ResolvedFormatOptions;
@@ -26,7 +28,35 @@ export interface FormatRequest {
   options: FormatOptions;
 }
 
-export type WorkerRequest = InitializeRequest | FormatRequest;
+export type SiteProfileInput = { json: string } | { apiUrl: string };
+
+export interface LoadedSiteProfile {
+  profile: SiteProfile;
+  serialized: string;
+  options: FormatOptions;
+}
+
+export interface LoadSiteProfileRequest {
+  type: "load-site-profile";
+  generation: number;
+  requestId: number;
+  input: SiteProfileInput;
+}
+
+export interface TemplateDataRequest {
+  type: "template-data";
+  generation: number;
+  requestId: number;
+  profile: SiteProfile;
+  title: string;
+  language: "en" | "zh-hans" | "zh-hant";
+}
+
+export type WorkerRequest =
+  | InitializeRequest
+  | FormatRequest
+  | LoadSiteProfileRequest
+  | TemplateDataRequest;
 
 export interface FormatterMetadata {
   defaults: ResolvedBrowserOptions;
@@ -37,6 +67,17 @@ export interface FormatterMetadata {
 }
 
 export type FormatResponse =
+  | ({
+      type: "site-profile";
+      generation: number;
+      requestId: number;
+    } & LoadedSiteProfile)
+  | {
+      type: "template-data";
+      generation: number;
+      requestId: number;
+      template: SiteProfileTemplate | null;
+    }
   | {
       type: "ready";
       generation: number;
@@ -73,15 +114,22 @@ const placements = ["preserve", "footer"] as const;
 const tableSeparators = ["auto", "split", "preserve"] as const;
 const voidStyles = ["html5", "xhtml", "preserve"] as const;
 
-function isOneOf<T extends string>(value: unknown, values: readonly T[]): boolean {
+function isOneOf<T extends string>(
+  value: unknown,
+  values: readonly T[],
+): boolean {
   return typeof value === "string" && values.includes(value as T);
 }
 
 function isStringArray(value: unknown): boolean {
-  return Array.isArray(value) && value.every((item) => typeof item === "string");
+  return (
+    Array.isArray(value) && value.every((item) => typeof item === "string")
+  );
 }
 
-function isResolvedBrowserOptions(value: unknown): value is ResolvedBrowserOptions {
+function isResolvedBrowserOptions(
+  value: unknown,
+): value is ResolvedBrowserOptions {
   if (!isRecord(value)) return false;
   return (
     isOneOf(value.profile, profileNames) &&
@@ -115,7 +163,9 @@ function isResolvedBrowserOptions(value: unknown): value is ResolvedBrowserOptio
   );
 }
 
-function isProfileOverrides(value: unknown): value is FormatterProfileOverrides {
+function isProfileOverrides(
+  value: unknown,
+): value is FormatterProfileOverrides {
   if (!isRecord(value)) return false;
   if (
     Object.keys(value).length !== profileNames.length ||
@@ -127,12 +177,13 @@ function isProfileOverrides(value: unknown): value is FormatterProfileOverrides 
     const overrides = value[profile];
     return (
       isRecord(overrides) &&
-      Object.entries(overrides).every(([key, option]) =>
-        Object.hasOwn(emptyResolvedBrowserOptions, key) &&
-        isResolvedBrowserOptions({
-          ...emptyResolvedBrowserOptions,
-          [key]: option,
-        }),
+      Object.entries(overrides).every(
+        ([key, option]) =>
+          Object.hasOwn(emptyResolvedBrowserOptions, key) &&
+          isResolvedBrowserOptions({
+            ...emptyResolvedBrowserOptions,
+            [key]: option,
+          }),
       )
     );
   });
@@ -192,6 +243,142 @@ function isTemplateDiagnostics(value: unknown): boolean {
   );
 }
 
+function isJson(value: unknown): boolean {
+  return (
+    value === null ||
+    typeof value === "string" ||
+    typeof value === "boolean" ||
+    (typeof value === "number" && Number.isFinite(value)) ||
+    (Array.isArray(value) && value.every(isJson)) ||
+    (isRecord(value) && Object.values(value).every(isJson))
+  );
+}
+
+function isInterfaceText(value: unknown): boolean {
+  return (
+    typeof value === "string" ||
+    (isRecord(value) &&
+      Object.values(value).every((text) => typeof text === "string"))
+  );
+}
+
+function isTemplate(value: unknown): value is SiteProfileTemplate {
+  if (!isRecord(value) || !isJson(value)) return false;
+  if (value.description !== undefined && !isInterfaceText(value.description))
+    return false;
+  if (value.format !== undefined && typeof value.format !== "string")
+    return false;
+  if (value.paramOrder !== undefined && !isStringArray(value.paramOrder))
+    return false;
+  return (
+    value.params === undefined ||
+    (isRecord(value.params) &&
+      Object.values(value.params).every((parameter) => {
+        if (!isRecord(parameter)) return false;
+        return (
+          ["label", "description", "default", "example", "autovalue"].every(
+            (key) =>
+              parameter[key] === undefined || isInterfaceText(parameter[key]),
+          ) &&
+          ["required", "suggested"].every(
+            (key) =>
+              parameter[key] === undefined ||
+              typeof parameter[key] === "boolean",
+          ) &&
+          ["aliases", "suggestedvalues"].every(
+            (key) =>
+              parameter[key] === undefined || isStringArray(parameter[key]),
+          ) &&
+          (parameter.type === undefined ||
+            typeof parameter.type === "string") &&
+          (parameter.deprecated === undefined ||
+            typeof parameter.deprecated === "boolean" ||
+            typeof parameter.deprecated === "string")
+        );
+      }))
+  );
+}
+
+function isFormatOptions(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    Object.entries(value).every(
+      ([key, option]) =>
+        Object.hasOwn(emptyResolvedBrowserOptions, key) &&
+        isResolvedBrowserOptions({
+          ...emptyResolvedBrowserOptions,
+          [key]: option,
+        }),
+    )
+  );
+}
+
+function isHttpUrl(value: unknown): boolean {
+  if (typeof value !== "string") return false;
+  try {
+    const url = new URL(value);
+    return (
+      ["http:", "https:"].includes(url.protocol) &&
+      !url.username &&
+      !url.password
+    );
+  } catch {
+    return false;
+  }
+}
+
+function isSiteProfile(value: unknown): value is SiteProfile {
+  if (!isRecord(value)) return false;
+  const allowed = [
+    "schemaVersion",
+    "name",
+    "apiUrl",
+    "articlePath",
+    "extensions",
+    "formatter",
+    "templates",
+    "interwiki",
+  ];
+  if (Object.keys(value).some((key) => !allowed.includes(key))) return false;
+  if (
+    isRecord(value.formatter) &&
+    (Object.hasOwn(value.formatter, "parserConfig") ||
+      Object.hasOwn(value.formatter, "site"))
+  )
+    return false;
+  return (
+    value.schemaVersion === 1 &&
+    typeof value.name === "string" &&
+    value.name.trim().length > 0 &&
+    (value.apiUrl === undefined || isHttpUrl(value.apiUrl)) &&
+    (value.articlePath === undefined ||
+      (isHttpUrl(value.articlePath) &&
+        typeof value.articlePath === "string" &&
+        value.articlePath.includes("$1"))) &&
+    isRecord(value.extensions) &&
+    Object.keys(value.extensions).length === 1 &&
+    typeof value.extensions.templateData === "boolean" &&
+    (value.formatter === undefined || isFormatOptions(value.formatter)) &&
+    (value.templates === undefined ||
+      (isRecord(value.templates) &&
+        Object.entries(value.templates).every(
+          ([name, template]) => name.trim().length > 0 && isTemplate(template),
+        ))) &&
+    (value.interwiki === undefined ||
+      (Array.isArray(value.interwiki) &&
+        value.interwiki.every(
+          (entry) =>
+            isRecord(entry) &&
+            typeof entry.prefix === "string" &&
+            entry.prefix.trim().length > 0 &&
+            (entry.language === undefined ||
+              typeof entry.language === "string") &&
+            (entry.url === undefined || typeof entry.url === "string") &&
+            (entry.local === undefined || typeof entry.local === "boolean"),
+        )))
+  );
+}
+
 export function isFormatResponse(value: unknown): value is FormatResponse {
   if (!value || typeof value !== "object" || !("type" in value)) {
     return false;
@@ -238,6 +425,21 @@ export function isFormatResponse(value: unknown): value is FormatResponse {
       typeof resultRecord?.formatted === "string" &&
       isTemplateDiagnostics(resultRecord.templateDiagnostics) &&
       !("templateParameterDiagnostics" in resultRecord)
+    );
+  }
+
+  if (candidate.type === "site-profile") {
+    return (
+      Number.isInteger(candidate.requestId) &&
+      isSiteProfile(candidate.profile) &&
+      typeof candidate.serialized === "string" &&
+      isFormatOptions(candidate.options)
+    );
+  }
+  if (candidate.type === "template-data") {
+    return (
+      Number.isInteger(candidate.requestId) &&
+      (candidate.template === null || isTemplate(candidate.template))
     );
   }
 

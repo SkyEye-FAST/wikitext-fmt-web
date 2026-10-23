@@ -1,6 +1,13 @@
-import { forwardRef, memo, useEffect, useImperativeHandle, useRef } from "react";
+import {
+  forwardRef,
+  memo,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+} from "react";
 
 import { isolateHistory } from "@codemirror/commands";
+import type { CompletionSource } from "@codemirror/autocomplete";
 import { StateEffect } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 
@@ -32,6 +39,8 @@ interface EditorPaneProps {
   changedLines?: Set<number>;
   onFormat?: () => void;
   describedBy?: string;
+  interwiki?: string[];
+  completionSource?: CompletionSource;
 }
 
 /**
@@ -52,6 +61,8 @@ const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(
       changedLines,
       onFormat,
       describedBy,
+      interwiki,
+      completionSource,
     }: EditorPaneProps,
     forwardedRef,
   ) {
@@ -118,6 +129,8 @@ const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(
         readOnly,
         lineWrapping,
         theme,
+        interwiki,
+        completionSource,
         enableChangedLines: readOnly,
         placeholder,
         onFormat: onFormat ? () => onFormatRef.current?.() : undefined,
@@ -161,7 +174,17 @@ const EditorPaneComponent = forwardRef<EditorPaneHandle, EditorPaneProps>(
       else content.removeAttribute("aria-describedby");
       // extensionOptions() reads exactly these props.
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [describedBy, label, lineWrapping, onFormat, placeholder, readOnly, theme]);
+    }, [
+      describedBy,
+      label,
+      lineWrapping,
+      onFormat,
+      placeholder,
+      readOnly,
+      theme,
+      interwiki,
+      completionSource,
+    ]);
 
     useEffect(() => {
       const view = viewRef.current;

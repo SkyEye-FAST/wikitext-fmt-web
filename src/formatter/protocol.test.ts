@@ -8,6 +8,60 @@ import {
 import { createMetadata } from "../test/fixtures.js";
 
 describe("Worker protocol", () => {
+  it("validates normalized site profile and TemplateData responses", () => {
+    const response = {
+      type: "site-profile",
+      generation: 1,
+      requestId: 5,
+      profile: {
+        schemaVersion: 1,
+        name: "Wiki",
+        apiUrl: "https://wiki.example/api.php",
+        extensions: { templateData: true },
+        templates: {
+          Info: { params: { name: { aliases: ["n"], label: { en: "Name" } } } },
+        },
+        interwiki: [{ prefix: "en", language: "English" }],
+      },
+      serialized: "{}\n",
+      options: { lineWidth: 100, localizationAliases: {} },
+    };
+    expect(isFormatResponse(response)).toBe(true);
+    for (const profile of [
+      { ...response.profile, schemaVersion: 2 },
+      { ...response.profile, extensions: {} },
+      { ...response.profile, apiUrl: "javascript:alert(1)" },
+      {
+        ...response.profile,
+        templates: { Info: { params: { name: { aliases: [3] } } } },
+      },
+    ]) {
+      expect(isFormatResponse({ ...response, profile })).toBe(false);
+    }
+    expect(isFormatResponse({ ...response, serialized: null })).toBe(false);
+    expect(
+      isFormatResponse({ ...response, options: { lineWidth: "100" } }),
+    ).toBe(false);
+    const data = {
+      type: "template-data",
+      generation: 1,
+      requestId: 6,
+      template: {
+        params: { name: { suggestedvalues: ["A"] } },
+        paramOrder: ["name"],
+      },
+    };
+    expect(isFormatResponse(data)).toBe(true);
+    expect(isFormatResponse({ ...data, template: null })).toBe(true);
+    expect(isFormatResponse({ ...data, template: { params: [] } })).toBe(false);
+    expect(
+      isFormatResponse({
+        ...data,
+        template: { params: { name: { required: "yes" } } },
+      }),
+    ).toBe(false);
+    expect(isFormatResponse({ ...data, requestId: "6" })).toBe(false);
+  });
   it("accepts typed monotonically identifiable messages", () => {
     const request: FormatRequest = {
       type: "format",

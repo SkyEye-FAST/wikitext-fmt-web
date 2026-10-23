@@ -1,8 +1,15 @@
-import type { FormatDetailedResult, FormatOptions } from "wikitext-fmt/browser";
+import type {
+  FormatDetailedResult,
+  FormatOptions,
+  SiteProfile,
+  SiteProfileTemplate,
+} from "wikitext-fmt/browser";
 
 import {
   type FormatResponse,
   type FormatterMetadata,
+  type LoadedSiteProfile,
+  type SiteProfileInput,
   isFormatResponse,
   type WorkerRequest,
 } from "./protocol.js";
@@ -47,6 +54,16 @@ interface PendingOperation {
   reject: (error: Error) => void;
 }
 
+type MetadataRequest =
+  | Omit<
+      Extract<WorkerRequest, { type: "load-site-profile" }>,
+      "generation" | "requestId"
+    >
+  | Omit<
+      Extract<WorkerRequest, { type: "template-data" }>,
+      "generation" | "requestId"
+    >;
+
 interface WorkerSession {
   generation: number;
   worker: WorkerLike;
@@ -87,6 +104,17 @@ export class FormatterClient {
   private generation = 0;
   private pending = new Map<number, PendingOperation>();
   private disposed = false;
+  private metadataPending = new Map<
+    number,
+    {
+      resolve: (response: FormatResponse) => void;
+      reject: (error: Error) => void;
+    }
+  >();
+  private templateCache = new Map<
+    string,
+    Promise<SiteProfileTemplate | null>
+  >();
 
   constructor(workerFactory: WorkerFactory = defaultWorkerFactory) {
     this.workerFactory = workerFactory;
@@ -103,6 +131,77 @@ export class FormatterClient {
       );
     }
     return this.session.readiness;
+  }
+
+  async loadSiteProfile(input: SiteProfileInput): Promise<LoadedSiteProfile> {
+    const response = await this.metadataRequest({
+      type: "load-site-profile",
+      input,
+    });
+    if (response.type !== "site-profile")
+      throw new Error("Unexpected site profile response");
+    return {
+      profile: response.profile,
+      serialized: response.serialized,
+      options: response.options,
+    };
+  }
+
+  async templateData(
+    profile: SiteProfile,
+    title: string,
+    language: "en" | "zh-hans" | "zh-hant",
+  ): Promise<SiteProfileTemplate | null> {
+    const key = JSON.stringify([
+      profile.apiUrl,
+      language,
+      title.replaceAll("_", " ").trim(),
+      profile.extensions.templateData,
+    ]);
+    let pending = this.templateCache.get(key);
+    if (!pending) {
+      pending = this.metadataRequest({
+        type: "template-data",
+        profile,
+        title,
+        language,
+      })
+        .then((response) => {
+          if (response.type !== "template-data")
+            throw new Error("Unexpected TemplateData response");
+          return response.template;
+        })
+        .catch(() => null);
+      this.templateCache.set(key, pending);
+    }
+    return pending;
+  }
+
+  private async metadataRequest(
+    request: MetadataRequest,
+  ): Promise<FormatResponse> {
+    let session = this.session;
+    if (session.state === "failed" && !this.disposed) {
+      await this.restart(session.error?.message);
+      session = this.session;
+    }
+    await this.ready();
+    if (this.disposed || session !== this.session || session.state !== "ready")
+      throw new WorkerStoppedError();
+    const requestId = ++this.nextRequestId;
+    return new Promise((resolve, reject) => {
+      this.metadataPending.set(requestId, { resolve, reject });
+      try {
+        session.worker.postMessage({
+          ...request,
+          generation: session.generation,
+          requestId,
+        });
+      } catch (error) {
+        this.metadataPending.delete(requestId);
+        reject(error);
+      }
+    });
   }
 
   async format(
@@ -282,6 +381,18 @@ export class FormatterClient {
       return;
     }
 
+    const metadataPending = this.metadataPending.get(response.requestId);
+    if (metadataPending) {
+      this.metadataPending.delete(response.requestId);
+      if (response.type === "error")
+        metadataPending.reject(
+          new FormatterClientError("request-rejected", response.message),
+        );
+      else metadataPending.resolve(response);
+      return;
+    }
+    if (response.type === "site-profile" || response.type === "template-data")
+      return;
     if (response.requestId !== this.latestRequestId) {
       return;
     }
@@ -331,6 +442,8 @@ export class FormatterClient {
   }
 
   private failPending(error: Error): void {
+    for (const pending of this.metadataPending.values()) pending.reject(error);
+    this.metadataPending.clear();
     for (const pending of this.pending.values()) {
       pending.reject(error);
     }

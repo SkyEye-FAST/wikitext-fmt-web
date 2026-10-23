@@ -1,4 +1,10 @@
-import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
+import {
+  autocompletion,
+  closeBrackets,
+  closeBracketsKeymap,
+  completionKeymap,
+  type CompletionSource,
+} from "@codemirror/autocomplete";
 import {
   defaultKeymap,
   history,
@@ -43,6 +49,8 @@ export interface EditorExtensionOptions {
   enableChangedLines?: boolean;
   placeholder?: string;
   onFormat?: () => void;
+  interwiki?: string[];
+  completionSource?: CompletionSource;
 }
 
 export interface EditorStateOptions extends EditorExtensionOptions {
@@ -69,12 +77,13 @@ export function createEditorExtensions(
     highlightSelectionMatches(),
     keymap.of([
       ...closeBracketsKeymap,
+      ...completionKeymap,
       ...defaultKeymap,
       ...searchKeymap,
       ...historyKeymap,
       indentWithTab,
     ]),
-    ...createWikitextExtensions(),
+    ...createWikitextExtensions(options.interwiki),
     createSyntaxTheme(),
     EditorState.readOnly.of(options.readOnly),
     EditorView.editable.of(!options.readOnly),
@@ -84,6 +93,15 @@ export function createEditorExtensions(
     createEditorTheme(options.theme),
     currentLineLigatures(),
   ];
+
+  if (!options.readOnly && options.completionSource) {
+    extensions.push(
+      autocompletion({
+        override: [options.completionSource],
+        activateOnCompletion: (completion) => completion.type === "property",
+      }),
+    );
+  }
 
   if (options.lineWrapping) {
     extensions.push(EditorView.lineWrapping);
