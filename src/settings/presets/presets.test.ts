@@ -6,7 +6,7 @@ import minecraftJson from "./zh-minecraft-wiki.json?raw";
 it("normalizes the bundled Chinese Minecraft Wiki profile with templates and interwiki", () => {
   const profile = normalizeSiteProfile(JSON.parse(minecraftJson));
 
-  expect(profile.name).toBe("中文Minecraft Wiki");
+  expect(profile.name).toBe("Minecraft Wiki (ZH)");
   expect(profile.apiUrl).toBe("https://zh.minecraft.wiki/api.php");
   expect(profile.extensions.templateData).toBe(true);
   const templates = Object.values(profile.templates ?? {});

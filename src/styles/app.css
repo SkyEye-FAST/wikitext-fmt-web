@@ -1469,6 +1469,12 @@ input.text-input {
   resize: none;
 }
 
+select.text-input {
+  height: var(--control-height);
+  padding: 0 8px;
+  font-family: inherit;
+}
+
 .number-input[aria-invalid="true"],
 .text-input[aria-invalid="true"] {
   border-color: var(--destructive);

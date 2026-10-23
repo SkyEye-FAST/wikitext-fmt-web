@@ -74,8 +74,8 @@ The main React bundle imports only public `wikitext-fmt/browser` types. `formatW
 
 The settings sheet exposes:
 
+- Site: choose a bundled preset, fetch a profile from a MediaWiki API URL, import/export JSON, remove it, or switch TemplateData access. Profiles supply template names, parameter and value suggestions in Source, interwiki highlighting and prefix suggestions, and formatter options.
 - Preset: Default or Complete.
-- Site: fetch a profile from a MediaWiki API URL, import/export JSON, remove it, or switch TemplateData access. Profiles supply template names, parameter and value suggestions in Source, interwiki highlighting and prefix suggestions, and formatter options.
 - Templates: template formatting, line width, one-line call spacing, and multi-line parameter layout.
 - Tables: table formatting and how cells joined with `||` or `!!` are laid out. "Keep as written" preserves only inline cell separators.
 - Page layout: headings, lists, space around headings, blank-line collapsing, and break-tag style.
@@ -83,7 +83,7 @@ The settings sheet exposes:
 - Display: theme, line wrapping, font size, font family (a CSS `font-family` list), ligatures (off, on, or on except the lines holding a cursor or selection) and font features (a CSS `font-feature-settings` value).
 - Advanced: rule reliability limit and formatter/app versions.
 
-Settings → Site → Presets includes a Chinese Minecraft Wiki profile; refresh it with `node scripts/generate-site-preset.mjs`.
+The bundled preset is Minecraft Wiki (ZH), the Chinese Minecraft Wiki; refresh it with `node scripts/generate-site-preset.mjs`.
 
 The formatter uses the bundled MediaWiki browser parser configuration. Loading a site profile applies its formatter options once; subsequent edits remain adjustable. Profile localization aliases accompany each format request, and interwiki prefixes extend editor highlighting. TemplateData uses embedded profile data first, then session-cached wiki requests when enabled.
 

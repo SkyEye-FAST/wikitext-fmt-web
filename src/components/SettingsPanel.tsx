@@ -398,13 +398,14 @@ type SiteSettingsProps = Pick<
 >;
 
 interface SitePreset {
+  /** Matches the profile name, so the menu shows the loaded preset. */
   name: string;
   load: () => Promise<string>;
 }
 
 const sitePresets: readonly SitePreset[] = [
   {
-    name: "中文Minecraft Wiki",
+    name: "Minecraft Wiki (ZH)",
     load: async () =>
       (await import("../settings/presets/zh-minecraft-wiki.json?raw")).default,
   },
@@ -420,8 +421,12 @@ function SiteSettings({
 }: SiteSettingsProps) {
   const { t } = useI18n();
   const id = useId();
+  const presetId = useId();
   const fileInput = useRef<HTMLInputElement>(null);
   const profile = siteProfile?.profile;
+  const activePreset = sitePresets.find(
+    (preset) => preset.name === profile?.name,
+  );
   const [apiUrl, setApiUrl] = useState(profile?.apiUrl ?? "");
   const [previousUrl, setPreviousUrl] = useState(profile?.apiUrl);
   const [readError, setReadError] = useState(false);
@@ -449,7 +454,9 @@ function SiteSettings({
     URL.revokeObjectURL(url);
   }
 
-  async function loadPreset(preset: SitePreset): Promise<void> {
+  async function loadPreset(name: string): Promise<void> {
+    const preset = sitePresets.find((candidate) => candidate.name === name);
+    if (!preset) return;
     setReadError(false);
     setPresetBusy(true);
     try {
@@ -463,22 +470,27 @@ function SiteSettings({
 
   return (
     <SettingsSection title={t("settings.section.site")}>
-      <fieldset className="setting-row setting-choice">
-        <legend>{t("settings.site.presets")}</legend>
-        <div className="site-actions">
+      <div className="setting-row site-form">
+        <label className="setting-label" htmlFor={presetId}>
+          {t("settings.site.presets")}
+        </label>
+        <select
+          id={presetId}
+          className="text-input"
+          value={activePreset?.name ?? ""}
+          disabled={busy}
+          onChange={(event) => void loadPreset(event.target.value)}
+        >
+          <option value="" disabled>
+            {t("settings.site.presets.choose")}
+          </option>
           {sitePresets.map((preset) => (
-            <button
-              key={preset.name}
-              className="button"
-              type="button"
-              disabled={busy}
-              onClick={() => void loadPreset(preset)}
-            >
+            <option key={preset.name} value={preset.name}>
               {preset.name}
-            </button>
+            </option>
           ))}
-        </div>
-      </fieldset>
+        </select>
+      </div>
       <div className="setting-row site-summary">
         {profile ? (
           <strong>{profile.name}</strong>
@@ -731,6 +743,15 @@ export default function SettingsPanel({
           </header>
 
           <div className="sheet-body">
+            <SiteSettings
+              siteProfile={siteProfile}
+              siteBusy={siteBusy}
+              siteError={siteError}
+              onLoadSite={onLoadSite}
+              onRemoveSite={onRemoveSite}
+              onTemplateDataChange={onTemplateDataChange}
+            />
+
             <SettingsSection title={t("settings.preset")}>
               <ChoiceRow
                 legend={t("settings.preset")}
@@ -944,14 +965,6 @@ export default function SettingsPanel({
               )}
             </SettingsSection>
 
-            <SiteSettings
-              siteProfile={siteProfile}
-              siteBusy={siteBusy}
-              siteError={siteError}
-              onLoadSite={onLoadSite}
-              onRemoveSite={onRemoveSite}
-              onTemplateDataChange={onTemplateDataChange}
-            />
             <SettingsSection title={t("settings.section.editor")}>
               <ChoiceRow
                 legend={t("theme.label")}

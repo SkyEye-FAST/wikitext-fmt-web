@@ -23,7 +23,9 @@ const profileOverrides = Object.fromEntries(
   ]),
 ) as Parameters<typeof SettingsPanel>[0]["profileOverrides"];
 
-function renderPanel(overrides: Partial<Parameters<typeof SettingsPanel>[0]> = {}) {
+function renderPanel(
+  overrides: Partial<Parameters<typeof SettingsPanel>[0]> = {},
+) {
   const props: Parameters<typeof SettingsPanel>[0] = {
     open: true,
     settings: createDefaultSettings({
@@ -95,11 +97,16 @@ describe("SettingsPanel", () => {
     const user = userEvent.setup();
     const props = renderPanel();
 
-    await user.click(screen.getByRole("button", { name: "中文Minecraft Wiki" }));
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: "Presets" }),
+      "Minecraft Wiki (ZH)",
+    );
 
     await waitFor(() => expect(props.onLoadSite).toHaveBeenCalledOnce());
     expect(props.onLoadSite).toHaveBeenCalledWith({
-      json: expect.stringContaining('"apiUrl": "https://zh.minecraft.wiki/api.php"'),
+      json: expect.stringContaining(
+        '"apiUrl": "https://zh.minecraft.wiki/api.php"',
+      ),
     });
   });
 
@@ -180,7 +187,7 @@ describe("SettingsPanel", () => {
 
     // Font family commits valid value and rejects invalid
     const fontInput = screen.getByLabelText("Font");
-    await user.type(fontInput, 'invalid; {font}{enter}');
+    await user.type(fontInput, "invalid; {font}{enter}");
     expect(fontInput).toHaveAttribute("aria-invalid", "true");
 
     await user.clear(fontInput);

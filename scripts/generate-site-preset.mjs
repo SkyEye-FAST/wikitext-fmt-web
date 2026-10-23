@@ -10,7 +10,7 @@ import {
 
 const apiUrl = "https://zh.minecraft.wiki/api.php";
 // The wiki reports "Minecraft Wiki", the same as the English wiki.
-const name = "中文Minecraft Wiki";
+const name = "Minecraft Wiki (ZH)";
 const output = new URL(
   "../src/settings/presets/zh-minecraft-wiki.json",
   import.meta.url,
