@@ -1,0 +1,2213 @@
+{
+  "apiUrl": "https://zh.minecraft.wiki/api.php",
+  "articlePath": "https://zh.minecraft.wiki/w/$1",
+  "extensions": {
+    "templateData": true
+  },
+  "formatter": {
+    "interlanguagePrefixes": [
+      "cs",
+      "de",
+      "el",
+      "en",
+      "es",
+      "fr",
+      "hu",
+      "id",
+      "it",
+      "ja",
+      "ko",
+      "lzh",
+      "nl",
+      "pl",
+      "pt",
+      "pt-br",
+      "ru",
+      "th",
+      "tr",
+      "uk",
+      "zh"
+    ],
+    "localizationAliases": {
+      "behaviorSwitches": {
+        "forcetoc": [
+          "__FORCETOC__",
+          "__强显目录__",
+          "__強制目錄__"
+        ],
+        "hiddencat": [
+          "__HIDDENCAT__",
+          "__隐藏分类__",
+          "__隱藏分類__"
+        ],
+        "index": [
+          "__INDEX__",
+          "__索引__"
+        ],
+        "newsectionlink": [
+          "__NEWSECTIONLINK__",
+          "__新段落链接__"
+        ],
+        "nocontentconvert": [
+          "__NOCONTENTCONVERT__",
+          "__NOCC__",
+          "__不转换内容__",
+          "__不轉換內容__"
+        ],
+        "noeditsection": [
+          "__NOEDITSECTION__",
+          "__无编辑段落__",
+          "__无段落编辑__",
+          "__無段落編輯__"
+        ],
+        "nogallery": [
+          "__NOGALLERY__",
+          "__无图库__",
+          "__無圖庫__"
+        ],
+        "noindex": [
+          "__NOINDEX__",
+          "__无索引__"
+        ],
+        "nonewsectionlink": [
+          "__NONEWSECTIONLINK__",
+          "__无新段落链接__"
+        ],
+        "notitleconvert": [
+          "__NOTITLECONVERT__",
+          "__NOTC__",
+          "__不转换标题__",
+          "__不轉換標題__"
+        ],
+        "notoc": [
+          "__NOTOC__",
+          "__无目录__",
+          "__無目錄__"
+        ],
+        "staticredirect": [
+          "__STATICREDIRECT__",
+          "__静态重定向__",
+          "__靜態重新導向__"
+        ],
+        "toc": [
+          "__TOC__",
+          "__目录__",
+          "__目錄__"
+        ]
+      },
+      "categoryNamespaces": [
+        "Category"
+      ],
+      "defaultsortMagicWords": [
+        "DEFAULTSORT:",
+        "DEFAULTSORTKEY:",
+        "DEFAULTCATEGORYSORT:",
+        "默认排序:",
+        "默认排序关键字:",
+        "默认分类排序:"
+      ],
+      "fileNamespaces": [
+        "File"
+      ],
+      "imageOptionAliases": {
+        "img_alt": [
+          "alt=$1",
+          "替代=$1",
+          "替代文本=$1",
+          "替代文字"
+        ],
+        "img_border": [
+          "border",
+          "边框",
+          "邊框"
+        ],
+        "img_center": [
+          "center",
+          "centre",
+          "居中",
+          "置中"
+        ],
+        "img_class": [
+          "class=$1",
+          "类=$1",
+          "類別=$1"
+        ],
+        "img_framed": [
+          "frame",
+          "framed",
+          "enframed",
+          "有框"
+        ],
+        "img_frameless": [
+          "frameless",
+          "无框",
+          "無框"
+        ],
+        "img_lang": [
+          "lang=$1",
+          "语言=$1",
+          "語言=$1"
+        ],
+        "img_left": [
+          "left",
+          "左"
+        ],
+        "img_link": [
+          "link=$1",
+          "链接=$1",
+          "連結=$1"
+        ],
+        "img_manualthumb": [
+          "thumbnail=$1",
+          "thumb=$1",
+          "缩略图=$1",
+          "縮圖=$1"
+        ],
+        "img_none": [
+          "none",
+          "无",
+          "無"
+        ],
+        "img_page": [
+          "page=$1",
+          "page $1",
+          "页数=$1",
+          "$1页",
+          "頁=$1",
+          "$1頁"
+        ],
+        "img_right": [
+          "right",
+          "右"
+        ],
+        "img_thumbnail": [
+          "thumb",
+          "thumbnail",
+          "缩略图",
+          "縮圖"
+        ],
+        "img_upright": [
+          "upright",
+          "upright=$1",
+          "upright $1",
+          "右上",
+          "右上=$1",
+          "右上$1"
+        ],
+        "img_width": [
+          "$1px",
+          "$1像素",
+          "width=$1"
+        ]
+      },
+      "redirectMagicWords": [
+        "#REDIRECT",
+        "#重定向",
+        "#重新導向"
+      ]
+    }
+  },
+  "interwiki": [
+    {
+      "prefix": "aether",
+      "url": "https://aether.fandom.com/wiki/$1"
+    },
+    {
+      "prefix": "bedev",
+      "url": "https://wiki.mcbe-dev.net/p/$1"
+    },
+    {
+      "prefix": "bugtracker",
+      "url": "https://bugs.mojang.com/browse/$1"
+    },
+    {
+      "prefix": "commons",
+      "url": "https://commons.wikimedia.org/wiki/$1"
+    },
+    {
+      "language": "čeština",
+      "local": true,
+      "prefix": "cs",
+      "url": "https://cs.minecraft.wiki/w/$1"
+    },
+    {
+      "language": "Deutsch",
+      "local": true,
+      "prefix": "de",
+      "url": "https://de.minecraft.wiki/w/$1"
+    },
+    {
+      "prefix": "dinnerbonetweet",
+      "url": "https://twitter.com/Dinnerbone/status/$1"
+    },
+    {
+      "language": "Ελληνικά",
+      "local": true,
+      "prefix": "el",
+      "url": "https://el.minecraft.wiki/w/$1"
+    },
+    {
+      "language": "English",
+      "local": true,
+      "prefix": "en",
+      "url": "https://minecraft.wiki/w/$1"
+    },
+    {
+      "language": "español",
+      "local": true,
+      "prefix": "es",
+      "url": "https://es.minecraft.wiki/w/$1"
+    },
+    {
+      "language": "français",
+      "local": true,
+      "prefix": "fr",
+      "url": "https://fr.minecraft.wiki/w/$1"
+    },
+    {
+      "prefix": "ftb",
+      "url": "https://ftb.fandom.com/wiki/$1"
+    },
+    {
+      "prefix": "google",
+      "url": "https://www.google.com/search?q=$1"
+    },
+    {
+      "prefix": "gpcommons",
+      "url": "https://commons.fandom.com/wiki/$1"
+    },
+    {
+      "prefix": "gphelp",
+      "url": "https://help.fandom.com/wiki/$1"
+    },
+    {
+      "prefix": "gphelpzh",
+      "url": "https://help.fandom.com/zh/wiki/$1"
+    },
+    {
+      "language": "magyar",
+      "local": true,
+      "prefix": "hu",
+      "url": "https://hu.minecraft.wiki/w/$1"
+    },
+    {
+      "language": "Bahasa Indonesia",
+      "local": true,
+      "prefix": "id",
+      "url": "https://id.minecraft.wiki/w/$1"
+    },
+    {
+      "language": "italiano",
+      "local": true,
+      "prefix": "it",
+      "url": "https://it.minecraft.wiki/w/$1"
+    },
+    {
+      "language": "日本語",
+      "local": true,
+      "prefix": "ja",
+      "url": "https://ja.minecraft.wiki/w/$1"
+    },
+    {
+      "prefix": "jebtweet",
+      "url": "https://twitter.com/jeb_/status/$1"
+    },
+    {
+      "prefix": "klpbbs",
+      "url": "https://klpbbs.com/$1"
+    },
+    {
+      "language": "한국어",
+      "local": true,
+      "prefix": "ko",
+      "url": "https://ko.minecraft.wiki/w/$1"
+    },
+    {
+      "language": "文言",
+      "local": true,
+      "prefix": "lzh",
+      "url": "https://lzh.minecraft.wiki/w/$1"
+    },
+    {
+      "prefix": "mcf",
+      "url": "https://www.minecraftforum.net/forums/$1"
+    },
+    {
+      "prefix": "mcfnews",
+      "url": "https://www.minecraftforum.net/news/$1"
+    },
+    {
+      "prefix": "mcftopic",
+      "url": "https://www.minecraftforum.net/topic/$1"
+    },
+    {
+      "prefix": "mcservers",
+      "url": "https://minecraftservers.fandom.com/wiki/$1"
+    },
+    {
+      "prefix": "mediazilla",
+      "url": "https://bugzilla.wikimedia.org/$1"
+    },
+    {
+      "prefix": "metawikipedia",
+      "url": "https://meta.wikimedia.org/wiki/$1"
+    },
+    {
+      "prefix": "minebbs",
+      "url": "https://www.minebbs.com/$1"
+    },
+    {
+      "prefix": "moe",
+      "url": "https://zh.moegirl.org.cn/$1"
+    },
+    {
+      "prefix": "mojira",
+      "url": "https://bugs.mojang.com/browse/$1"
+    },
+    {
+      "prefix": "mojiraarchive",
+      "url": "https://web.archive.org/web/0/https://bugs.mojang.com/browse/$1"
+    },
+    {
+      "prefix": "mwbug",
+      "url": "https://bugzilla.wikimedia.org/show_bug.cgi?id=$1"
+    },
+    {
+      "prefix": "mwphab",
+      "url": "https://phabricator.wikimedia.org/$1"
+    },
+    {
+      "language": "Nederlands",
+      "local": true,
+      "prefix": "nl",
+      "url": "https://nl.minecraft.wiki/w/$1"
+    },
+    {
+      "prefix": "notchtweet",
+      "url": "https://twitter.com/notch/status/$1"
+    },
+    {
+      "prefix": "phab",
+      "url": "https://phabricator.wikimedia.org/$1"
+    },
+    {
+      "language": "polski",
+      "local": true,
+      "prefix": "pl",
+      "url": "https://pl.minecraft.wiki/w/$1"
+    },
+    {
+      "prefix": "pmid",
+      "url": "https://www.ncbi.nlm.nih.gov/pubmed/$1?dopt=Abstract"
+    },
+    {
+      "language": "português",
+      "local": true,
+      "prefix": "pt",
+      "url": "https://pt.minecraft.wiki/w/$1"
+    },
+    {
+      "language": "português do Brasil",
+      "local": true,
+      "prefix": "pt-br",
+      "url": "https://pt.minecraft.wiki/w/$1"
+    },
+    {
+      "prefix": "rfc",
+      "url": "https://www.rfc-editor.org/info/rfc$1"
+    },
+    {
+      "language": "русский",
+      "local": true,
+      "prefix": "ru",
+      "url": "https://ru.minecraft.wiki/w/$1"
+    },
+    {
+      "language": "ไทย",
+      "local": true,
+      "prefix": "th",
+      "url": "https://th.minecraft.wiki/w/$1"
+    },
+    {
+      "prefix": "thewordofnotch",
+      "url": "https://web.archive.org/web/0/https://notch.tumblr.com/post/$1"
+    },
+    {
+      "language": "Türkçe",
+      "local": true,
+      "prefix": "tr",
+      "url": "https://tr.minecraft.wiki/w/$1"
+    },
+    {
+      "prefix": "twitter",
+      "url": "https://twitter.com/$1/"
+    },
+    {
+      "language": "українська",
+      "local": true,
+      "prefix": "uk",
+      "url": "https://uk.minecraft.wiki/w/$1"
+    },
+    {
+      "prefix": "wikia",
+      "url": "https://community.fandom.com/w:c:$1"
+    },
+    {
+      "prefix": "wikimedia",
+      "url": "https://wikimediafoundation.org/wiki/$1"
+    },
+    {
+      "prefix": "wikipedia",
+      "url": "https://en.wikipedia.org/wiki/$1"
+    },
+    {
+      "prefix": "wikipediazh",
+      "url": "https://zh.wikipedia.org/wiki/$1"
+    },
+    {
+      "prefix": "wikisource",
+      "url": "https://wikisource.org/wiki/$1"
+    },
+    {
+      "prefix": "wiktionary",
+      "url": "https://en.wiktionary.org/wiki/$1"
+    },
+    {
+      "prefix": "wordofnotch",
+      "url": "https://web.archive.org/web/0/https://notch.tumblr.com/post/$1"
+    },
+    {
+      "prefix": "wphelp",
+      "url": "https://en.wikipedia.org/wiki/Help:$1"
+    },
+    {
+      "prefix": "wphelpzh",
+      "url": "https://zh.wikipedia.org/wiki/Help:$1"
+    },
+    {
+      "prefix": "wzh",
+      "url": "https://zh.wikipedia.org/wiki/$1"
+    },
+    {
+      "language": "中文",
+      "local": true,
+      "prefix": "zh",
+      "url": "https://zh.minecraft.wiki/w/$1"
+    },
+    {
+      "prefix": "zhcommunity",
+      "url": "https://community.fandom.com/zh/wiki/$1"
+    }
+  ],
+  "name": "中文Minecraft Wiki",
+  "schemaVersion": 1,
+  "templates": {
+    "About": {
+      "description": "用于生成页面顶部消歧义的模板。",
+      "format": "inline",
+      "maps": {},
+      "paramOrder": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "section"
+      ],
+      "params": {
+        "1": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "本页面的主题。",
+          "example": "生成于下界的下界菌",
+          "label": "主题",
+          "required": false,
+          "suggested": true,
+          "suggestedvalues": [],
+          "type": "line"
+        },
+        "2": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "另一个用法。",
+          "label": "用法2",
+          "required": false,
+          "suggested": true,
+          "suggestedvalues": [],
+          "type": "line"
+        },
+        "3": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "另一个相似主题的页面。",
+          "label": "页面2",
+          "required": false,
+          "suggested": true,
+          "suggestedvalues": [],
+          "type": "wiki-page-name"
+        },
+        "4": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "第3种用法。",
+          "label": "用法3",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "line"
+        },
+        "5": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "用法3对应的页面。",
+          "label": "页面3",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "wiki-page-name"
+        },
+        "6": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "第4种用法。",
+          "label": "用法4",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "line"
+        },
+        "7": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "用法4对应的页面。",
+          "label": "页面4",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "wiki-page-name"
+        },
+        "8": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "第5种用法。",
+          "label": "用法5",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "line"
+        },
+        "9": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "用法5对应的页面。",
+          "label": "页面5",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "wiki-page-name"
+        },
+        "section": {
+          "aliases": [],
+          "autovalue": "1",
+          "deprecated": false,
+          "description": "将原本显示为命名空间名称的位置替换为“段落”。",
+          "label": "段落",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "boolean"
+        }
+      },
+      "sets": []
+    },
+    "BiomeLink": {
+      "description": "",
+      "format": "inline",
+      "maps": {},
+      "paramOrder": [
+        "1",
+        "id",
+        "link",
+        "2"
+      ],
+      "params": {
+        "1": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "为其他参数设置默认值。",
+          "label": "名稱",
+          "required": false,
+          "suggested": true,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "2": {
+          "aliases": [
+            "text"
+          ],
+          "default": "參數名稱的值",
+          "deprecated": false,
+          "description": "设置要显示的文字。",
+          "label": "文字",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "id": {
+          "aliases": [],
+          "default": "參數名稱的值",
+          "deprecated": false,
+          "description": "设置Sprite。此参数内的空格會用连字符代替，字母轉為小写。",
+          "label": "Sprite名",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "link": {
+          "aliases": [],
+          "default": "參數名稱的值",
+          "deprecated": false,
+          "description": "设置链接，支持内部或外部链接。\r\n如果设置为none，则不会链接到任何页面。",
+          "label": "連結",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        }
+      },
+      "sets": []
+    },
+    "BlockLink": {
+      "description": "",
+      "format": "inline",
+      "maps": {},
+      "paramOrder": [
+        "1",
+        "id",
+        "link",
+        "2"
+      ],
+      "params": {
+        "1": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "为其他参数设置默认值。",
+          "label": "名稱",
+          "required": false,
+          "suggested": true,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "2": {
+          "aliases": [
+            "text"
+          ],
+          "default": "參數名稱的值",
+          "deprecated": false,
+          "description": "设置要显示的文字。",
+          "label": "文字",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "id": {
+          "aliases": [],
+          "default": "參數名稱的值",
+          "deprecated": false,
+          "description": "设置Sprite。此参数内的空格會用连字符代替，字母轉為小写。",
+          "label": "Sprite名",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "link": {
+          "aliases": [],
+          "default": "參數名稱的值",
+          "deprecated": false,
+          "description": "设置链接，支持内部或外部链接。\r\n如果设置为none，则不会链接到任何页面。",
+          "label": "連結",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        }
+      },
+      "sets": []
+    },
+    "BlockSprite": {
+      "description": "",
+      "format": "inline",
+      "maps": {},
+      "paramOrder": [
+        "1",
+        "link",
+        "text"
+      ],
+      "params": {
+        "1": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "设置Sprite。此参数内的空格會用连字符代替，字母轉為小写。",
+          "label": "Sprite名",
+          "required": true,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "link": {
+          "aliases": [],
+          "default": "Sprite名",
+          "deprecated": false,
+          "description": "设置Sprite和可选文本的链接。如果未设置或设置为none，则不添加任何链接。\r\n同时支持内部和外部链接。",
+          "label": "連結",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "text": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "如果设置，则该值在Sprite后显示为文本。",
+          "label": "文字",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        }
+      },
+      "sets": []
+    },
+    "Citation": {
+      "description": "用于格式化外部链接。",
+      "format": "inline",
+      "maps": {},
+      "paramOrder": [
+        "url",
+        "title",
+        "section",
+        "dead-link",
+        "nocat",
+        "archive-url",
+        "archive",
+        "archive-time",
+        "author",
+        "website",
+        "date",
+        "quote",
+        "access-date"
+      ],
+      "params": {
+        "access-date": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "最后验证链接的内容支持条目内容的日期。",
+          "label": "网址访问日期",
+          "required": false,
+          "suggested": true,
+          "suggestedvalues": [],
+          "type": "date"
+        },
+        "archive": {
+          "aliases": [],
+          "autovalue": "1",
+          "deprecated": false,
+          "description": "生成一个自动存档页链接（链接到被存档的第一个版本），需要减少字节数时很有用。",
+          "label": "存档",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "boolean"
+        },
+        "archive-time": {
+          "aliases": [],
+          "default": "0（即被存档的第一个版本）",
+          "deprecated": false,
+          "description": "指定自动生成的存档页链接的存档时间。",
+          "label": "存档时间",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "archive-url": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "存档页的链接。",
+          "label": "存档URL",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "url"
+        },
+        "author": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "页面的作者。",
+          "label": "作者",
+          "required": false,
+          "suggested": true,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "date": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "页面创建的时间。",
+          "label": "日期",
+          "required": false,
+          "suggested": true,
+          "suggestedvalues": [],
+          "type": "date"
+        },
+        "dead-link": {
+          "aliases": [],
+          "autovalue": "1",
+          "deprecated": false,
+          "description": "当页面或网站不存在时设置。",
+          "label": "失效链接",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "boolean"
+        },
+        "nocat": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "在主命名空间外使用，用于不把页面列入分类中。",
+          "label": "不列入分类",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "boolean"
+        },
+        "quote": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "显示从文章中引用的一句话。",
+          "label": "引文",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "section": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "指定要引用的页面中的特定段落。",
+          "label": "段落",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "title": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "页面的标题。",
+          "label": "页面标题",
+          "required": false,
+          "suggested": true,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "url": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "页面的完整URL。",
+          "label": "URL",
+          "required": false,
+          "suggested": true,
+          "suggestedvalues": [],
+          "type": "url"
+        },
+        "website": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "页面所处网站的名字。",
+          "label": "网站",
+          "required": false,
+          "suggested": true,
+          "suggestedvalues": [],
+          "type": "string"
+        }
+      },
+      "sets": []
+    },
+    "Citation needed": {
+      "description": "告诉读者句子没有任何形式的证据支持。请勿将该模板放置到您的贡献上。如果您添加了没有明确来源的东西，完全删除它或完全不要添加它。",
+      "format": "inline",
+      "maps": {},
+      "paramOrder": [
+        "1",
+        "nocat"
+      ],
+      "params": {
+        "1": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "标记原因、描述等附加信息。",
+          "label": "悬浮提示",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "nocat": {
+          "aliases": [],
+          "autovalue": "1",
+          "deprecated": false,
+          "description": "是否不添加分类。",
+          "label": "不加入分类",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "boolean"
+        }
+      },
+      "sets": []
+    },
+    "Code": {
+      "description": "此模板是<code>...</code>的简化用法。它支持任意多个参数，所有内容都将由<code>...</code>元素包装。注意，如果参数包含管道符号（|）或等号（=），则需要换用转义字符（如{{!}}、&#124;和{{=}}、&#61;），或在参数值周围加上<nowiki>...</nowiki>，否则它们将分别被视为参数分隔符或参数标识符。不建议用于单个参数的场景。",
+      "format": "inline",
+      "maps": {},
+      "paramOrder": [
+        "1",
+        "2",
+        "3",
+        "d",
+        "fd",
+        "mode"
+      ],
+      "params": {
+        "1": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "第一个由<code>...</code>包裹的内容。",
+          "required": false,
+          "suggested": true,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "2": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "第二个由<code>...</code>包裹的内容。",
+          "required": false,
+          "suggested": true,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "3": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "第三个由<code>...</code>包裹的内容。如需更多参数，请手动添加。",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "d": {
+          "aliases": [
+            "delimiter"
+          ],
+          "deprecated": false,
+          "description": "指定每个元素之间的间隔符。",
+          "label": "间隔符",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "fd": {
+          "aliases": [
+            "finaldelimiter"
+          ],
+          "deprecated": false,
+          "description": "特别指定最后两个元素之间的间隔符。",
+          "label": "最后一个间隔符",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "mode": {
+          "aliases": [],
+          "autovalue": "single",
+          "deprecated": false,
+          "description": "設為single以使用分隔符分割參數1的輸入。",
+          "label": "模式",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [
+            "single"
+          ],
+          "type": "string"
+        }
+      },
+      "sets": []
+    },
+    "CollapseH": {
+      "description": "此模板用于隐藏大篇幅内容，且应放置在需要隐藏内容的开头。此模板应与{{CollapseE}}一同使用。",
+      "format": "inline",
+      "maps": {},
+      "paramOrder": [
+        "1",
+        "expanded",
+        "style",
+        "titlestyle"
+      ],
+      "params": {
+        "1": {
+          "aliases": [],
+          "default": "此段内容过长，请通过显示按钮阅读",
+          "deprecated": false,
+          "description": "用于替换默认标题。",
+          "label": "标题",
+          "required": false,
+          "suggested": true,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "expanded": {
+          "aliases": [],
+          "autovalue": "1",
+          "deprecated": false,
+          "description": "使折叠的文本默认显示。",
+          "label": "是否展开",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "boolean"
+        },
+        "style": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "需要的内容样式，使用CSS语法。",
+          "label": "内容样式",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "titlestyle": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "需要的标题样式，使用CSS语法。",
+          "label": "标题样式",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        }
+      },
+      "sets": []
+    },
+    "Editions": {
+      "description": "",
+      "format": "inline",
+      "maps": {},
+      "paramOrder": [
+        "1",
+        "short",
+        "nocat"
+      ],
+      "params": {
+        "1": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "指定显示的版本，推荐值见下文。",
+          "label": "显示版本",
+          "required": true,
+          "suggested": false,
+          "suggestedvalues": [
+            "JE",
+            "BE",
+            "EE"
+          ],
+          "type": "string"
+        },
+        "nocat": {
+          "aliases": [],
+          "autovalue": "1",
+          "deprecated": false,
+          "description": "使模板所在页面不进入维护分类。一般在文档、讨论页、导航模板中使用。",
+          "label": "禁用分类",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "boolean"
+        },
+        "short": {
+          "aliases": [],
+          "autovalue": "0",
+          "deprecated": false,
+          "description": "是否简化版本显示内容，简化映射表见下文。",
+          "label": "缩短版本",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "boolean"
+        }
+      },
+      "sets": []
+    },
+    "EffectLink": {
+      "description": "",
+      "format": "inline",
+      "maps": {},
+      "paramOrder": [
+        "1",
+        "id",
+        "link",
+        "2"
+      ],
+      "params": {
+        "1": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "为其他参数设置默认值。",
+          "label": "名稱",
+          "required": false,
+          "suggested": true,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "2": {
+          "aliases": [
+            "text"
+          ],
+          "default": "參數名稱的值",
+          "deprecated": false,
+          "description": "设置要显示的文字。",
+          "label": "文字",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "id": {
+          "aliases": [],
+          "default": "參數名稱的值",
+          "deprecated": false,
+          "description": "设置Sprite。此参数内的空格會用连字符代替，字母轉為小写。",
+          "label": "Sprite名",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "link": {
+          "aliases": [],
+          "default": "參數名稱的值",
+          "deprecated": false,
+          "description": "设置链接，支持内部或外部链接。\r\n如果设置为none，则不会链接到任何页面。",
+          "label": "連結",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        }
+      },
+      "sets": []
+    },
+    "EntityLink": {
+      "description": "",
+      "format": "inline",
+      "maps": {},
+      "paramOrder": [
+        "1",
+        "id",
+        "link",
+        "2"
+      ],
+      "params": {
+        "1": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "为其他参数设置默认值。",
+          "label": "名稱",
+          "required": false,
+          "suggested": true,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "2": {
+          "aliases": [
+            "text"
+          ],
+          "default": "參數名稱的值",
+          "deprecated": false,
+          "description": "设置要显示的文字。",
+          "label": "文字",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "id": {
+          "aliases": [],
+          "default": "參數名稱的值",
+          "deprecated": false,
+          "description": "设置Sprite。此参数内的空格會用连字符代替，字母轉為小写。",
+          "label": "Sprite名",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "link": {
+          "aliases": [],
+          "default": "參數名稱的值",
+          "deprecated": false,
+          "description": "设置链接，支持内部或外部链接。\r\n如果设置为none，则不会链接到任何页面。",
+          "label": "連結",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        }
+      },
+      "sets": []
+    },
+    "EntitySprite": {
+      "description": "",
+      "format": "inline",
+      "maps": {},
+      "paramOrder": [
+        "1",
+        "link",
+        "text"
+      ],
+      "params": {
+        "1": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "设置Sprite。此参数内的空格會用连字符代替，字母轉為小写。",
+          "label": "Sprite名",
+          "required": true,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "link": {
+          "aliases": [],
+          "default": "Sprite名",
+          "deprecated": false,
+          "description": "设置Sprite和可选文本的链接。如果未设置或设置为none，则不添加任何链接。\r\n同时支持内部和外部链接。",
+          "label": "連結",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "text": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "如果设置，则该值在Sprite后显示为文本。",
+          "label": "文字",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        }
+      },
+      "sets": []
+    },
+    "Flatlist": {
+      "description": "该模板是-{}-<div class=\"hlist\">...</div>的简化用法，主要用于將無序列表更改為水平样式。",
+      "format": "inline",
+      "maps": {},
+      "paramOrder": [
+        "1",
+        "class",
+        "style",
+        "indent"
+      ],
+      "params": {
+        "1": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "需要显示并应用样式的文字。",
+          "example": "* A\n* B\n* C",
+          "label": "文字",
+          "required": true,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "content"
+        },
+        "class": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "用于设置class参数。",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "indent": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "用于使文字整体缩进。",
+          "example": "3",
+          "label": "缩进",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "number"
+        },
+        "style": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "用于设置文字的CSS样式。",
+          "example": "color: #0645AD",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        }
+      },
+      "sets": []
+    },
+    "In": {
+      "description": "作为only模板的非上标变种使用，用于标记某内容在指定版本中存在，可创建类似“在基岩版中，”的版本说明，默认附加中文逗号。预设的三个“适用版本”（后二者可选）可覆盖大多数多版本并列的场景，如需更多版本标识可在源代码编辑中添加。",
+      "format": "inline",
+      "maps": {},
+      "paramOrder": [
+        "1",
+        "2",
+        "3",
+        "nc",
+        "nocat"
+      ],
+      "params": {
+        "1": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "指明适用的版本，可用值见Template:Editions。",
+          "label": "适用版本1",
+          "required": true,
+          "suggested": false,
+          "suggestedvalues": [
+            "JE",
+            "BE",
+            "EE"
+          ],
+          "type": "string"
+        },
+        "2": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "第2个版本，用于多版本并列场景。",
+          "label": "适用版本2",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [
+            "JE",
+            "BE",
+            "EE"
+          ],
+          "type": "string"
+        },
+        "3": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "第3个版本，用于多版本并列场景。",
+          "label": "适用版本3",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [
+            "JE",
+            "BE",
+            "EE"
+          ],
+          "type": "string"
+        },
+        "nc": {
+          "aliases": [],
+          "autovalue": "1",
+          "deprecated": false,
+          "description": "设置时，移除模板末尾默认附加的中文逗号。",
+          "label": "去除逗号",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "boolean"
+        },
+        "nocat": {
+          "aliases": [],
+          "autovalue": "1",
+          "deprecated": false,
+          "description": "如未设置，此模板默认会将页面加入“xxx版独有信息”分类中。",
+          "label": "禁用分类",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "boolean"
+        }
+      },
+      "sets": []
+    },
+    "ItemLink": {
+      "description": "",
+      "format": "inline",
+      "maps": {},
+      "paramOrder": [
+        "1",
+        "id",
+        "link",
+        "2"
+      ],
+      "params": {
+        "1": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "为其他参数设置默认值。",
+          "label": "名稱",
+          "required": false,
+          "suggested": true,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "2": {
+          "aliases": [
+            "text"
+          ],
+          "default": "參數名稱的值",
+          "deprecated": false,
+          "description": "设置要显示的文字。",
+          "label": "文字",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "id": {
+          "aliases": [],
+          "default": "參數名稱的值",
+          "deprecated": false,
+          "description": "设置Sprite。此参数内的空格會用连字符代替，字母轉為小写。",
+          "label": "Sprite名",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "link": {
+          "aliases": [],
+          "default": "參數名稱的值",
+          "deprecated": false,
+          "description": "设置链接，支持内部或外部链接。\r\n如果设置为none，则不会链接到任何页面。",
+          "label": "連結",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        }
+      },
+      "sets": []
+    },
+    "ItemSprite": {
+      "description": "",
+      "format": "inline",
+      "maps": {},
+      "paramOrder": [
+        "1",
+        "link",
+        "text"
+      ],
+      "params": {
+        "1": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "设置Sprite。此参数内的空格會用连字符代替，字母轉為小写。",
+          "label": "Sprite名",
+          "required": true,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "link": {
+          "aliases": [],
+          "default": "Sprite名",
+          "deprecated": false,
+          "description": "设置Sprite和可选文本的链接。如果未设置或设置为none，则不添加任何链接。\r\n同时支持内部和外部链接。",
+          "label": "連結",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "text": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "如果设置，则该值在Sprite后显示为文本。",
+          "label": "文字",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        }
+      },
+      "sets": []
+    },
+    "Mob icon": {
+      "description": "一个使用名称和图标生成生物头像的模板。",
+      "format": "inline",
+      "maps": {},
+      "paramOrder": [
+        "1",
+        "id",
+        "image-size",
+        "image-element",
+        "image",
+        "pixel-image",
+        "class",
+        "ifexist-style",
+        "link",
+        "nonamespace",
+        "externallink",
+        "text-nowrap",
+        "postfix"
+      ],
+      "params": {
+        "1": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "指定生物的英文原名。",
+          "required": true,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "class": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "为图片添加额外类。",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "externallink": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "指定头像的外部链接。",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "url"
+        },
+        "id": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "指定显示的生物的英文原名。",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "ifexist-style": {
+          "aliases": [],
+          "default": "nostyle",
+          "deprecated": false,
+          "description": "指定图片不存在时的问号图片是否响应image-size和class。",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "image": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "指定生物图片。",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "wiki-file-name"
+        },
+        "image-element": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "指定自定义图片组件。可以是任意Wikitext.",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "unbalanced-wikitext"
+        },
+        "image-size": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "指定图片的尺寸。相当于Wikitext图片尺寸语法。",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "link": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "指定头像的链接，自动附带命名空间。指定为“none”会禁用链接。",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "nonamespace": {
+          "aliases": [],
+          "default": "0",
+          "deprecated": false,
+          "description": "指定是否取消链接附带的命名空间。",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "boolean"
+        },
+        "pixel-image": {
+          "aliases": [],
+          "default": "1",
+          "deprecated": false,
+          "description": "指定图片是否使用“pixel-image”类。在自定义图片组件中不起作用。已弃用。",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "boolean"
+        },
+        "postfix": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "指定显示在生物名称后的文本。用于添加参考、注释或其他自定义文本。",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "text-nowrap": {
+          "aliases": [],
+          "default": "0",
+          "deprecated": false,
+          "description": "指定生物名称是否可以换行。",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "boolean"
+        }
+      },
+      "sets": []
+    },
+    "Note": {
+      "description": "用于在页面上创建注释。{{Notelist}}也必须在同一页面上使用。",
+      "format": "inline",
+      "maps": {},
+      "paramOrder": [
+        "1",
+        "name",
+        "group"
+      ],
+      "params": {
+        "1": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "注释的内容。未设置注释名称或首次设置名称时为必填。",
+          "label": "注释内容",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "content"
+        },
+        "group": {
+          "aliases": [],
+          "default": "注",
+          "deprecated": false,
+          "description": "注释隶属的组。",
+          "label": "组名",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "name": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "设置注释的名称以重复使用相同的注释。",
+          "label": "注释名称",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        }
+      },
+      "sets": []
+    },
+    "Only": {
+      "description": "该模板用于简要地标记某个特性是特定版本的独有特性。",
+      "format": "inline",
+      "maps": {},
+      "paramOrder": [
+        "1",
+        "2",
+        "3",
+        "for",
+        "short",
+        "nocat"
+      ],
+      "params": {
+        "1": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "指明适用的版本，可用值见Template:Editions。",
+          "label": "适用版本",
+          "required": true,
+          "suggested": false,
+          "suggestedvalues": [
+            "JE",
+            "BE",
+            "EE"
+          ],
+          "type": "string"
+        },
+        "2": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "第2个版本，用于多版本并列场景。",
+          "label": "适用版本2",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [
+            "JE",
+            "BE",
+            "EE"
+          ],
+          "type": "string"
+        },
+        "3": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "第3个版本，可覆盖多数版本并列场景。如需更多版本标识可在源代码编辑中添加。",
+          "label": "适用版本3",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [
+            "JE",
+            "BE",
+            "EE"
+          ],
+          "type": "string"
+        },
+        "for": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "指明哪些内容适用于本模板。为了避免影响观感，请勿滥用此参数。",
+          "label": "适用内容",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "line"
+        },
+        "nocat": {
+          "aliases": [],
+          "autovalue": "1",
+          "deprecated": false,
+          "description": "使模板所在页面不进入维护分类。一般在文档、讨论页、导航模板中使用。",
+          "label": "禁用分类",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "boolean"
+        },
+        "short": {
+          "aliases": [],
+          "autovalue": "0",
+          "deprecated": false,
+          "description": "缩短版本名称。示例：基岩版 → BE\r\n对于全称过长的Minecraft Dungeons、Minecraft Dungeons Arcade和Minecraft Legends，可以使用该参数进行缩写。其他的缩写只在表格等空间窄小的地方、较短的句子或词组中使用。",
+          "label": "缩短版本",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "boolean"
+        }
+      },
+      "sets": []
+    },
+    "Quote": {
+      "description": "引用某人发言或某处来源。此模板应当直接放置于段首，前面不应加上任何类似于“:”、“#”、“;”之类的内容。",
+      "maps": {},
+      "paramOrder": [
+        "1",
+        "image",
+        "author",
+        "custom",
+        "topic",
+        "image-class"
+      ],
+      "params": {
+        "1": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "引用的一句话或一段内容。",
+          "label": "引用内容",
+          "required": true,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "content"
+        },
+        "author": {
+          "aliases": [
+            "2"
+          ],
+          "deprecated": false,
+          "description": "作者的名称。",
+          "label": "作者",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "content"
+        },
+        "custom": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "在引言下方加入自定义信息。会覆盖“作者”和“来源话题”的值。",
+          "label": "自定义信息",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "content"
+        },
+        "image": {
+          "aliases": [
+            "4"
+          ],
+          "deprecated": false,
+          "description": "引言左侧显示的图片。",
+          "label": "图片",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "wiki-file-name"
+        },
+        "image-class": {
+          "aliases": [],
+          "default": "notpageimage",
+          "deprecated": false,
+          "description": "引言左侧图片的类",
+          "label": "图片的class",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "content"
+        },
+        "topic": {
+          "aliases": [
+            "3"
+          ],
+          "deprecated": false,
+          "description": "在作者名称后显示的引用内容的出处。",
+          "label": "来源话题",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "content"
+        }
+      },
+      "sets": []
+    },
+    "STConversion": {
+      "description": "该模板用于显式指定本模板所处页面中全部或部分内容的繁简转换规则。注意：此模板只能在轉換規則較簡單的情況下使用，較進階的語法還請直接寫轉換標記。",
+      "format": "inline",
+      "maps": {},
+      "paramOrder": [
+        "1",
+        "2",
+        "3",
+        "closehkinherit",
+        "mode"
+      ],
+      "params": {
+        "1": {
+          "aliases": [
+            "zh-cn"
+          ],
+          "deprecated": false,
+          "description": "转换目标为“大陆简体”时需要显示的文本。",
+          "label": "大陆简体文本",
+          "required": true,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "content"
+        },
+        "2": {
+          "aliases": [
+            "zh-tw"
+          ],
+          "deprecated": false,
+          "description": "转换目标为“臺灣正體”时需要显示的文本。",
+          "label": "臺灣正體文本",
+          "required": true,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "content"
+        },
+        "3": {
+          "aliases": [
+            "zh-hk"
+          ],
+          "deprecated": false,
+          "description": "转换目标为“香港繁體”时需要显示的文本。未设置此参数时，会改顯示“臺灣正體文本”的内容。",
+          "label": "香港繁體文本",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "content"
+        },
+        "closehkinherit": {
+          "aliases": [],
+          "autovalue": "1",
+          "deprecated": true,
+          "description": "关闭在未指定有效的香港繁體文本时，由臺灣正體文本补位的功能。請改直接指定香港繁體文本為空。",
+          "label": "关闭补位",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "boolean"
+        },
+        "mode": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "用于定义转换模式，默认进行一般转换。如需分词以禁用规则，不带任何参数使用此模板即可。\r\n“H”表示进行全文转换，“T”表示进行标题转换",
+          "label": "模式",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [
+            "H",
+            "T"
+          ],
+          "type": "string"
+        }
+      },
+      "sets": []
+    },
+    "See also": {
+      "description": "该模板的作用是生成一个类似于“参见：首页”的站内超链接，可引导读者去阅读本站上的一些与该章节相关的页面，以了解更多信息。该模板应放在包含相关文章的章节的开头，不要在页面顶部使用。可使用 {{!}} 来改变显示的文本（例如：en:Tutorial:Water ladder{{!}}水梯）。",
+      "format": "inline",
+      "maps": {},
+      "paramOrder": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "params": {
+        "1": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "第一个要链接的页面。",
+          "label": "链接1",
+          "required": true,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "2": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "第二个要链接的页面。",
+          "label": "链接2",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "3": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "第三个要链接的页面。",
+          "label": "链接3",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "4": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "第四个要链接的页面。",
+          "label": "链接4",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "5": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "第五个要链接的页面。",
+          "label": "链接5",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        }
+      },
+      "sets": []
+    },
+    "Until": {
+      "description": "该模板用于标记对即将失效特性的参考。",
+      "format": "inline",
+      "maps": {},
+      "paramOrder": [
+        "1",
+        "2",
+        "for",
+        "only",
+        "nocat"
+      ],
+      "params": {
+        "1": {
+          "aliases": [
+            "ver"
+          ],
+          "deprecated": false,
+          "description": "此特性的移除版本。",
+          "example": "JE 1.21.7",
+          "label": "移除版本",
+          "required": false,
+          "suggested": true,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "2": {
+          "aliases": [
+            "ver2"
+          ],
+          "deprecated": false,
+          "description": "此特性的额外移除版本，通常为基岩版。",
+          "example": "BE 1.21.100",
+          "label": "额外移除版本",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "for": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "指定要标记的文本。",
+          "label": "目标文本",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "line"
+        },
+        "nocat": {
+          "aliases": [],
+          "autovalue": "1",
+          "deprecated": false,
+          "description": "当指定此参数时禁用分类。",
+          "label": "禁用分类",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "boolean"
+        },
+        "only": {
+          "aliases": [
+            "o"
+          ],
+          "deprecated": false,
+          "description": "说明该特性先前所在的版本，可用值见Template:Editions。",
+          "label": "先前版本",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [
+            "JE",
+            "BE"
+          ],
+          "type": "string"
+        }
+      },
+      "sets": []
+    },
+    "Upcoming": {
+      "description": "该模板用于标记对即将发布特性的参考。",
+      "format": "inline",
+      "maps": {},
+      "paramOrder": [
+        "1",
+        "2",
+        "for",
+        "only",
+        "nocat"
+      ],
+      "params": {
+        "1": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "此特性的加入版本。",
+          "example": "JE 1.21.7",
+          "label": "加入版本",
+          "required": false,
+          "suggested": true,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "2": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "此特性的额外加入版本，通常为基岩版。",
+          "example": "BE 1.21.100",
+          "label": "额外加入版本",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "string"
+        },
+        "for": {
+          "aliases": [],
+          "deprecated": false,
+          "description": "指定要标记的文本。",
+          "label": "目标文本",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "line"
+        },
+        "nocat": {
+          "aliases": [],
+          "autovalue": "1",
+          "deprecated": false,
+          "description": "当指定此参数时禁用分类。",
+          "label": "禁用分类",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [],
+          "type": "boolean"
+        },
+        "only": {
+          "aliases": [
+            "o"
+          ],
+          "deprecated": false,
+          "description": "说明该特性先前所在的版本，可用值见Template:Editions。",
+          "label": "先前版本",
+          "required": false,
+          "suggested": false,
+          "suggestedvalues": [
+            "JE",
+            "BE"
+          ],
+          "type": "string"
+        }
+      },
+      "sets": []
+    }
+  }
+}

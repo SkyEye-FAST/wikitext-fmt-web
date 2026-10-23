@@ -121,6 +121,7 @@
   "error.worker-not-ready": "格式化器尚未就緒。請稍後重試。",
   "settings.title": "設定",
   "settings.section.site": "網站",
+  "settings.site.presets": "預設",
   "settings.site.none": "無",
   "settings.site.api": "API網址",
   "settings.site.counts": "模板{templates}個，跨維基前綴{interwiki}個",

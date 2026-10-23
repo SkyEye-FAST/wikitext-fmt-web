@@ -136,6 +136,7 @@
 
   "settings.title": "Settings",
   "settings.section.site": "Site",
+  "settings.site.presets": "Presets",
   "settings.site.none": "None",
   "settings.site.api": "API URL",
   "settings.site.counts": "Templates: {templates}, interwiki prefixes: {interwiki}",

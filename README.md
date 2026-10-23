@@ -83,6 +83,8 @@ The settings sheet exposes:
 - Display: theme, line wrapping, font size, font family (a CSS `font-family` list), ligatures (off, on, or on except the lines holding a cursor or selection) and font features (a CSS `font-feature-settings` value).
 - Advanced: rule reliability limit and formatter/app versions.
 
+Settings → Site → Presets includes a Chinese Minecraft Wiki profile; refresh it with `node scripts/generate-site-preset.mjs`.
+
 The formatter uses the bundled MediaWiki browser parser configuration. Loading a site profile applies its formatter options once; subsequent edits remain adjustable. Profile localization aliases accompany each format request, and interwiki prefixes extend editor highlighting. TemplateData uses embedded profile data first, then session-cached wiki requests when enabled.
 
 Language, theme, line wrapping, editor typography, and validated formatter settings are saved to `localStorage`. The serialized site profile is stored separately under `wikitext-formatter.site-profile` and revalidated in the Worker on startup; restoring it preserves subsequent formatter setting changes. Source, output, completed-run snapshots, files, diagnostics, and fetched TemplateData are never persisted.

@@ -121,6 +121,7 @@
   "error.worker-not-ready": "格式化器尚未就绪。请稍后重试。",
   "settings.title": "设置",
   "settings.section.site": "站点",
+  "settings.site.presets": "预设",
   "settings.site.none": "无",
   "settings.site.api": "API地址",
   "settings.site.counts": "模板{templates}个，跨维基前缀{interwiki}个",

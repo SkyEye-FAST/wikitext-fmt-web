@@ -6,7 +6,7 @@ import {
   type FormatProfile,
 } from "wikitext-fmt/browser";
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import type { ResolvedBrowserOptions } from "../formatter/protocol.js";
@@ -89,6 +89,18 @@ describe("SettingsPanel", () => {
     expect(props.onFormatterChange).toHaveBeenLastCalledWith(
       expect.objectContaining({ formatTemplates: false }),
     );
+  });
+
+  it("loads the site preset through the JSON import callback", async () => {
+    const user = userEvent.setup();
+    const props = renderPanel();
+
+    await user.click(screen.getByRole("button", { name: "中文Minecraft Wiki" }));
+
+    await waitFor(() => expect(props.onLoadSite).toHaveBeenCalledOnce());
+    expect(props.onLoadSite).toHaveBeenCalledWith({
+      json: expect.stringContaining('"apiUrl": "https://zh.minecraft.wiki/api.php"'),
+    });
   });
 
   it("commits only valid line widths", async () => {

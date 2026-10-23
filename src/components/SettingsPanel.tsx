@@ -397,6 +397,19 @@ type SiteSettingsProps = Pick<
   | "onTemplateDataChange"
 >;
 
+interface SitePreset {
+  name: string;
+  load: () => Promise<string>;
+}
+
+const sitePresets: readonly SitePreset[] = [
+  {
+    name: "中文Minecraft Wiki",
+    load: async () =>
+      (await import("../settings/presets/zh-minecraft-wiki.json?raw")).default,
+  },
+];
+
 function SiteSettings({
   siteProfile,
   siteBusy,
@@ -412,6 +425,8 @@ function SiteSettings({
   const [apiUrl, setApiUrl] = useState(profile?.apiUrl ?? "");
   const [previousUrl, setPreviousUrl] = useState(profile?.apiUrl);
   const [readError, setReadError] = useState(false);
+  const [presetBusy, setPresetBusy] = useState(false);
+  const busy = siteBusy || presetBusy;
   if (previousUrl !== profile?.apiUrl) {
     setPreviousUrl(profile?.apiUrl);
     setApiUrl(profile?.apiUrl ?? "");
@@ -434,8 +449,36 @@ function SiteSettings({
     URL.revokeObjectURL(url);
   }
 
+  async function loadPreset(preset: SitePreset): Promise<void> {
+    setReadError(false);
+    setPresetBusy(true);
+    try {
+      onLoadSite({ json: await preset.load() });
+    } catch {
+      setReadError(true);
+    } finally {
+      setPresetBusy(false);
+    }
+  }
+
   return (
     <SettingsSection title={t("settings.section.site")}>
+      <fieldset className="setting-row setting-choice">
+        <legend>{t("settings.site.presets")}</legend>
+        <div className="site-actions">
+          {sitePresets.map((preset) => (
+            <button
+              key={preset.name}
+              className="button"
+              type="button"
+              disabled={busy}
+              onClick={() => void loadPreset(preset)}
+            >
+              {preset.name}
+            </button>
+          ))}
+        </div>
+      </fieldset>
       <div className="setting-row site-summary">
         {profile ? (
           <strong>{profile.name}</strong>
@@ -480,9 +523,9 @@ function SiteSettings({
           <button
             className="button"
             type="submit"
-            disabled={siteBusy || !apiUrl.trim()}
+            disabled={busy || !apiUrl.trim()}
           >
-            {t(siteBusy ? "settings.site.loading" : "settings.site.fetch")}
+            {t(busy ? "settings.site.loading" : "settings.site.fetch")}
           </button>
         </div>
       </form>
@@ -508,7 +551,7 @@ function SiteSettings({
         <button
           className="button"
           type="button"
-          disabled={siteBusy}
+          disabled={busy}
           onClick={() => fileInput.current?.click()}
         >
           {t("settings.site.import")}
@@ -516,7 +559,7 @@ function SiteSettings({
         <button
           className="button"
           type="button"
-          disabled={!profile || siteBusy}
+          disabled={!profile || busy}
           onClick={exportProfile}
         >
           {t("settings.site.export")}
@@ -524,7 +567,7 @@ function SiteSettings({
         <button
           className="button is-quiet is-destructive"
           type="button"
-          disabled={!profile && !siteBusy}
+          disabled={presetBusy || (!profile && !siteBusy)}
           onClick={() => {
             setReadError(false);
             onRemoveSite();
@@ -538,7 +581,7 @@ function SiteSettings({
           label={t("settings.site.template-data")}
           hint={t("settings.site.template-data.hint")}
           checked={profile.extensions.templateData}
-          disabled={siteBusy}
+          disabled={busy}
           onChange={onTemplateDataChange}
         />
       ) : null}
