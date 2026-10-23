@@ -1470,16 +1470,12 @@ input.text-input {
 }
 
 .number-input[aria-invalid="true"],
-.text-input[aria-invalid="true"],
-.number-input:invalid,
-.text-input:invalid {
+.text-input[aria-invalid="true"] {
   border-color: var(--destructive);
 }
 
 .number-input[aria-invalid="true"]:focus,
-.text-input[aria-invalid="true"]:focus,
-.number-input:invalid:focus,
-.text-input:invalid:focus {
+.text-input[aria-invalid="true"]:focus {
   border-color: var(--destructive);
   outline-color: var(--destructive);
 }
