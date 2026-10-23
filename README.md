@@ -15,7 +15,7 @@ Formatting runs locally in your browser. Source text is not uploaded, logged, pl
 - System, light and dark themes; responsive layouts down to 320px and 200% zoom.
 - No backend, analytics, advertising, external parser CDN, service worker, or Wikitext preview rendering.
 
-This project is independent of the core formatter repository and consumes the exact published npm dependency `wikitext-fmt: "0.10.0"` as an ordinary external application. It is not affiliated with the Wikimedia Foundation.
+This project is independent of the core formatter repository and consumes the exact published npm dependency `wikitext-fmt: "0.11.0"` as an ordinary external application. It is not affiliated with the Wikimedia Foundation.
 
 ## Requirements and development
 
@@ -119,7 +119,7 @@ pnpm e2e
 pnpm check
 ```
 
-Vitest and React Testing Library cover settings validation/migration, storage privacy, Worker typing/lifecycle/stale responses, classification, structured failure rendering, helpers, statistics, and settings reset actions. Integration tests run the real installed `wikitext-fmt@0.10.0` browser package for headings, templates, table captions and attributes, split/preserve separators, nested and top-level list boundaries, redirects, references, interlanguage links, unchanged text, structured fail-closed output, CRLF, and idempotency.
+Vitest and React Testing Library cover settings validation/migration, storage privacy, Worker typing/lifecycle/stale responses, classification, structured failure rendering, helpers, statistics, and settings reset actions. Integration tests run the real installed `wikitext-fmt@0.11.0` browser package for headings, templates, table captions and attributes, split/preserve separators, nested and top-level list boundaries, redirects, references, interlanguage links, unchanged text, structured fail-closed output, CRLF, and idempotency.
 
 Playwright provides full Chromium coverage plus focused Firefox and WebKit smoke coverage. It covers iterative format → out of date → Changes → reformat → replace source → undo flows, presets and setting persistence, file drop, clear with undo, settings focus handling, Stop/recreation, fail-closed details, language switching, unique-marker network and storage privacy checks, axe accessibility scans, 200% zoom, and responsive layouts.
 

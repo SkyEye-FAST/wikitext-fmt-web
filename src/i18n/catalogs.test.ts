@@ -110,8 +110,8 @@ describe("i18n catalog consistency", () => {
 describe("interpolation and plurals", () => {
   it("interpolates named parameters", () => {
     const t = createT(enMessages);
-    expect(t("settings.version.value", { web: "0.6.0", fmt: "0.10.0" })).toBe(
-      "wikitext-fmt 0.10.0, web app 0.6.0",
+    expect(t("settings.version.value", { web: "0.7.0", fmt: "0.11.0" })).toBe(
+      "wikitext-fmt 0.11.0, web app 0.7.0",
     );
     expect(t("editor.stats.aria", { lines: 10, characters: 200 })).toBe(
       "10 lines, 200 characters",

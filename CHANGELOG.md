@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+## 0.7.0 — 2026-10-23
+
+### Added
+
+- Add editor font size, font family, ligature, and font feature settings.
+- Load site profiles from a wiki or JSON for TemplateData parameter and value
+  completion, interwiki prefix suggestions, and site-specific formatter options.
+- Add a Minecraft Wiki (ZH) bundled preset, available from the menu at the top
+  of Settings.
+
+### Changed
+
+- Upgrade the exact browser dependency to `wikitext-fmt@0.11.0` for its public
+  site-profile API.
+- Show formatting durations in milliseconds or seconds and use "wiki" in
+  interwiki labels.
+
+### Fixed
+
+- Keep the page title untranslated and remove middle-dot separators.
+- Mark only rejected editor font input invalid and simplify Chinese font hints.
+- Improve the contrast of off switches in dark mode.
+
 ## 0.6.0 — 2026-10-22
 
 ### Changed

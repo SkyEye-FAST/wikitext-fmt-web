@@ -6,7 +6,7 @@ import {
   ruleLevels,
 } from "wikitext-fmt/browser";
 
-describe("wikitext-fmt 0.10.0 browser integration", () => {
+describe("wikitext-fmt 0.11.0 browser integration", () => {
   it("exposes the canonical diagnostics and rule metadata", () => {
     const result = formatWikitextSafeDetailed("{{foo|a=1}}\n");
     expect(result).toHaveProperty("templateDiagnostics");

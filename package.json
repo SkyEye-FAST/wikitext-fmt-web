@@ -1,6 +1,6 @@
 {
   "name": "wikitext-fmt-web",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": true,
   "description": "Browser-based MediaWiki Wikitext formatter powered by wikitext-fmt",
   "license": "GPL-3.0-or-later",
@@ -44,7 +44,7 @@
     "react-dom": "^19.3.1",
     "sonner": "^2.0.8",
     "wikiparser-node": "^1.48.0",
-    "wikitext-fmt": "0.10.0"
+    "wikitext-fmt": "0.11.0"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
