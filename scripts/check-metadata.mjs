@@ -39,5 +39,5 @@ for (const version of [expected.webVersion, expected.formatterVersion]) {
 }
 
 console.log(
-  `Build metadata verified: Web ${expected.webVersion} · Formatter ${expected.formatterVersion}`,
+  `Build metadata verified: Web ${expected.webVersion}, Formatter ${expected.formatterVersion}`,
 );
