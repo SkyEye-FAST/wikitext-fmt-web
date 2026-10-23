@@ -1327,7 +1327,7 @@ kbd {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: var(--raised);
+  background: var(--switch-thumb);
   box-shadow: 0 1px 2px rgb(0 0 0 / 25%);
   transform: translateX(2px);
   transition: transform 140ms ease;
@@ -1336,6 +1336,11 @@ kbd {
 .switch[data-state="checked"] .switch-thumb {
   background: var(--on-progressive);
   transform: translateX(18px);
+}
+
+.switch:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .segmented {

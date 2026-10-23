@@ -12,6 +12,8 @@
   --ink-faint: #72777d;
   --rule: #c8ccd1;
   --rule-strong: #a2a9b1;
+  /* Off switches need a thumb that stands out from the track. */
+  --switch-thumb: #ffffff;
   --rule-soft: #eaecf0;
 
   --progressive: #36c;
@@ -82,6 +84,7 @@
   --rule: #3a3f45;
   --rule-strong: #5a6068;
   --rule-soft: #24282d;
+  --switch-thumb: #a2a9b1;
 
   --progressive: #88a3e8;
   --progressive-hover: #a5bbf0;

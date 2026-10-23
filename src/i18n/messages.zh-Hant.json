@@ -125,7 +125,7 @@
   "settings.site.presets.choose": "選擇…",
   "settings.site.none": "無",
   "settings.site.api": "API網址",
-  "settings.site.counts": "模板{templates}個，跨維基前綴{interwiki}個",
+  "settings.site.counts": "模板{templates}個，跨wiki前綴{interwiki}個",
   "settings.site.fetch": "取得",
   "settings.site.loading": "載入中…",
   "settings.site.import": "匯入",

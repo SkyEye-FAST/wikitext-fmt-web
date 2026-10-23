@@ -34,21 +34,13 @@ interface ReportBarProps {
 
 type Tone = "neutral" | "busy" | "success" | "stale" | "failure";
 
+/** Unit symbols read the same in every UI language. */
 function formatDuration(ms: number, locale: string): string {
-  if (ms < 1000) {
-    return new Intl.NumberFormat(locale, {
-      style: "unit",
-      unit: "millisecond",
-      unitDisplay: "short",
-      maximumFractionDigits: 0,
-    }).format(Math.max(1, Math.round(ms)));
-  }
-  return new Intl.NumberFormat(locale, {
-    style: "unit",
-    unit: "second",
-    unitDisplay: "short",
+  if (ms < 1000) return `${Math.max(1, Math.round(ms))} ms`;
+  const seconds = new Intl.NumberFormat(locale, {
     maximumFractionDigits: 1,
   }).format(ms / 1000);
+  return `${seconds} s`;
 }
 
 interface StatusPresentation {
