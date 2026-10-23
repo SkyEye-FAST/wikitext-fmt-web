@@ -2,21 +2,33 @@ import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
 import { EditorView } from "@codemirror/view";
 import { tags } from "@lezer/highlight";
 
+import { CURRENT_LINE_LIGATURES_CLASS } from "./currentLineLigatures.js";
+
 export type ResolvedTheme = "light" | "dark";
+
+export const DEFAULT_MONO_FONT_STACK =
+  '"JetBrains Mono Variable", ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace';
 
 // Colors come from tokens.css so light and dark stay in one place.
 const sharedTheme = {
   "&": {
     height: "100%",
-    fontSize: "13.5px",
+    fontSize: "var(--editor-font-size, 13.5px)",
     backgroundColor: "var(--paper)",
     color: "var(--ink)",
   },
   "&.cm-focused": { outline: "none" },
   ".cm-scroller": {
-    fontFamily: "var(--font-mono)",
+    fontFamily: "var(--editor-font-family, var(--font-mono))",
     lineHeight: "1.65",
     overflow: "auto",
+    fontVariantLigatures: "var(--editor-font-ligatures, normal)",
+    fontFeatureSettings: "var(--editor-font-features, normal)",
+  },
+  [`.${CURRENT_LINE_LIGATURES_CLASS}`]: {
+    fontVariantLigatures: "var(--current-line-font-ligatures, none)",
+    fontFeatureSettings:
+      'var(--current-line-font-features, "liga" 0, "clig" 0, "dlig" 0, "calt" 0)',
   },
   ".cm-content": {
     padding: "12px 0 40px",

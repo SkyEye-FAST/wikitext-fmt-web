@@ -52,6 +52,13 @@
     "JetBrains Mono Variable", ui-monospace, "SFMono-Regular", Menlo, Consolas,
     "Liberation Mono", monospace;
 
+  --editor-font-size: 13.5px;
+  --editor-font-family: var(--font-mono);
+  --editor-font-ligatures: normal;
+  --editor-font-features: normal;
+  --current-line-font-ligatures: none;
+  --current-line-font-features: "liga" 0, "clig" 0, "dlig" 0, "calt" 0;
+
   --radius: 2px;
   --radius-large: 6px;
   --control-height: 32px;

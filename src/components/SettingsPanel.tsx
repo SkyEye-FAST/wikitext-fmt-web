@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 import { Dialog, Switch } from "radix-ui";
 
 import { CORE_REPOSITORY_URL } from "../app/routes.js";
+import { DEFAULT_MONO_FONT_STACK } from "../editor/themes.js";
 import type {
   FormatterProfileOverrides,
   FormatterProfiles,
@@ -11,7 +12,14 @@ import type {
 } from "../formatter/protocol.js";
 import type { MessageCatalog } from "../i18n/types.js";
 import { useI18n } from "../i18n/useI18n.js";
-import { applyCoreProfile, type AppSettings } from "../settings/schema.js";
+import {
+  applyCoreProfile,
+  type AppSettings,
+  isValidCssFontFamily,
+  isValidCssFontFeatures,
+  MAX_EDITOR_FONT_SIZE,
+  MIN_EDITOR_FONT_SIZE,
+} from "../settings/schema.js";
 
 interface SettingsPanelProps {
   open: boolean;
@@ -201,6 +209,155 @@ function LineWidthField({
           }
         }}
         onBlur={() => setDraft(String(value))}
+      />
+    </div>
+  );
+}
+
+function FontSizeField({
+  value,
+  onCommit,
+}: {
+  value: number;
+  onCommit: (value: number) => void;
+}) {
+  const { t } = useI18n();
+  const id = useId();
+  const [draft, setDraft] = useState(String(value));
+  const [committed, setCommitted] = useState(value);
+  const [isInvalid, setIsInvalid] = useState(false);
+
+  if (committed !== value) {
+    setCommitted(value);
+    setDraft(String(value));
+    setIsInvalid(false);
+  }
+
+  function commit(): void {
+    const trimmed = draft.trim();
+    const next = Number(trimmed);
+    if (
+      trimmed !== "" &&
+      Number.isFinite(next) &&
+      next >= MIN_EDITOR_FONT_SIZE &&
+      next <= MAX_EDITOR_FONT_SIZE
+    ) {
+      setIsInvalid(false);
+      setDraft(String(next));
+      if (next !== value) {
+        setCommitted(next);
+        onCommit(next);
+      }
+    } else {
+      setIsInvalid(true);
+    }
+  }
+
+  return (
+    <div className="setting-row setting-field">
+      <div className="setting-text">
+        <label htmlFor={id}>{t("settings.font-size")}</label>
+      </div>
+      <input
+        id={id}
+        className="number-input"
+        type="number"
+        inputMode="decimal"
+        min={MIN_EDITOR_FONT_SIZE}
+        max={MAX_EDITOR_FONT_SIZE}
+        step={0.5}
+        value={draft}
+        aria-invalid={isInvalid ? "true" : undefined}
+        onChange={(event) => {
+          setDraft(event.target.value);
+          setIsInvalid(false);
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            commit();
+          }
+        }}
+        onBlur={commit}
+      />
+    </div>
+  );
+}
+
+function CssValueField({
+  label,
+  hint,
+  placeholder,
+  value,
+  disabled = false,
+  isValid,
+  onCommit,
+}: {
+  label: string;
+  hint: string;
+  placeholder: string;
+  value: string;
+  disabled?: boolean;
+  isValid: (value: string) => boolean;
+  onCommit: (value: string) => void;
+}) {
+  const id = useId();
+  const [draft, setDraft] = useState(value);
+  const [committed, setCommitted] = useState(value);
+  const [isInvalid, setIsInvalid] = useState(false);
+
+  if (committed !== value) {
+    setCommitted(value);
+    setDraft(value);
+    setIsInvalid(false);
+  }
+
+  function commit(): void {
+    const next = draft.trim();
+    if (next !== "" && !isValid(next)) {
+      setIsInvalid(true);
+      return;
+    }
+    setIsInvalid(false);
+    setDraft(next);
+    if (next !== value) {
+      setCommitted(next);
+      onCommit(next);
+    }
+  }
+
+  return (
+    <div
+      className={`setting-row setting-field is-stacked${disabled ? " is-disabled" : ""}`}
+    >
+      <div className="setting-text">
+        <label htmlFor={id}>{label}</label>
+        <p id={`${id}-hint`} className="setting-hint">
+          {hint}
+        </p>
+      </div>
+      <input
+        id={id}
+        className="text-input"
+        type="text"
+        spellCheck={false}
+        autoComplete="off"
+        placeholder={placeholder}
+        disabled={disabled}
+        value={draft}
+        aria-invalid={isInvalid ? "true" : undefined}
+        aria-describedby={`${id}-hint`}
+        onChange={(event) => {
+          setDraft(event.target.value);
+          setIsInvalid(false);
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            commit();
+          }
+        }}
+        onBlur={commit}
       />
     </div>
   );
@@ -569,6 +726,66 @@ export default function SettingsPanel({
                 checked={settings.lineWrapping}
                 onChange={(lineWrapping) =>
                   onChange({ ...settings, lineWrapping })
+                }
+              />
+              <FontSizeField
+                value={settings.editorFont.size}
+                onCommit={(size) =>
+                  onChange({
+                    ...settings,
+                    editorFont: { ...settings.editorFont, size },
+                  })
+                }
+              />
+              <CssValueField
+                label={t("settings.font-family")}
+                hint={t("settings.font-family.hint")}
+                placeholder={DEFAULT_MONO_FONT_STACK}
+                value={settings.editorFont.family}
+                isValid={isValidCssFontFamily}
+                onCommit={(family) =>
+                  onChange({
+                    ...settings,
+                    editorFont: { ...settings.editorFont, family },
+                  })
+                }
+              />
+              <ChoiceRow
+                legend={t("settings.font-ligatures")}
+                value={settings.editorFont.ligatures}
+                options={[
+                  {
+                    value: "off",
+                    label: t("settings.font-ligatures.off"),
+                  },
+                  {
+                    value: "on",
+                    label: t("settings.font-ligatures.on"),
+                  },
+                  {
+                    value: "except-current-line",
+                    label: t("settings.font-ligatures.except-current-line"),
+                  },
+                ]}
+                onChange={(ligatures) =>
+                  onChange({
+                    ...settings,
+                    editorFont: { ...settings.editorFont, ligatures },
+                  })
+                }
+              />
+              <CssValueField
+                label={t("settings.font-features")}
+                hint={t("settings.font-features.hint")}
+                placeholder="normal"
+                value={settings.editorFont.features}
+                isValid={isValidCssFontFeatures}
+                disabled={settings.editorFont.ligatures === "off"}
+                onCommit={(features) =>
+                  onChange({
+                    ...settings,
+                    editorFont: { ...settings.editorFont, features },
+                  })
                 }
               />
             </SettingsSection>

@@ -1464,6 +1464,37 @@ kbd {
   outline-offset: 0;
 }
 
+input.text-input {
+  height: var(--control-height);
+  resize: none;
+}
+
+.number-input[aria-invalid="true"],
+.text-input[aria-invalid="true"],
+.number-input:invalid,
+.text-input:invalid {
+  border-color: var(--destructive);
+}
+
+.number-input[aria-invalid="true"]:focus,
+.text-input[aria-invalid="true"]:focus,
+.number-input:invalid:focus,
+.text-input:invalid:focus {
+  border-color: var(--destructive);
+  outline-color: var(--destructive);
+}
+
+.number-input:disabled,
+.text-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--chrome);
+}
+
+.setting-field.is-disabled {
+  opacity: 0.6;
+}
+
 /* ---------- Toasts ---------- */
 
 [data-sonner-toaster][data-sonner-theme] {

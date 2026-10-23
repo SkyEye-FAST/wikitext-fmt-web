@@ -7,12 +7,94 @@ import type { LanguagePreference } from "../i18n/locales.js";
 import { isLanguagePreference } from "../i18n/locales.js";
 
 export type ThemePreference = "system" | "light" | "dark";
+export type EditorLigaturesPreference = "off" | "on" | "except-current-line";
+
+export interface EditorFontSettings {
+  size: number;
+  family: string;
+  ligatures: EditorLigaturesPreference;
+  features: string;
+}
 
 export interface AppSettings {
   theme: ThemePreference;
   language: LanguagePreference;
   lineWrapping: boolean;
+  editorFont: EditorFontSettings;
   formatter: ResolvedBrowserOptions;
+}
+
+export const MIN_EDITOR_FONT_SIZE = 10;
+export const MAX_EDITOR_FONT_SIZE = 32;
+export const DEFAULT_EDITOR_FONT_SIZE = 13.5;
+
+export const DEFAULT_EDITOR_FONT: EditorFontSettings = {
+  size: DEFAULT_EDITOR_FONT_SIZE,
+  family: "",
+  ligatures: "on",
+  features: "",
+};
+
+const editorLigatures = ["off", "on", "except-current-line"] as const;
+
+export function isValidCssValue(property: string, value: string): boolean {
+  if (!value) return true;
+  if (typeof CSS !== "undefined" && typeof CSS.supports === "function") {
+    try {
+      return CSS.supports(property, value);
+    } catch {
+      return false;
+    }
+  }
+  return !/[;{}]/.test(value);
+}
+
+export function isValidCssFontFamily(value: string): boolean {
+  return isValidCssValue("font-family", value);
+}
+
+export function isValidCssFontFeatures(value: string): boolean {
+  return isValidCssValue("font-feature-settings", value);
+}
+
+export function sanitizeEditorFontSettings(
+  value: unknown,
+  defaults: EditorFontSettings = DEFAULT_EDITOR_FONT,
+): EditorFontSettings {
+  const source = isRecord(value) ? value : {};
+
+  const size =
+    typeof source.size === "number" &&
+    Number.isFinite(source.size) &&
+    source.size >= MIN_EDITOR_FONT_SIZE &&
+    source.size <= MAX_EDITOR_FONT_SIZE
+      ? source.size
+      : defaults.size;
+
+  const family =
+    typeof source.family === "string" &&
+    isValidCssFontFamily(source.family.trim())
+      ? source.family.trim()
+      : defaults.family;
+
+  const ligatures = enumValue(
+    source.ligatures,
+    editorLigatures,
+    defaults.ligatures,
+  );
+
+  const features =
+    typeof source.features === "string" &&
+    isValidCssFontFeatures(source.features.trim())
+      ? source.features.trim()
+      : defaults.features;
+
+  return {
+    size,
+    family,
+    ligatures,
+    features,
+  };
 }
 
 const profiles = ["default", "production"] as const;
@@ -159,6 +241,7 @@ export function createDefaultSettings(
     theme: "system",
     language: "system",
     lineWrapping: true,
+    editorFont: { ...DEFAULT_EDITOR_FONT },
     formatter: sanitizeFormatterSettings(defaults, defaults),
   };
 }

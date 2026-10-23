@@ -28,6 +28,7 @@ import {
 import type { DocumentStatistics } from "../utils/document.js";
 import { changedLineDecorations } from "./changedLineDecorations.js";
 import { createWikitextExtensions } from "./createWikitextExtensions.js";
+import { currentLineLigatures } from "./currentLineLigatures.js";
 import {
   createEditorTheme,
   createSyntaxTheme,
@@ -81,6 +82,7 @@ export function createEditorExtensions(
     // keyboard user could neither select nor scroll it.
     EditorView.contentAttributes.of({ tabindex: "0" }),
     createEditorTheme(options.theme),
+    currentLineLigatures(),
   ];
 
   if (options.lineWrapping) {

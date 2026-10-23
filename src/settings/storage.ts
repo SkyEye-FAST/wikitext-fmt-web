@@ -3,12 +3,23 @@ import { isLanguagePreference } from "../i18n/locales.js";
 import {
   type AppSettings,
   createDefaultSettings,
+  DEFAULT_EDITOR_FONT,
   isThemePreference,
+  sanitizeEditorFontSettings,
   sanitizeFormatterSettings,
 } from "./schema.js";
 
 export const SETTINGS_STORAGE_KEY = "wikitext-formatter.settings";
-const STORAGE_VERSION = 3;
+const STORAGE_VERSION = 4;
+
+interface StoredSettingsV4 {
+  version: 4;
+  theme: AppSettings["theme"];
+  language: AppSettings["language"];
+  lineWrapping: boolean;
+  editorFont: AppSettings["editorFont"];
+  formatter: ResolvedBrowserOptions;
+}
 
 interface StoredSettingsV3 {
   version: 3;
@@ -67,6 +78,17 @@ function migrateV2ToV3(value: StoredSettingsV2): StoredSettingsV3 {
   };
 }
 
+function migrateV3ToV4(value: StoredSettingsV3): StoredSettingsV4 {
+  return {
+    version: 4,
+    theme: value.theme,
+    language: value.language,
+    lineWrapping: value.lineWrapping,
+    editorFont: { ...DEFAULT_EDITOR_FONT },
+    formatter: value.formatter,
+  };
+}
+
 function migrateV0ToV2(
   value: Record<string, unknown>,
 ): StoredSettingsV2 | undefined {
@@ -85,7 +107,7 @@ function migrateV0ToV2(
   };
 }
 
-function parseStored(raw: string): StoredSettingsV3 | undefined {
+function parseStored(raw: string): StoredSettingsV4 | undefined {
   let value: unknown;
   try {
     value = JSON.parse(raw);
@@ -94,25 +116,32 @@ function parseStored(raw: string): StoredSettingsV3 | undefined {
   }
   if (!isRecord(value)) return undefined;
 
-  // Already version 3.
+  // Already version 4.
+  if (value.version === 4) {
+    return value as unknown as StoredSettingsV4;
+  }
+
+  // Version 3 → 4 migration.
   if (value.version === 3) {
-    return value as unknown as StoredSettingsV3;
+    return migrateV3ToV4(value as unknown as StoredSettingsV3);
   }
 
-  // Version 2 → 3 migration.
+  // Version 2 → 4 migration.
   if (value.version === 2) {
-    return migrateV2ToV3(value as unknown as StoredSettingsV2);
+    return migrateV3ToV4(migrateV2ToV3(value as unknown as StoredSettingsV2));
   }
 
-  // Version 1 → 2 migration.
+  // Version 1 → 4 migration.
   if (value.version === 1) {
-    return migrateV2ToV3(migrateV1ToV2(value as unknown as StoredSettingsV1));
+    return migrateV3ToV4(
+      migrateV2ToV3(migrateV1ToV2(value as unknown as StoredSettingsV1)),
+    );
   }
 
-  // Version 0 → 2 migration (legacy nested settings).
+  // Version 0 → 4 migration (legacy nested settings).
   if (value.version === 0) {
     const v2 = migrateV0ToV2(value);
-    return v2 ? migrateV2ToV3(v2) : undefined;
+    return v2 ? migrateV3ToV4(migrateV2ToV3(v2)) : undefined;
   }
 
   return undefined;
@@ -139,6 +168,10 @@ export function loadSettings(
         typeof stored.lineWrapping === "boolean"
           ? stored.lineWrapping
           : fallback.lineWrapping,
+      editorFont: sanitizeEditorFontSettings(
+        stored.editorFont,
+        fallback.editorFont,
+      ),
       formatter: sanitizeFormatterSettings(stored.formatter, defaults),
     };
   } catch {
@@ -166,11 +199,12 @@ export function saveSettings(
   settings: AppSettings,
   storage: Pick<Storage, "setItem"> = localStorage,
 ): void {
-  const payload: StoredSettingsV3 = {
+  const payload: StoredSettingsV4 = {
     version: STORAGE_VERSION,
     theme: settings.theme,
     language: settings.language,
     lineWrapping: settings.lineWrapping,
+    editorFont: settings.editorFont,
     formatter: settings.formatter,
   };
   storage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(payload));

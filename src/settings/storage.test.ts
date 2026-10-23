@@ -11,6 +11,8 @@ import type { ResolvedBrowserOptions } from "../formatter/protocol.js";
 import {
   applyCoreProfile,
   createDefaultSettings,
+  DEFAULT_EDITOR_FONT,
+  sanitizeEditorFontSettings,
   sanitizeFormatterSettings,
 } from "./schema.js";
 import {
@@ -172,10 +174,53 @@ describe("settings storage", () => {
 
     saveSettings(loaded, storage);
     const saved = JSON.parse(storage.entries.get(SETTINGS_STORAGE_KEY) ?? "{}");
-    expect(saved.version).toBe(3);
+    expect(saved.version).toBe(4);
     expect(saved.formatter).not.toHaveProperty("formatTemplateParameters");
     expect(saved).not.toHaveProperty("source");
     expect(saved).not.toHaveProperty("output");
+  });
+
+  it("migrates version 3 settings to v4 with default typography settings", () => {
+    const storage = memoryStorage(
+      JSON.stringify({
+        version: 3,
+        theme: "dark",
+        language: "zh-Hans",
+        lineWrapping: false,
+        formatter: { ...defaults, lineWidth: 80 },
+      }),
+    );
+    const loaded = loadSettings(defaults, storage);
+    expect(loaded).toMatchObject({
+      theme: "dark",
+      language: "zh-Hans",
+      lineWrapping: false,
+      editorFont: DEFAULT_EDITOR_FONT,
+      formatter: { lineWidth: 80 },
+    });
+  });
+
+  it("sanitizes typography settings and falls back on invalid values", () => {
+    const sanitized = sanitizeEditorFontSettings({
+      size: 999, // out of range
+      family: 'invalid; font { family }', // invalid CSS with semicolon and braces
+      ligatures: "bogus",
+      features: 'invalid { feature }',
+    });
+    expect(sanitized).toEqual(DEFAULT_EDITOR_FONT);
+
+    const valid = sanitizeEditorFontSettings({
+      size: 16,
+      family: '"Fira Code", monospace',
+      ligatures: "except-current-line",
+      features: '"calt", "ss01"',
+    });
+    expect(valid).toEqual({
+      size: 16,
+      family: '"Fira Code", monospace',
+      ligatures: "except-current-line",
+      features: '"calt", "ss01"',
+    });
   });
 
   it("persists only theme, language, and settings, never source or output text", () => {

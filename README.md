@@ -11,7 +11,7 @@ Formatting runs locally in your browser. Source text is not uploaded, logged, pl
 - A status bar for every outcome (formatted, no changes, not formatted when the result fails verification, error, out of date) with per-rule change counts that jump to the affected line, and the core's failure code with its stage and message as a tooltip.
 - A Changes tab with a side-by-side merge view on wide screens and a unified view on narrow ones.
 - Paste, open or drop a file, load an example, copy, download, replace the source with the result (undoable), and clear with Undo.
-- A settings sheet with Default and Complete presets, per-rule controls, the theme and line-wrapping choices, and the formatter and web app versions.
+- A settings sheet with Default and Complete presets, per-rule controls, the theme, line-wrapping and editor font choices, and the formatter and web app versions.
 - System, light and dark themes; responsive layouts down to 320px and 200% zoom.
 - No backend, analytics, advertising, external parser CDN, service worker, or Wikitext preview rendering.
 
@@ -62,7 +62,7 @@ wikitext-fmt/browser + bundled wikiparser-node runtime
 - `src/settings/` validates, migrates, and persists theme and formatter settings.
 - `scripts/check-bundle.mjs` inspects the production application and full Worker graph.
 
-CodeMirror is the mutable authority for the source document; ordinary keystrokes update only editor-local statistics and do not copy the full document into React state. A completed formatting run retains one immutable submitted snapshot together with source and formatter-option revisions, the detailed result, and duration. Output, diagnostics, and Diff are derived from that one run. Editing source or formatting options keeps the prior output visible but marks it outdated; Diff continues comparing the submitted snapshot with its own output. A new result is discarded if either revision changes before the Worker responds. Theme, language, line wrapping, and panel visibility do not invalidate output.
+CodeMirror is the mutable authority for the source document; ordinary keystrokes update only editor-local statistics and do not copy the full document into React state. A completed formatting run retains one immutable submitted snapshot together with source and formatter-option revisions, the detailed result, and duration. Output, diagnostics, and Diff are derived from that one run. Editing source or formatting options keeps the prior output visible but marks it outdated; Diff continues comparing the submitted snapshot with its own output. A new result is discarded if either revision changes before the Worker responds. Theme, language, line wrapping, editor font, and panel visibility do not invalidate output.
 
 **Replace source** is available only for a current successful run. It replaces the CodeMirror source document in one transaction with its own undo step, returns focus to the source editor, and clears the completed run so an earlier snapshot cannot be mistaken for a result for the newly applied source.
 
@@ -79,12 +79,12 @@ The settings sheet exposes:
 - Tables: table formatting and how cells joined with `||` or `!!` are laid out. "Keep as written" preserves only inline cell separators.
 - Page layout: headings, lists, space around headings, blank-line collapsing, and break-tag style.
 - Links and footer: wikilinks, external links, file links, references, redirects, categories, behavior switches, interlanguage links, their positions, and language prefixes.
-- Display: theme and line wrapping.
+- Display: theme, line wrapping, font size, font family (a CSS `font-family` list), ligatures (off, on, or on except the lines holding a cursor or selection) and font features (a CSS `font-feature-settings` value).
 - Advanced: rule reliability limit and the read-only parser configuration.
 
 The parser configuration is read-only: **MediaWiki bundled browser configuration**. The first release does not expose arbitrary `parserConfig`, siteinfo fetching, or complex localization alias editing. The formatter browser build supports only its bundled `mediawiki`/`default` configuration.
 
-Only the language preference, theme preference, line-wrapping preference, and validated formatter settings are saved to `localStorage`. Source, output, completed-run snapshots, files, diagnostics, and failure details are never persisted.
+Only the language preference, theme preference, line-wrapping preference, editor font settings, and validated formatter settings are saved to `localStorage`. Source, output, completed-run snapshots, files, diagnostics, and failure details are never persisted.
 
 ## Language support
 
@@ -97,7 +97,7 @@ The UI is available in **English**, **简体中文** (Simplified Chinese), and *
 | 简体中文 | Forces Simplified Chinese. |
 | 繁體中文 | Forces Traditional Chinese. |
 
-The language preference is stored in `localStorage` (settings schema v3) so it is available before the formatter Worker finishes loading. Changing the language updates all React UI text, CodeMirror and diff accessible names, `document.documentElement.lang`, the page title, and meta tags immediately without rebuilding the Worker or clearing source text.
+The language preference is stored in `localStorage` (settings schema v4) so it is available before the formatter Worker finishes loading. Changing the language updates all React UI text, CodeMirror and diff accessible names, `document.documentElement.lang`, the page title, and meta tags immediately without rebuilding the Worker or clearing source text.
 
 **The formatter core returns diagnostics, failure codes, failure messages, and rule IDs in English.** The UI names each failure code with a short translated phrase and keeps the core's exact original message as the code's tooltip so it remains searchable.
 

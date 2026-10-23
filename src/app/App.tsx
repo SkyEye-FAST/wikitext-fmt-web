@@ -369,6 +369,38 @@ function AppMain({
   }, [resolvedTheme]);
 
   useEffect(() => {
+    const root = document.documentElement;
+    const { size, family, ligatures, features } = settings.editorFont;
+
+    root.style.setProperty("--editor-font-size", `${size}px`);
+
+    if (family) {
+      root.style.setProperty("--editor-font-family", family);
+    } else {
+      root.style.removeProperty("--editor-font-family");
+    }
+
+    const off = ligatures === "off";
+    const editorFeatures = (!off && features) || "normal";
+    const set = (name: string, value: string) =>
+      root.style.setProperty(name, value);
+    set("--editor-font-ligatures", off ? "none" : "normal");
+    set("--editor-font-features", editorFeatures);
+    if (ligatures === "except-current-line") {
+      set("--current-line-font-ligatures", "none");
+      set(
+        "--current-line-font-features",
+        [features, '"liga" 0, "clig" 0, "dlig" 0, "calt" 0']
+          .filter(Boolean)
+          .join(", "),
+      );
+    } else {
+      set("--current-line-font-ligatures", off ? "none" : "normal");
+      set("--current-line-font-features", editorFeatures);
+    }
+  }, [settings.editorFont]);
+
+  useEffect(() => {
     outputEditorRef.current?.setValue(formatRun?.result.formatted ?? "");
   }, [formatRun]);
 

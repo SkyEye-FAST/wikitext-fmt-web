@@ -110,4 +110,70 @@ describe("SettingsPanel", () => {
     );
   });
 
+  it("handles typography settings (font size, font family, ligatures, features)", async () => {
+    const user = userEvent.setup();
+    const props = renderPanel();
+
+    const fontSizeInput = screen.getByLabelText("Font size");
+    expect(fontSizeInput).toHaveValue(13.5);
+
+    // Invalid font size keeps last valid value and marks aria-invalid
+    await user.clear(fontSizeInput);
+    await user.type(fontSizeInput, "5{enter}");
+    expect(fontSizeInput).toHaveAttribute("aria-invalid", "true");
+    expect(props.onChange).not.toHaveBeenCalled();
+
+    // Valid font size commits
+    await user.clear(fontSizeInput);
+    await user.type(fontSizeInput, "15.5{enter}");
+    expect(fontSizeInput).not.toHaveAttribute("aria-invalid");
+    expect(props.onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        editorFont: expect.objectContaining({ size: 15.5 }),
+      }),
+    );
+
+    // Ligatures choices
+    const ligaturesOn = screen.getByRole("radio", { name: "On" });
+    const ligaturesOff = screen.getByRole("radio", { name: "Off" });
+    const ligaturesExcept = screen.getByRole("radio", {
+      name: "Except current line",
+    });
+    expect(ligaturesOn).toBeChecked();
+
+    await user.click(ligaturesExcept);
+    expect(props.onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        editorFont: expect.objectContaining({
+          ligatures: "except-current-line",
+        }),
+      }),
+    );
+
+    // Font features disabled when ligatures is off
+    const featuresInput = screen.getByLabelText("Font features");
+    expect(featuresInput).not.toBeDisabled();
+    await user.click(ligaturesOff);
+    expect(props.onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        editorFont: expect.objectContaining({ ligatures: "off" }),
+      }),
+    );
+
+    // Font family commits valid value and rejects invalid
+    const fontInput = screen.getByLabelText("Font");
+    await user.type(fontInput, 'invalid; {font}{enter}');
+    expect(fontInput).toHaveAttribute("aria-invalid", "true");
+
+    await user.clear(fontInput);
+    await user.type(fontInput, '"Fira Code", monospace{enter}');
+    expect(fontInput).not.toHaveAttribute("aria-invalid");
+    expect(props.onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        editorFont: expect.objectContaining({
+          family: '"Fira Code", monospace',
+        }),
+      }),
+    );
+  });
 });
