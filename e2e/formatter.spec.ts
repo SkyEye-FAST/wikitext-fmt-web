@@ -42,7 +42,7 @@ test("uses the complete preset for references and interlanguage footers", async 
   await page.getByRole("button", { name: "Close settings" }).click();
   await expect(page.locator(".report-preset")).toContainText("Complete preset");
 
-  const fileInput = page.locator('input[type="file"]');
+  const fileInput = page.locator('input[type="file"][accept*=".wiki"]');
   await fileInput.setInputFiles({
     name: "Production.wikitext",
     mimeType: "text/plain",
@@ -77,7 +77,7 @@ test("opens a file dropped onto the workspace", async ({ page }) => {
 });
 
 test("shows no-change and real structured fail-closed states", async ({ page }) => {
-  const fileInput = page.locator('input[type="file"]');
+  const fileInput = page.locator('input[type="file"][accept*=".wiki"]');
   await fileInput.setInputFiles({
     name: "Canonical.wikitext",
     mimeType: "text/plain",
@@ -193,7 +193,7 @@ test("shows one pane at a time in a narrow mobile layout", async ({ page }) => {
 });
 
 test("warns for a large document and recovers after Stop", async ({ page }) => {
-  await page.locator('input[type="file"]').setInputFiles({
+  await page.locator('input[type="file"][accept*=".wiki"]').setInputFiles({
     name: "Large.wikitext",
     mimeType: "text/plain",
     buffer: Buffer.from("plain text\n".repeat(100_001)),

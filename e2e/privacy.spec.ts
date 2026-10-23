@@ -17,7 +17,7 @@ test("never transmits, logs, URL-encodes, or persists Wikitext", async ({ page }
   await source.click();
   await page.keyboard.insertText(`== ${marker}-typed ==\n`);
 
-  const fileInput = page.locator('input[type="file"]');
+  const fileInput = page.locator('input[type="file"][accept*=".wiki"]');
   await fileInput.setInputFiles({
     name: "Private.wikitext",
     mimeType: "text/plain",
