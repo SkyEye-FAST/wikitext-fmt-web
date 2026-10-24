@@ -66,8 +66,8 @@ importers:
         specifier: ^1.48.0
         version: 1.48.0(@codemirror/state@6.7.6)(@codemirror/view@6.43.15)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
       wikitext-fmt:
-        specifier: 0.11.0
-        version: 0.11.0(@codemirror/state@6.7.6)(@codemirror/view@6.43.15)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
+        specifier: 0.11.1
+        version: 0.11.1(@codemirror/state@6.7.6)(@codemirror/view@6.43.15)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3))
     devDependencies:
       '@axe-core/playwright':
         specifier: ^4.12.1
@@ -2665,8 +2665,8 @@ packages:
       vscode-json-languageservice:
         optional: true
 
-  wikitext-fmt@0.11.0:
-    resolution: {integrity: sha512-EiG5zOnCLzHcPt+ae2rG5qVkWxNg/YZRw5htrvf/nZOfdnBhXqnv9hg6hIrOJoIM0pyYkCrFrxfsECvSSg+htA==}
+  wikitext-fmt@0.11.1:
+    resolution: {integrity: sha512-6+pDVUhhVv8E3w23hofA8MNtvgs2mMVjav5hgZ1/vSI+eZWau+URBZScdETuxfoslyNlWY/aA6+POpZ8PMGZwA==}
     engines: {node: ^22.13.0 || >=24.11.0}
     hasBin: true
 
@@ -5202,7 +5202,7 @@ snapshots:
       - monaco-editor
       - stylelint-config-recommended
 
-  wikitext-fmt@0.11.0(@codemirror/state@6.7.6)(@codemirror/view@6.43.15)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)):
+  wikitext-fmt@0.11.1(@codemirror/state@6.7.6)(@codemirror/view@6.43.15)(ajv@8.20.0)(stylelint-config-recommended@18.0.0(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)))(stylelint@17.14.1(supports-color@10.2.2)(typescript@6.0.3)):
     dependencies:
       '@bhsd/cm-util': 2.2.0
       fast-glob: 3.3.3

@@ -38,7 +38,7 @@ function renderPanel(
     onReset: vi.fn(),
     profiles,
     profileOverrides,
-    formatterVersion: "0.11.0",
+    formatterVersion: "0.11.1",
     webVersion: "0.7.0",
     siteProfile: null,
     siteBusy: false,
@@ -67,7 +67,7 @@ describe("SettingsPanel", () => {
     expect(props.onRestoreDefaults).toHaveBeenCalledOnce();
     expect(props.onReset).toHaveBeenCalledOnce();
     expect(
-      screen.getByText("wikitext-fmt 0.11.0, web app 0.7.0"),
+      screen.getByText("wikitext-fmt 0.11.1, web app 0.7.0"),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Formatter engine" }),
