@@ -28,10 +28,10 @@ The 0.7.0 release build, including editor typography controls, site profiles, an
 
 | Surface | Raw | Gzip |
 | --- | ---: | ---: |
-| Initial application JavaScript | 904.94 KiB | 285.97 KiB |
+| Initial application JavaScript | 907.53 KiB | 287.24 KiB |
 | Initial application CSS | 31.92 KiB | 9.38 KiB |
-| Complete formatter Worker graph | 323.02 KiB | 104.83 KiB |
+| Complete formatter Worker graph | 323.88 KiB | 105.19 KiB |
 | Diff chunk | 0.67 KiB | 0.46 KiB |
-| Settings chunk | 23.40 KiB | 6.80 KiB |
+| Settings chunk | 23.43 KiB | 6.83 KiB |
 
 Run `pnpm build && pnpm check:bundle` to regenerate the report. The check identifies entries and their full static/dynamic relationships from emitted Vite/Rollup graph metadata, and rejects browser-incompatible or out-of-scope dependencies.

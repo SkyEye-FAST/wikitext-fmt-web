@@ -2,20 +2,21 @@
 
 ## Unreleased
 
-## 0.7.0 — 2026-10-23
+## 0.7.0 — 2026-10-24
 
 ### Added
 
 - Add editor font size, font family, ligature, and font feature settings.
 - Load site profiles from a wiki or JSON for TemplateData parameter and value
   completion, interwiki prefix suggestions, and site-specific formatter options.
-- Add a Minecraft Wiki (ZH) bundled preset, available from the menu at the top
-  of Settings.
+- Add a Minecraft Wiki (ZH) bundled preset, including localized namespace
+  aliases such as `分类`, available from the menu at the top of Settings.
 
 ### Changed
 
-- Upgrade the exact browser dependency to `wikitext-fmt@0.11.0` for its public
-  site-profile API.
+- Upgrade the exact browser dependency to `wikitext-fmt@0.11.1` for its public
+  site-profile API and fixes to link, heading, table, template, and category
+  formatting.
 - Show formatting durations in milliseconds or seconds and use "wiki" in
   interwiki labels.
 
