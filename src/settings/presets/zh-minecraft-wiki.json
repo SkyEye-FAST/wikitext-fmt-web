@@ -96,7 +96,9 @@
         ]
       },
       "categoryNamespaces": [
-        "Category"
+        "Category",
+        "分类",
+        "分類"
       ],
       "defaultsortMagicWords": [
         "DEFAULTSORT:",
@@ -107,7 +109,15 @@
         "默认分类排序:"
       ],
       "fileNamespaces": [
-        "File"
+        "File",
+        "Image",
+        "图像",
+        "图片",
+        "圖像",
+        "圖片",
+        "文件",
+        "档案",
+        "檔案"
       ],
       "imageOptionAliases": {
         "img_alt": [
